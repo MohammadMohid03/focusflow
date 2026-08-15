@@ -1,0 +1,1582 @@
+# FocusFlow — Commitment Lock / Focus Contract Feature
+
+You have already implemented the FocusFlow Android application based on the previous specification.
+
+Now extend the existing application with a major new feature called **Commitment Lock**.
+
+Do NOT rebuild the application from scratch.
+
+Do NOT replace the existing architecture.
+
+Do NOT remove or break existing functionality.
+
+Integrate this feature cleanly into the current Kotlin + Jetpack Compose + MVVM/Clean Architecture + Room + Firebase + Coroutines/Flow + WorkManager architecture.
+
+The feature should make FocusFlow significantly more unique:
+
+> Users voluntarily create a commitment around a task. If they fail to complete the commitment before the deadline, FocusFlow activates a user-selected consequence, such as restricting access to selected distracting apps where technically and policy-wise supported.
+
+The feature should be designed as a core productivity/accountability system rather than simply an "app blocker."
+
+---
+
+# 1. Product Concept
+
+Introduce:
+
+## Commitment Lock
+
+The philosophy is:
+
+> **You decide the consequence before you start.**
+
+Example:
+
+The user creates:
+
+Task:
+"Complete ML Assignment"
+
+Deadline:
+8:00 PM
+
+Estimated duration:
+2 hours
+
+The user enables:
+
+**Commitment Lock**
+
+Then chooses:
+
+* Which distracting apps to restrict
+* What happens when the deadline is missed
+* How the restriction can be released
+* Whether an emergency cancellation is available
+
+The user explicitly confirms the commitment before it becomes active.
+
+---
+
+# 2. Important Android / Google Play Constraint
+
+This feature MUST be implemented with Android and Google Play policies in mind.
+
+Do NOT secretly disable, uninstall, modify, or interfere with other applications.
+
+Do NOT attempt to bypass Android security mechanisms.
+
+Do NOT make FocusFlow impossible for the user to recover from.
+
+Do NOT use AccessibilityService merely as a hidden mechanism to control other apps.
+
+If AccessibilityService is considered, first structure the feature around:
+
+* Prominent disclosure
+* Explicit user consent
+* Clear explanation of what the service does
+* Appropriate Android implementation
+* Google Play policy compliance
+* Play Console declaration requirements
+
+If a particular app-restriction mechanism is not suitable for ordinary consumer Google Play distribution, do NOT force it into the implementation.
+
+Instead:
+
+1. Build the complete Commitment Engine and UI.
+2. Create a clean abstraction for the restriction mechanism.
+3. Implement the strongest policy-compliant mechanism available for the target Android version/device.
+4. Provide a graceful fallback if actual app restriction cannot be performed.
+5. Clearly communicate limitations to the user.
+
+The product must remain publishable.
+
+Create an abstraction such as:
+
+`AppRestrictionManager`
+
+so the rest of the application does not depend directly on a particular Android restriction API.
+
+Example conceptual interface:
+
+```kotlin
+interface AppRestrictionManager {
+
+    suspend fun getAvailableApps(): List<RestrictableApp>
+
+    suspend fun enableRestriction(
+        apps: List<String>,
+        reason: String
+    ): RestrictionResult
+
+    suspend fun disableRestriction(
+        apps: List<String>
+    ): RestrictionResult
+
+    suspend fun isRestrictionActive(
+        packageName: String
+    ): Boolean
+}
+```
+
+Adapt this interface to the actual Android APIs and capabilities available.
+
+---
+
+# 3. Core Feature Flow
+
+The complete user flow should be:
+
+```text
+Create Task
+     ↓
+Enable Commitment Lock
+     ↓
+Configure Commitment
+     ↓
+Select consequence
+     ↓
+Select distracting apps
+     ↓
+Choose unlock condition
+     ↓
+Review commitment
+     ↓
+User confirms
+     ↓
+ACTIVE COMMITMENT
+     ↓
+Deadline approaching
+     ↓
+Task completed?
+   ↙          ↘
+ YES           NO
+ ↓             ↓
+SUCCESS      MISSED
+ ↓             ↓
+Restore      Activate
+access       consequence
+ ↓             ↓
+Analytics    Recovery
+```
+
+---
+
+# 4. Create Commitment UI
+
+When creating/editing a task, add:
+
+## Commitment Lock
+
+Use a polished toggle/card.
+
+Example:
+
+```text
+Commitment Lock
+
+Make yourself accountable if
+you miss this task.
+
+[ OFF / ON ]
+```
+
+When enabled, open the Commitment configuration screen.
+
+---
+
+# 5. Commitment Configuration
+
+Create a dedicated screen:
+
+## Create Commitment
+
+Fields:
+
+### Task
+
+Display the selected task.
+
+Example:
+
+```text
+Complete ML Assignment
+```
+
+### Deadline
+
+Allow:
+
+* Date
+* Time
+
+### Estimated duration
+
+Example:
+
+`2 hours`
+
+### Commitment type
+
+Options:
+
+* Complete task before deadline
+* Complete selected subtasks
+* Complete minimum focus duration
+
+For v1, prioritize:
+
+**Complete task before deadline**
+
+---
+
+# 6. Consequence Selection
+
+Show:
+
+## If I miss this commitment...
+
+Options:
+
+### No consequence
+
+Normal task behavior.
+
+### Commitment Lock
+
+Activate selected distraction restrictions.
+
+This should be visually clear and not misleading.
+
+---
+
+# 7. Select Distracting Apps
+
+Create:
+
+## Select Apps
+
+Display installed apps that can potentially be selected under the supported Android mechanism.
+
+Show:
+
+* App icon
+* App name
+* Package identifier only if useful for debugging/settings
+* Selection state
+
+Example:
+
+```text
+Select distractions
+
+☑ YouTube
+☑ Instagram
+☑ Reddit
+☐ Netflix
+☐ TikTok
+☐ Games
+```
+
+Add:
+
+**Select All**
+
+**Clear All**
+
+Do not automatically select applications.
+
+The user must explicitly choose.
+
+Persist selected package names safely.
+
+---
+
+# 8. Unlock Conditions
+
+Allow the user to choose:
+
+### Unlock when:
+
+* Task is completed
+* Focus session completed
+* Recovery plan completed
+* User cancels commitment
+
+For the first production implementation, make:
+
+**Task completed**
+
+the primary unlock condition.
+
+---
+
+# 9. Emergency Cancellation
+
+There MUST be a user-controlled way to cancel an active commitment.
+
+Never create an irreversible lock.
+
+If the user chooses:
+
+**Cancel Commitment**
+
+show:
+
+```text
+Cancel Commitment?
+
+Your commitment will be marked as
+missed.
+
+Your commitment score may be affected.
+
+[ Keep Commitment ]
+
+[ Cancel Commitment ]
+```
+
+If confirmed:
+
+* Mark commitment as cancelled
+* Record reason/status
+* Remove restriction where applicable
+* Update analytics
+
+---
+
+# 10. Commitment Review Screen
+
+Before activating the commitment, show a complete summary.
+
+Example:
+
+```text
+FOCUS CONTRACT
+
+Complete ML Assignment
+
+Deadline
+Today · 8:00 PM
+
+Estimated time
+2 hours
+
+If you miss it
+
+Commitment Lock
+
+Apps selected
+YouTube
+Instagram
+Reddit
+
+Unlock
+When task is completed
+
+────────────────────
+
+I understand the commitment
+and want to activate it.
+
+[ Activate Commitment ]
+```
+
+Require explicit confirmation.
+
+Do not activate accidentally.
+
+---
+
+# 11. Commitment State Machine
+
+Implement the Commitment Engine as a real state machine.
+
+Recommended states:
+
+```text
+DRAFT
+  ↓
+ACTIVE
+  ↓
+WARNING
+  ↓
+COMPLETED
+```
+
+or:
+
+```text
+ACTIVE
+  ↓
+MISSED
+  ↓
+RESTRICTED
+  ↓
+RECOVERY
+  ↓
+COMPLETED
+  ↓
+RESTORED
+```
+
+Possible terminal/cancellation states:
+
+```text
+CANCELLED
+EXPIRED
+```
+
+Create an enum/sealed model appropriate to the architecture.
+
+Example conceptual states:
+
+```kotlin
+enum class CommitmentStatus {
+    DRAFT,
+    ACTIVE,
+    WARNING,
+    COMPLETED,
+    MISSED,
+    RESTRICTED,
+    RECOVERY,
+    CANCELLED,
+    EXPIRED
+}
+```
+
+Do not duplicate state logic throughout multiple screens.
+
+Create a centralized Commitment Engine/use case layer.
+
+---
+
+# 12. Deadline Monitoring
+
+Use WorkManager and appropriate scheduling mechanisms.
+
+The system should monitor active commitments.
+
+For example:
+
+Commitment:
+
+```text
+Deadline: 8:00 PM
+```
+
+At:
+
+```text
+7:30 PM
+```
+
+show a warning:
+
+> Your commitment is due in 30 minutes.
+
+At:
+
+```text
+7:50 PM
+```
+
+show:
+
+> 10 minutes remaining.
+
+At:
+
+```text
+8:00 PM
+```
+
+evaluate:
+
+```text
+Is task completed?
+```
+
+If YES:
+
+```text
+COMPLETED
+```
+
+If NO:
+
+```text
+MISSED
+```
+
+Then trigger the configured consequence.
+
+Do not rely exclusively on a continuously running foreground timer for deadline detection.
+
+Use reliable scheduling/background mechanisms and verify the actual task state at execution time.
+
+---
+
+# 13. Deadline Warning Notifications
+
+Implement notifications such as:
+
+### 30 minutes before
+
+> FocusFlow
+>
+> Your ML Assignment commitment is due in 30 minutes.
+
+### 10 minutes before
+
+> FocusFlow
+>
+> 10 minutes left to complete your commitment.
+
+### Deadline reached
+
+If incomplete:
+
+> Commitment missed
+>
+> Your selected Focus Lock has been activated.
+
+Notifications must respect user settings and Android notification permissions.
+
+---
+
+# 14. Missed Commitment Screen
+
+If the task is not complete at the deadline, show a strong but non-aggressive screen:
+
+```text
+COMMITMENT MISSED
+
+ML Assignment
+
+Deadline
+8:00 PM
+
+Completed
+40 / 120 min
+
+Your selected commitment
+has been activated.
+
+[ Start Recovery Plan ]
+
+[ View Task ]
+```
+
+Do not shame the user.
+
+The application should be motivational rather than punitive.
+
+---
+
+# 15. Restriction Activation
+
+When a commitment enters:
+
+`RESTRICTED`
+
+call:
+
+`AppRestrictionManager.enableRestriction(...)`
+
+for the user's selected apps.
+
+The implementation must:
+
+* Use only supported/policy-compliant Android mechanisms.
+* Handle permission denial.
+* Handle unsupported devices.
+* Handle apps that cannot be restricted.
+* Handle system applications safely.
+* Never crash the application.
+* Never create an unrecoverable state.
+
+If actual restriction is unavailable, show:
+
+> Focus Lock could not be activated on this device.
+
+Then provide the fallback accountability experience instead of pretending the app was blocked.
+
+---
+
+# 16. Restricted App Experience
+
+If the selected technical mechanism allows FocusFlow to intercept or present a restriction screen when a restricted app is opened, the experience should look like:
+
+```text
+        🔒
+
+COMMITMENT ACTIVE
+
+Complete your task first.
+
+ML Assignment
+
+Deadline missed:
+12 minutes ago
+
+Progress:
+68%
+
+────────────────
+
+[ Continue Task ]
+
+[ Start Recovery ]
+
+[ Cancel Commitment ]
+```
+
+Do not attempt to disguise the application as another system component.
+
+Clearly identify FocusFlow.
+
+---
+
+# 17. Recovery Mode
+
+This is one of the most important parts of the feature.
+
+After a missed commitment, do NOT simply block the user.
+
+Offer:
+
+## Recovery Plan
+
+The AI analyzes:
+
+* Original task
+* Remaining work
+* Time already spent
+* Current time
+* Original deadline
+* Task/subtask status
+
+Then generates a realistic recovery plan.
+
+Example:
+
+```text
+RECOVERY PLAN
+
+ML Assignment
+
+40 minutes
+Data preprocessing
+
+10 minutes
+Break
+
+45 minutes
+Model training
+
+25 minutes
+Documentation
+
+[ Start Recovery ]
+```
+
+Allow:
+
+**Start Recovery**
+
+**Edit Plan**
+
+**Cancel**
+
+---
+
+# 18. Earn-Back System
+
+Introduce:
+
+## Earn Back
+
+The user can restore access by completing meaningful work.
+
+Example:
+
+```text
+ACCESS RECOVERY
+
+You need:
+
+30 minutes focused work
+
+Progress
+
+████████████░░ 80%
+
+24 / 30 minutes
+
+[ Continue Focus ]
+```
+
+When complete:
+
+```text
+ACCESS RESTORED
+
+Nice work.
+
+You completed your recovery session.
+```
+
+Then:
+
+`RESTRICTED → RESTORED`
+
+where supported.
+
+---
+
+# 19. Focus Session Integration
+
+Integrate Commitment Lock with the existing Focus Mode.
+
+If a commitment is active:
+
+Starting Focus Mode should automatically associate the session with the commitment.
+
+Example:
+
+```text
+COMMITMENT
+
+ML Assignment
+
+Recovery Session
+
+30:00
+
+██████████░░
+
+[ Pause ]
+
+[ End Session ]
+```
+
+Completed focus time should contribute to:
+
+* Task progress
+* Commitment progress
+* Productivity analytics
+* Commitment score
+
+---
+
+# 20. Commitment Score
+
+Add a new productivity metric:
+
+## Commitment Score
+
+Example:
+
+```text
+Commitment Score
+
+        87
+
+Completed
+14
+
+Missed
+2
+
+Cancelled
+1
+```
+
+Calculate based on historical behavior.
+
+Do NOT punish the user excessively for one missed task.
+
+Consider:
+
+* Completed commitments
+* Missed commitments
+* Cancelled commitments
+* Recovery completions
+* Consistency over time
+
+The algorithm should be transparent enough to explain.
+
+---
+
+# 21. Analytics Integration
+
+Add a new analytics section:
+
+## Commitments
+
+Display:
+
+* Commitment completion rate
+* Missed commitments
+* Recovery sessions
+* Current commitment streak
+* Average completion delay
+* Commitment score
+
+Example:
+
+```text
+COMMITMENTS
+
+87%
+Completion Rate
+
+14
+Completed
+
+2
+Missed
+
+5
+Recovered
+```
+
+Add a weekly trend chart.
+
+---
+
+# 22. AI Commitment Insights
+
+Use the AI to provide useful behavioral insights.
+
+Examples:
+
+> You complete 82% of commitments created before 6 PM.
+
+> Your missed commitments are most often tasks estimated above 2 hours.
+
+> You have a stronger completion rate when you schedule a focus session immediately after creating a commitment.
+
+The AI should use aggregated statistics rather than unnecessary raw personal information.
+
+---
+
+# 23. Smart Commitment Suggestions
+
+When creating a task, the AI can suggest:
+
+> This task is estimated at 3 hours.
+
+> Would you like to split it into smaller commitments?
+
+Options:
+
+**Yes, split it**
+
+**Keep as one task**
+
+This prevents unrealistic commitments.
+
+---
+
+# 24. Prevent Bad Commitments
+
+The system should detect unreasonable configurations.
+
+Examples:
+
+Task duration:
+
+`4 hours`
+
+Deadline:
+
+`20 minutes`
+
+Show:
+
+> This commitment may not be realistic.
+
+Then suggest:
+
+* Extend deadline
+* Split task
+* Reduce scope
+
+Do not prevent the user from continuing unless necessary.
+
+---
+
+# 25. Commitment History
+
+Create:
+
+## Commitment History
+
+Each item:
+
+```text
+✓ ML Assignment
+Completed
+Aug 14 · 8:00 PM
+
+✓ Research Paper
+Completed
+Aug 13 · 7:30 PM
+
+✕ Database Revision
+Missed
+Aug 12 · 9:00 PM
+
+↻ Flutter Project
+Recovered
+Aug 11 · 10:00 PM
+```
+
+Allow filtering:
+
+* All
+* Completed
+* Missed
+* Recovered
+* Cancelled
+
+---
+
+# 26. Data Model
+
+Extend the existing Room/Firebase model.
+
+Conceptual structure:
+
+```kotlin
+data class Commitment(
+    val id: String,
+    val taskId: String,
+    val deadline: Long,
+    val estimatedDurationMinutes: Int,
+    val status: CommitmentStatus,
+    val consequenceType: ConsequenceType,
+    val selectedAppPackages: List<String>,
+    val unlockCondition: UnlockCondition,
+    val createdAt: Long,
+    val activatedAt: Long?,
+    val missedAt: Long?,
+    val completedAt: Long?,
+    val cancelledAt: Long?,
+    val recoveryMinutesRequired: Int?,
+    val recoveryMinutesCompleted: Int?
+)
+```
+
+Adapt this to the existing Room entities and Firebase models.
+
+Do not blindly copy this model if it conflicts with the current architecture.
+
+Create appropriate migrations.
+
+Do not destroy existing user data.
+
+---
+
+# 27. Repository / Use Cases
+
+Create dedicated domain logic.
+
+Suggested use cases:
+
+```text
+CreateCommitment
+ActivateCommitment
+EvaluateCommitmentDeadline
+CompleteCommitment
+MissCommitment
+ActivateConsequence
+CancelCommitment
+StartRecovery
+CompleteRecovery
+RestoreAccess
+GetActiveCommitments
+GetCommitmentHistory
+CalculateCommitmentScore
+GenerateRecoveryPlan
+```
+
+Do not put these rules inside Composables.
+
+---
+
+# 28. Home Dashboard Integration
+
+Add an:
+
+## Active Commitment
+
+section to Home.
+
+Example:
+
+```text
+ACTIVE COMMITMENT
+
+ML Assignment
+
+████████░░░░ 68%
+
+1h 24m remaining
+
+[ Continue ]
+```
+
+If missed:
+
+```text
+COMMITMENT MISSED
+
+ML Assignment
+
+Recovery available
+
+[ Recover ]
+```
+
+If none exist:
+
+```text
+No active commitments
+
+Create one to make
+your next goal count.
+
+[ Create Commitment ]
+```
+
+---
+
+# 29. Task Details Integration
+
+Every task with an active commitment should display:
+
+```text
+Commitment Active
+```
+
+with:
+
+* Deadline
+* Progress
+* Consequence
+* Selected apps
+* Status
+
+Allow:
+
+**View Commitment**
+
+**Edit Commitment**
+
+**Cancel Commitment**
+
+Do not allow dangerous edits that silently change an active commitment. If the user changes deadline/consequence/apps, require confirmation and record the change.
+
+---
+
+# 30. UX Philosophy
+
+This feature must feel:
+
+* Motivational
+* Premium
+* Respectful
+* User-controlled
+* Transparent
+* Slightly serious when a commitment is missed
+* Helpful during recovery
+
+It must NOT feel:
+
+* Punitive
+* Hostile
+* Manipulative
+* Impossible to escape
+* Like malware
+* Like a fake system security screen
+
+The user must always understand:
+
+1. What is happening.
+2. Why it is happening.
+3. What they can do next.
+4. How to recover.
+
+---
+
+# 31. Permissions & Setup
+
+If the chosen Android restriction mechanism requires special permissions/settings:
+
+Create a dedicated setup screen:
+
+## Commitment Lock Setup
+
+Explain:
+
+> To enable app restrictions, Android requires additional access.
+
+Clearly explain:
+
+* What access is requested.
+* Why FocusFlow needs it.
+* What FocusFlow can do with it.
+* How to disable it.
+
+Provide:
+
+**Set Up Commitment Lock**
+
+and:
+
+**Not Now**
+
+Do not request permissions before the user understands why they are needed.
+
+---
+
+# 32. Device Compatibility
+
+Handle:
+
+* Android version differences
+* Permission differences
+* Manufacturer-specific behavior
+* Battery optimization
+* Background execution limitations
+* Unsupported restriction mechanisms
+
+Create a capability check:
+
+```text
+RestrictionCapability
+```
+
+Possible states:
+
+```text
+SUPPORTED
+REQUIRES_PERMISSION
+UNSUPPORTED
+ERROR
+```
+
+Do not assume all Android devices behave identically.
+
+---
+
+# 33. Testing
+
+Create comprehensive tests.
+
+### Unit tests
+
+Test:
+
+* Commitment creation
+* State transitions
+* Deadline evaluation
+* Completion
+* Missed state
+* Cancellation
+* Recovery
+* Earn-back calculation
+* Commitment score
+* Unrealistic deadline detection
+
+Example scenarios:
+
+```text
+Task completed before deadline
+→ COMPLETED
+
+Task incomplete at deadline
+→ MISSED
+
+Task incomplete + consequence enabled
+→ RESTRICTED
+
+Recovery completed
+→ RESTORED
+
+User cancels
+→ CANCELLED
+```
+
+### UI tests
+
+Test:
+
+* Create commitment
+* Select apps
+* Confirm commitment
+* Cancel commitment
+* Recovery flow
+* Completion flow
+
+### Background tests
+
+Verify deadline evaluation using the application's scheduling architecture.
+
+---
+
+# 34. Security & Privacy
+
+Do not collect unnecessary installed-app information.
+
+Only access the minimum information required for the selected feature.
+
+Do not upload a user's complete installed-app list to Firebase.
+
+Store selected package identifiers locally where possible.
+
+If any information must be synchronized, minimize it.
+
+Do not send installed-app data to the AI service.
+
+Do not expose private user data.
+
+---
+
+# 35. Notifications
+
+Add commitment-specific notifications.
+
+Examples:
+
+### Commitment created
+
+> Commitment activated
+>
+> ML Assignment is due at 8:00 PM.
+
+### Warning
+
+> 30 minutes left
+>
+> Complete your commitment before Focus Lock activates.
+
+### Missed
+
+> Commitment missed
+>
+> Your selected consequence has been activated.
+
+### Recovery
+
+> Recovery available
+>
+> Complete 30 minutes of focused work to restore access.
+
+---
+
+# 36. Design Requirements
+
+The Commitment screens must use the existing FocusFlow design system.
+
+Do not create a separate visual language.
+
+Use:
+
+* Existing typography
+* Existing colors
+* Existing spacing
+* Existing card components
+* Existing button components
+* Existing navigation
+* Existing animation language
+
+Create new reusable components only where necessary:
+
+```text
+CommitmentCard
+CommitmentProgress
+CommitmentStatusBadge
+CommitmentConfiguration
+AppSelectionItem
+CommitmentReview
+RecoveryPlanCard
+CommitmentScoreCard
+```
+
+Use subtle animations when:
+
+* Commitment activates
+* Deadline approaches
+* Commitment is missed
+* Recovery starts
+* Access is restored
+
+---
+
+# 37. Edge Cases
+
+Handle all of the following:
+
+1. User completes the task one second before deadline.
+2. User completes the task exactly at deadline.
+3. Device is offline when deadline occurs.
+4. Device is powered off at deadline.
+5. Device restarts.
+6. WorkManager job is delayed.
+7. User changes device time.
+8. User changes timezone.
+9. User changes the task deadline.
+10. User deletes the task.
+11. User deletes an app selected for restriction.
+12. Selected app is not available.
+13. Restriction permission is revoked.
+14. Android version does not support the required mechanism.
+15. User logs out.
+16. User logs into another account.
+17. Multiple commitments overlap.
+18. User has multiple missed commitments.
+19. User completes recovery.
+20. User cancels a commitment.
+21. Firebase synchronization fails.
+22. Room database contains stale data.
+
+Never allow inconsistent commitment state.
+
+Use server timestamps or trusted time sources where appropriate, and protect against obvious local clock manipulation without making the app unusable.
+
+---
+
+# 38. Multiple Active Commitments
+
+Support multiple commitments, but avoid creating a chaotic experience.
+
+Example:
+
+```text
+ACTIVE COMMITMENTS
+
+ML Assignment
+1h 20m
+
+Research Paper
+3h 10m
+
+Gym
+6h 30m
+```
+
+If multiple commitments fail simultaneously:
+
+* Evaluate each independently.
+* Do not repeatedly trigger the same restriction.
+* Merge overlapping restrictions intelligently.
+* Keep track of which commitments caused each restriction.
+* Only restore an app when all relevant active restrictions have been satisfied.
+
+---
+
+# 39. Restriction Conflict Logic
+
+If:
+
+Commitment A restricts YouTube until Task A is completed.
+
+Commitment B restricts YouTube until Task B is completed.
+
+Completing Task A must NOT immediately restore YouTube if Task B is still active.
+
+Conceptually:
+
+```text
+YouTube restrictions:
+
+Commitment A → ACTIVE
+Commitment B → ACTIVE
+
+Result:
+YouTube remains restricted.
+```
+
+Only restore when:
+
+```text
+Commitment A → COMPLETE
+Commitment B → COMPLETE
+```
+
+This should be handled by a centralized restriction coordinator.
+
+---
+
+# 40. Final Acceptance Criteria
+
+Do not consider this feature complete until:
+
+* Commitment creation works.
+* Commitment editing works safely.
+* Commitment confirmation works.
+* Deadline monitoring works.
+* Warning notifications work.
+* Missed commitments are detected.
+* Commitment states are consistent.
+* User-selected consequences are stored.
+* Supported app restriction functionality works where technically and policy-wise permitted.
+* Unsupported devices are handled gracefully.
+* Emergency cancellation works.
+* Recovery mode works.
+* Earn-back works.
+* Focus sessions integrate with commitments.
+* Commitment score works.
+* Analytics work.
+* History works.
+* AI recovery planning works.
+* Home dashboard shows active commitments.
+* Task details show commitment state.
+* Room migrations work without data loss.
+* Firebase synchronization works.
+* Offline scenarios work.
+* Multiple commitments work correctly.
+* Restriction conflicts are handled correctly.
+* Permissions are transparent.
+* No sensitive app/user data is unnecessarily uploaded.
+* No API keys are exposed.
+* Unit tests pass.
+* UI tests pass.
+* Release build succeeds.
+* Existing FocusFlow features still work.
+
+---
+
+# 41. Implementation Order
+
+Implement this feature in the following order:
+
+### Step 1
+
+Inspect the existing FocusFlow architecture before modifying anything.
+
+### Step 2
+
+Identify existing:
+
+* Task model
+* Room database
+* Repository layer
+* Firebase synchronization
+* Navigation
+* Notification system
+* WorkManager implementation
+* Focus Mode
+* AI service
+
+Reuse existing components.
+
+### Step 3
+
+Implement Commitment domain models and state machine.
+
+### Step 4
+
+Implement Room persistence and migrations.
+
+### Step 5
+
+Implement Commitment repository/use cases.
+
+### Step 6
+
+Implement commitment creation/configuration UI.
+
+### Step 7
+
+Implement app-selection abstraction and capability detection.
+
+### Step 8
+
+Implement deadline monitoring.
+
+### Step 9
+
+Implement notifications.
+
+### Step 10
+
+Implement missed commitment state.
+
+### Step 11
+
+Implement supported restriction mechanism.
+
+### Step 12
+
+Implement recovery mode.
+
+### Step 13
+
+Integrate with Focus Mode.
+
+### Step 14
+
+Implement commitment analytics and scoring.
+
+### Step 15
+
+Implement AI recovery plans and insights.
+
+### Step 16
+
+Implement multiple-commitment conflict handling.
+
+### Step 17
+
+Add tests.
+
+### Step 18
+
+Polish animations and UI.
+
+### Step 19
+
+Test edge cases and offline behavior.
+
+### Step 20
+
+Build release AAB and verify the entire application.
+
+---
+
+# 42. Critical Instruction
+
+Before writing code, inspect the existing project and understand how FocusFlow is currently implemented.
+
+Do not duplicate:
+
+* Task models
+* Repositories
+* Navigation
+* Notification systems
+* AI clients
+* Database infrastructure
+* Design components
+
+Extend what already exists.
+
+If something required by this feature does not exist, add it using the project's existing architecture and conventions.
+
+Do not introduce a completely different architecture.
+
+Most importantly:
+
+**Build the Commitment Engine as a reusable, well-tested domain feature.**
+
+The app restriction layer must be isolated behind an interface so that Android/Google Play policy or device capability changes do not require rewriting the entire application.
+
+The user must remain in control at all times.
+
+The result should feel like a natural evolution of FocusFlow:
+
+> **FocusFlow doesn't just tell you what to do. It helps you keep the commitment you made to yourself.**

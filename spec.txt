@@ -1,0 +1,259 @@
+﻿FocusFlow
+AI-Powered Productivity & Study AssistantComplete Production Android App Specification & Agent Build Brief
+Purpose: Build a polished, publishable Android application in Kotlin that demonstrates modern Android engineering, AI integration, offline-first architecture, cloud synchronization, background processing, analytics, testing, and production release practices.
+1. Product Overview
+FocusFlow is an AI-powered productivity and study-management application for students and professionals. It helps users create tasks and goals, break complex work into actionable steps, generate adaptive study/productivity plans, track habits, run focus sessions, receive intelligent reminders, analyze productivity, work offline, and synchronize data across devices.
+2. Primary Product Goals
+Feel like a real commercial Android product rather than a university/demo CRUD application.
+Use Kotlin and Jetpack Compose throughout the native Android application.
+Demonstrate production-grade architecture and state management.
+Combine Android engineering with AI and data-driven productivity insights.
+Work reliably offline and synchronize changes when connectivity returns.
+Be suitable for Google Play publication and professional portfolio/GitHub presentation.
+3. Technology Stack
+Kotlin
+Jetpack Compose
+Material 3
+Navigation Compose
+MVVM / Clean Architecture principles
+Kotlin Coroutines and Flow
+Hilt dependency injection
+Room
+Firebase Authentication
+Cloud Firestore
+Firebase Cloud Messaging
+WorkManager
+Retrofit / OkHttp
+Kotlin Serialization or Moshi
+DataStore
+Compose-compatible charting library
+4. Architecture
+Use clean, modular, maintainable architecture. Suggested structure:
+app/
+├── data/
+│   ├── local/
+│   ├── remote/
+│   └── repository/
+├── domain/
+│   ├── model/
+│   ├── repository/
+│   └── usecase/
+├── presentation/
+│   ├── auth/
+│   ├── onboarding/
+│   ├── home/
+│   ├── tasks/
+│   ├── planner/
+│   ├── focus/
+│   ├── habits/
+│   ├── analytics/
+│   ├── ai/
+│   ├── profile/
+│   └── settings/
+├── navigation/
+├── di/
+└── utils/
+Do not put business logic directly inside Composables. Use repositories between UI/domain logic and data sources. Avoid giant ViewModels and giant files. Use immutable UI state where appropriate.
+5. Visual Design System
+The supplied reference images are the primary visual direction. Match their visual language as closely as possible: premium, modern, minimal, clean, spacious, rounded cards, strong typography hierarchy, subtle elevation, sophisticated dark/light themes, smooth animations, and consistent iconography.
+Create reusable color, typography, spacing, radius, button, card, input, bottom-sheet, and navigation tokens.
+Spacing scale: 4 / 8 / 12 / 16 / 24 / 32dp.
+Corner radius scale: 12 / 16 / 20 / 24dp.
+Use meaningful animations for navigation, task completion, progress, AI generation, bottom sheets, dialogs, charts, and the focus timer.
+Avoid excessive gradients, random colors, clutter, default-looking templates, unnecessary borders, and emoji-driven UI.
+If exact reference screenshots are supplied to the agent, treat them as pixel-level visual targets rather than generic inspiration.
+6. Navigation & Screens
+Main navigation: Home, Tasks, Planner, Focus, Analytics.
+Additional screens:
+Splash
+Onboarding
+Authentication
+Home
+Tasks
+Planner
+Focus
+Analytics
+Task Details
+Create Task
+Edit Task
+Goal Details
+Create Goal
+AI Planner
+AI Task Breakdown
+Habits
+Create Habit
+Focus Session
+Focus History
+Analytics Details
+Profile
+Settings
+Notification Settings
+Appearance
+Account
+About
+Privacy Policy
+Terms
+7. Splash & Onboarding
+Splash: display FocusFlow with the tagline “Plan. Focus. Progress.” using a subtle logo animation.
+Onboarding should explain smart planning, AI assistance, focus tracking, and analytics. Ask about primary goal, productivity area, and preferred working time. Persist completion with DataStore.
+8. Authentication
+Firebase Authentication.
+Google Sign-In.
+Email/password sign-up and login.
+Forgot password.
+Logout.
+Optional guest mode if practical.
+Handle loading, errors, invalid credentials, and network failures.
+9. Home Dashboard
+Build the primary dashboard according to the supplied visual references. Include personalized greeting, today's progress, tasks completed/remaining, current streak, focus time, today's task cards, AI recommendation, and quick actions.
+Add Task
+AI Plan
+Focus
+Habit
+The dashboard should be information-dense without becoming cluttered and should look premium on different Android screen sizes.
+10. Task Management
+Task fields:
+ID
+Title
+Description
+Category
+Priority
+Due date
+Estimated duration
+Completion status
+Created date
+Updated date
+Reminder
+Goal ID
+Subtasks
+Support create, edit, delete, complete, restore, search, filter, and sort.
+Filters: All, Today, Upcoming, Completed, High Priority.
+Support nested subtasks and progress tracking.
+11. AI Task Breakdown
+Allow the user to enter a large goal such as “I need to build a machine learning project.” The AI should return structured, actionable tasks with descriptions, estimated minutes, and priority.
+Use structured JSON responses rather than parsing arbitrary natural-language UI output.
+Allow users to add all generated tasks, edit them, remove them, or regenerate the plan.
+12. AI Study/Productivity Planner
+Inputs: goal, deadline, available hours, current skill level, preferred study time, and existing commitments.
+Generate daily tasks, study sessions, breaks, revision sessions, and priority order. If a session is missed, allow the schedule to be regenerated.
+13. Focus Mode
+Support 25/5 Pomodoro, 50/10, and custom durations.
+Timer
+Current task
+Progress
+Start
+Pause
+Resume
+End Session
+On completion, save the focus session, update analytics/task progress, show a completion animation, and notify when appropriate.
+Store start time, end time, duration, task ID, and completion status.
+14. Habits
+Habit fields: name, description, frequency, reminder, goal, and icon.
+Support daily, weekly, and custom-day schedules. Track current streak, longest streak, completion rate, and history.
+15. Calendar
+Provide Day / Week / Month views showing tasks, deadlines, focus sessions, study sessions, and appropriate habit events. Tapping an event opens details.
+16. Analytics
+Display total focus time, tasks completed, completion rate, current streak, and longest streak.
+Charts: daily focus time, weekly productivity, task completion, category distribution, and habit consistency.
+Support Week / Month / Year. Use real Room/Firestore data; do not keep fake statistics after actual data exists.
+17. AI Productivity Insights
+Analyze aggregated productivity history and generate useful insights such as when the user performs best, average focus duration, consistency changes, and scheduling recommendations. Minimize transmission of raw personal data.
+18. Offline-First & Sync
+Room should be the local source for user-facing data. Tasks, habits, focus sessions, and analytics must remain usable without internet. Synchronize changes with Firestore when connectivity returns and implement reasonable conflict handling.
+Conceptual flow: Room → Repository → Sync Manager → Firestore.
+19. Firebase & Data Model
+Use Firebase Authentication and Cloud Firestore with security rules isolating each user's data.
+users/{userId}
+tasks/{taskId}
+goals/{goalId}
+habits/{habitId}
+focusSessions/{sessionId}
+plannerSessions/{sessionId}
+Do not leave Firestore publicly readable/writable.
+20. Notifications & Background Work
+Support task reminders, deadline warnings, habit reminders, focus-session events, daily plans, and carefully controlled AI recommendations.
+Use WorkManager and Android notification APIs appropriately. Respect Android notification permissions and do not spam users.
+21. Settings
+Appearance: System / Light / Dark
+Notifications: individually configurable
+Productivity: default focus duration, default break, working hours
+Account: profile, sync, export data, delete account, sign out
+Privacy and About
+22. Error, Loading & Empty States
+Every major network/API operation must expose Loading, Success, Error, and Empty states.
+Handle no internet, Firebase errors, AI errors, invalid input, authentication failures, database failures, and timeouts without crashing.
+Use polished skeleton/loading states rather than blank screens.
+Examples: “Nothing planned yet.”, “Build your first habit.”, “Your focus history will appear here.”
+23. Security
+Never hardcode production AI API keys in the APK.
+Use a secure backend for secret AI credentials.
+Use HTTPS.
+Use Firebase security rules.
+Validate inputs.
+Do not log passwords, tokens, API keys, or private user data.
+24. Testing
+Unit-test task calculations, habit streaks, productivity calculations, planner logic, repository behavior, and AI response parsing.
+UI-test login, task creation/completion, focus session, and navigation.
+Test offline functionality and synchronization.
+25. Performance & Accessibility
+Optimize Lazy lists, database queries, Compose recomposition, images, and network calls.
+Avoid unnecessary recompositions and load only required Firestore data.
+Provide content descriptions, adequate touch targets, dynamic text support, screen-reader support, and good contrast.
+Do not rely only on color to communicate state.
+26. Release & Google Play Readiness
+Configure application ID, version code/name, release signing, and R8/ProGuard where appropriate.
+Ensure ./gradlew bundleRelease succeeds.
+Prepare app icon and splash screen.
+Prepare store description, screenshots, privacy policy, data safety information, and release AAB.
+Complete required Google Play metadata and testing before production publication.
+27. Documentation & GitHub
+Create a professional README containing project overview, features, architecture, technology stack, screenshots, setup instructions, Firebase setup, AI/backend setup, environment variables, testing, build and release instructions, and future improvements.
+Include an architecture diagram.
+Use logical commits such as:
+feat: implement authentication
+feat: add task management
+feat: implement AI planner
+feat: add offline database
+feat: implement focus mode
+feat: add analytics
+test: add repository tests
+fix: resolve sync conflict
+release: prepare production build
+Never commit API keys, local.properties, build artifacts, or private credentials.
+28. Recommended Development Phases
+Phase 1: Foundation + design system + navigation
+Phase 2: Authentication + onboarding
+Phase 3: Home + tasks + goals
+Phase 4: Room + offline-first architecture
+Phase 5: AI task breakdown + AI planner
+Phase 6: Focus mode + notifications
+Phase 7: Habits + calendar
+Phase 8: Analytics + AI insights
+Phase 9: Firebase sync + security
+Phase 10: Testing + performance + accessibility
+Phase 11: Final UI polish + animations
+Phase 12: Release build + Play Store assets + publication
+29. Final Acceptance Criteria
+1. Application builds successfully.
+2. Release AAB can be generated.
+3. Authentication works.
+4. Tasks work.
+5. Goals work.
+6. AI task breakdown works.
+7. AI planning works.
+8. Focus mode works.
+9. Habits work.
+10. Calendar works.
+11. Analytics use real data.
+12. Offline mode works.
+13. Firebase synchronization works.
+14. Notifications work.
+15. Dark and light modes work.
+16. Navigation is stable.
+17. Error states are implemented.
+18. Tests pass.
+19. No sensitive API keys are exposed.
+20. UI consistently follows supplied reference images.
+21. README is complete.
+22. Project is suitable for GitHub portfolio presentation.
+23. Application is ready for Google Play release after store-specific metadata/review requirements are completed.

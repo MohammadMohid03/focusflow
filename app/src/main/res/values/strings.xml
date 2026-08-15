@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FocusFlow</string>
+    <string name="app_tagline">Plan. Focus. Progress.</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">Smart Planning</string>
+    <string name="onboarding_desc_1">Organize your tasks and goals with AI-powered planning that adapts to your schedule.</string>
+    <string name="onboarding_title_2">AI Assistant</string>
+    <string name="onboarding_desc_2">Break complex goals into actionable steps. Get personalized study and productivity plans.</string>
+    <string name="onboarding_title_3">Deep Focus</string>
+    <string name="onboarding_desc_3">Stay in the zone with Pomodoro sessions, commitment locks, and distraction blocking.</string>
+    <string name="onboarding_title_4">Track Progress</string>
+    <string name="onboarding_desc_4">Visualize your productivity with detailed analytics, streaks, and AI-powered insights.</string>
+
+    <!-- Auth -->
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in_with_google">Continue with Google</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="display_name">Display Name</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="continue_as_guest">Continue as Guest</string>
+    <string name="or">or</string>
+
+    <!-- Home -->
+    <string name="good_morning">Good Morning</string>
+    <string name="good_afternoon">Good Afternoon</string>
+    <string name="good_evening">Good Evening</string>
+    <string name="todays_progress">Today\'s Progress</string>
+    <string name="tasks_completed">Tasks Completed</string>
+    <string name="focus_time">Focus Time</string>
+    <string name="current_streak">Current Streak</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="add_task">Add Task</string>
+    <string name="ai_plan">AI Plan</string>
+    <string name="focus">Focus</string>
+    <string name="habit">Habit</string>
+    <string name="todays_tasks">Today\'s Tasks</string>
+    <string name="ai_recommendation">AI Recommendation</string>
+
+    <!-- Tasks -->
+    <string name="tasks">Tasks</string>
+    <string name="create_task">Create Task</string>
+    <string name="edit_task">Edit Task</string>
+    <string name="task_title">Task Title</string>
+    <string name="task_description">Description</string>
+    <string name="category">Category</string>
+    <string name="priority">Priority</string>
+    <string name="due_date">Due Date</string>
+    <string name="estimated_duration">Estimated Duration</string>
+    <string name="reminder">Reminder</string>
+    <string name="subtasks">Subtasks</string>
+    <string name="add_subtask">Add Subtask</string>
+    <string name="all">All</string>
+    <string name="today">Today</string>
+    <string name="upcoming">Upcoming</string>
+    <string name="completed">Completed</string>
+    <string name="high_priority">High Priority</string>
+    <string name="no_tasks_yet">Nothing planned yet.</string>
+    <string name="no_tasks_desc">Create your first task to get started.</string>
+
+    <!-- Goals -->
+    <string name="goals">Goals</string>
+    <string name="create_goal">Create Goal</string>
+    <string name="goal_title">Goal Title</string>
+    <string name="target_date">Target Date</string>
+    <string name="no_goals_yet">No goals yet.</string>
+    <string name="no_goals_desc">Set a goal to stay on track.</string>
+
+    <!-- Focus -->
+    <string name="focus_mode">Focus Mode</string>
+    <string name="focus_session">Focus Session</string>
+    <string name="focus_history">Focus History</string>
+    <string name="start_session">Start Session</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="end_session">End Session</string>
+    <string name="pomodoro_25_5">Pomodoro 25/5</string>
+    <string name="pomodoro_50_10">Deep Focus 50/10</string>
+    <string name="custom">Custom</string>
+    <string name="session_complete">Session Complete!</string>
+    <string name="great_work">Great work! You stayed focused.</string>
+    <string name="no_focus_history">Your focus history will appear here.</string>
+
+    <!-- Habits -->
+    <string name="habits">Habits</string>
+    <string name="create_habit">Create Habit</string>
+    <string name="habit_name">Habit Name</string>
+    <string name="frequency">Frequency</string>
+    <string name="daily">Daily</string>
+    <string name="weekly">Weekly</string>
+    <string name="streak">Streak</string>
+    <string name="longest_streak">Longest Streak</string>
+    <string name="completion_rate">Completion Rate</string>
+    <string name="build_first_habit">Build your first habit.</string>
+
+    <!-- Planner -->
+    <string name="planner">Planner</string>
+    <string name="ai_planner">AI Planner</string>
+    <string name="ai_task_breakdown">AI Task Breakdown</string>
+    <string name="enter_goal">Enter your goal</string>
+    <string name="generate_plan">Generate Plan</string>
+    <string name="regenerate">Regenerate</string>
+    <string name="add_all_tasks">Add All Tasks</string>
+
+    <!-- Analytics -->
+    <string name="analytics">Analytics</string>
+    <string name="week">Week</string>
+    <string name="month">Month</string>
+    <string name="year">Year</string>
+    <string name="total_focus_time">Total Focus Time</string>
+    <string name="completion_rate_label">Completion Rate</string>
+    <string name="productivity_insights">Productivity Insights</string>
+
+    <!-- Commitment Lock -->
+    <string name="commitment_lock">Commitment Lock</string>
+    <string name="commitment_lock_desc">Make yourself accountable if you miss this task.</string>
+    <string name="create_commitment">Create Commitment</string>
+    <string name="active_commitment">Active Commitment</string>
+    <string name="active_commitments">Active Commitments</string>
+    <string name="commitment_history">Commitment History</string>
+    <string name="commitment_score">Commitment Score</string>
+    <string name="commitment_missed">Commitment Missed</string>
+    <string name="commitment_active">Commitment Active</string>
+    <string name="focus_contract">Focus Contract</string>
+    <string name="if_i_miss">If I miss this commitment…</string>
+    <string name="no_consequence">No consequence</string>
+    <string name="select_apps">Select Apps</string>
+    <string name="select_distractions">Select distractions</string>
+    <string name="unlock_when">Unlock when</string>
+    <string name="task_completed">Task is completed</string>
+    <string name="focus_completed">Focus session completed</string>
+    <string name="recovery_completed">Recovery plan completed</string>
+    <string name="activate_commitment">Activate Commitment</string>
+    <string name="cancel_commitment">Cancel Commitment</string>
+    <string name="cancel_commitment_desc">Your commitment will be marked as missed. Your commitment score may be affected.</string>
+    <string name="keep_commitment">Keep Commitment</string>
+    <string name="continue_task">Continue Task</string>
+    <string name="start_recovery">Start Recovery</string>
+    <string name="recovery_plan">Recovery Plan</string>
+    <string name="earn_back">Earn Back</string>
+    <string name="access_recovery">Access Recovery</string>
+    <string name="access_restored">Access Restored</string>
+    <string name="access_restored_desc">Nice work. You completed your recovery session.</string>
+    <string name="continue_focus">Continue Focus</string>
+    <string name="commitment_activated">Commitment activated</string>
+    <string name="complete_first">Complete your task first.</string>
+    <string name="no_active_commitments">No active commitments</string>
+    <string name="no_active_commitments_desc">Create one to make your next goal count.</string>
+    <string name="unrealistic_warning">This commitment may not be realistic.</string>
+    <string name="i_understand">I understand the commitment and want to activate it.</string>
+    <string name="view_commitment">View Commitment</string>
+    <string name="edit_commitment">Edit Commitment</string>
+    <string name="commitment_lock_setup">Commitment Lock Setup</string>
+    <string name="commitment_lock_setup_desc">To enable app restrictions, Android requires additional access.</string>
+    <string name="setup_commitment_lock">Set Up Commitment Lock</string>
+    <string name="not_now">Not Now</string>
+    <string name="restriction_unavailable">Focus Lock could not be activated on this device.</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="appearance">Appearance</string>
+    <string name="notifications">Notifications</string>
+    <string name="productivity_settings">Productivity</string>
+    <string name="account">Account</string>
+    <string name="about">About</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="export_data">Export Data</string>
+    <string name="sync">Sync</string>
+    <string name="system_theme">System</string>
+    <string name="light_theme">Light</string>
+    <string name="dark_theme">Dark</string>
+    <string name="profile">Profile</string>
+
+    <!-- General -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="search">Search</string>
+    <string name="retry">Retry</string>
+    <string name="loading">Loading…</string>
+    <string name="error_occurred">Something went wrong</string>
+    <string name="no_internet">No internet connection</string>
+    <string name="select_all">Select All</string>
+    <string name="clear_all">Clear All</string>
+    <string name="minutes">min</string>
+    <string name="hours">hrs</string>
+    <string name="days">days</string>
+    <string name="remaining">remaining</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_back">Go back</string>
+    <string name="cd_add">Add</string>
+    <string name="cd_menu">Menu</string>
+    <string name="cd_search">Search</string>
+    <string name="cd_filter">Filter</string>
+    <string name="cd_sort">Sort</string>
+    <string name="cd_close">Close</string>
+    <string name="cd_settings">Settings</string>
+    <string name="cd_profile">Profile</string>
+    <string name="cd_notification">Notification</string>
+</resources>

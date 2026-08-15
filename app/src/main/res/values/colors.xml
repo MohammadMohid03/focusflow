@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light Theme Colors -->
+    <color name="purple_primary">#FF5B34A5</color>
+    <color name="purple_on_primary">#FFFFFFFF</color>
+    <color name="purple_primary_container">#FFEDE3FC</color>
+    <color name="purple_on_primary_container">#FF1B0A3C</color>
+
+    <color name="teal_secondary">#FF008A83</color>
+    <color name="teal_on_secondary">#FFFFFFFF</color>
+    <color name="teal_secondary_container">#FFC2FBF7</color>
+    <color name="teal_on_secondary_container">#FF002E2C</color>
+
+    <color name="amber_tertiary">#FFA65800</color>
+    <color name="amber_on_tertiary">#FFFFFFFF</color>
+    <color name="amber_tertiary_container">#FFFFE4C0</color>
+    <color name="amber_on_tertiary_container">#FF3A1C00</color>
+
+    <color name="error">#FFBA1A1A</color>
+    <color name="on_error">#FFFFFFFF</color>
+    <color name="error_container">#FFFFDAD6</color>
+    <color name="on_error_container">#FF410002</color>
+
+    <color name="background">#FFFEFBFF</color>
+    <color name="on_background">#FF1B1B1F</color>
+    <color name="surface">#FFFEFBFF</color>
+    <color name="on_surface">#FF1B1B1F</color>
+
+    <!-- Splash screen -->
+    <color name="splash_background">#FF1B0A3C</color>
+
+    <color name="seed">#FF5B34A5</color>
+</resources>
