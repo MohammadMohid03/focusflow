@@ -169,8 +169,9 @@ class CreateTaskViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val userId = authRepository.getCurrentUser()?.id ?: ""
-                val epochDue = state.selectedDate
-                    .atTime(state.selectedTime)
+                val startDateTime = state.selectedDate.atTime(state.selectedTime)
+                val dueDateTime = startDateTime.plusMinutes(duration.toLong())
+                val epochDue = dueDateTime
                     .atZone(ZoneId.systemDefault())
                     .toInstant()
                     .toEpochMilli()
@@ -214,11 +215,11 @@ class CreateTaskViewModel @Inject constructor(
                         )
                     }
 
-                    // Show activation notification
+                    // Show activation notification with exact DUE / DEADLINE time
                     val timeFormatter = java.time.format.DateTimeFormatter.ofPattern("hh:mm a")
                     notificationHelper.showCommitmentActivated(
                         taskName = title,
-                        deadline = state.selectedTime.format(timeFormatter)
+                        deadline = dueDateTime.format(timeFormatter)
                     )
 
                     // Schedule deadline and warning worker

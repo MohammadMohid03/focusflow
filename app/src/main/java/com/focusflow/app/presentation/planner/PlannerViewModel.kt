@@ -197,7 +197,8 @@ class PlannerViewModel @Inject constructor(
         if (title.isBlank()) return
         val date = _selectedDate.value
         val actualStartTime = startTime ?: if (date == LocalDate.now()) LocalTime.now() else LocalTime.of(9, 0)
-        val dueEpoch = date.atTime(actualStartTime).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val dueDateTime = date.atTime(actualStartTime).plusMinutes(durationMinutes.toLong())
+        val dueEpoch = dueDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val userId = authRepository.getCurrentUser()?.id ?: ""
         val taskId = UUID.randomUUID().toString()
 
@@ -241,7 +242,7 @@ class PlannerViewModel @Inject constructor(
                 val timeFmt = DateTimeFormatter.ofPattern("hh:mm a")
                 notificationHelper.showCommitmentActivated(
                     taskName = title,
-                    deadline = actualStartTime.format(timeFmt)
+                    deadline = dueDateTime.format(timeFmt)
                 )
 
                 scheduleCommitmentWork(commitment)

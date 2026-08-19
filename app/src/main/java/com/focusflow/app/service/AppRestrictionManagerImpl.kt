@@ -1,7 +1,6 @@
 package com.focusflow.app.service
 
 import android.app.AppOpsManager
-import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -18,20 +17,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Policy-compliant implementation of AppRestrictionManager.
- *
- * Uses UsageStatsManager to track app usage and provides
- * a notification/overlay-based restriction approach that is
- * compatible with Google Play policies.
- *
- * The actual "restriction" is implemented as:
- * 1. Monitoring foreground app usage
- * 2. Showing a FocusFlow overlay/notification when a restricted app is detected
- * 3. Providing the user with options to return to their task
- *
- * This approach respects user autonomy while providing accountability.
- */
 @Singleton
 class AppRestrictionManagerImpl @Inject constructor(
     @ApplicationContext private val context: Context
@@ -46,7 +31,6 @@ class AppRestrictionManagerImpl @Inject constructor(
 
         installedApps
             .filter { app ->
-                // Filter out system apps and our own app
                 val isSystemApp = (app.flags and ApplicationInfo.FLAG_SYSTEM) != 0
                 val isOurApp = app.packageName == context.packageName
                 val hasLaunchIntent = pm.getLaunchIntentForPackage(app.packageName) != null
@@ -69,42 +53,19 @@ class AppRestrictionManagerImpl @Inject constructor(
         reason: String
     ): RestrictionResult = withContext(Dispatchers.IO) {
         return@withContext try {
-            val capability = checkCapability()
-            when (capability) {
-                RestrictionCapability.SUPPORTED -> {
-                    restrictedApps.addAll(apps)
-                    apps.forEach { restrictionReasons[it] = reason }
-                    RestrictionResult(
-                        success = true,
-                        message = "Restrictions activated for ${apps.size} apps",
-                        capability = capability
-                    )
-                }
-                RestrictionCapability.REQUIRES_PERMISSION -> {
-                    RestrictionResult(
-                        success = false,
-                        message = "Usage access permission is required to enable restrictions",
-                        capability = capability
-                    )
-                }
-                RestrictionCapability.UNSUPPORTED -> {
-                    // Fallback: still track the restriction internally for accountability
-                    restrictedApps.addAll(apps)
-                    apps.forEach { restrictionReasons[it] = reason }
-                    RestrictionResult(
-                        success = true,
-                        message = "Focus Lock is active (notification-based accountability mode)",
-                        capability = capability
-                    )
-                }
-                RestrictionCapability.ERROR -> {
-                    RestrictionResult(
-                        success = false,
-                        message = "Focus Lock could not be activated on this device",
-                        capability = capability
-                    )
-                }
+            restrictedApps.addAll(apps)
+            apps.forEach { restrictionReasons[it] = reason }
+
+            if (apps.isNotEmpty()) {
+                AppBlockerService.start(context, ArrayList(restrictedApps))
             }
+
+            val capability = checkCapability()
+            RestrictionResult(
+                success = true,
+                message = "Restrictions activated for ${apps.size} apps",
+                capability = capability
+            )
         } catch (e: Exception) {
             RestrictionResult(
                 success = false,
@@ -120,6 +81,13 @@ class AppRestrictionManagerImpl @Inject constructor(
         return@withContext try {
             restrictedApps.removeAll(apps.toSet())
             apps.forEach { restrictionReasons.remove(it) }
+
+            if (restrictedApps.isEmpty()) {
+                AppBlockerService.stop(context)
+            } else {
+                AppBlockerService.start(context, ArrayList(restrictedApps))
+            }
+
             RestrictionResult(
                 success = true,
                 message = "Restrictions removed for ${apps.size} apps"
