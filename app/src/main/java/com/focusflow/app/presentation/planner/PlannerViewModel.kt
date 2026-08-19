@@ -52,6 +52,7 @@ data class PlannerUiState(
     val availableApps: List<RestrictableApp> = emptyList(),
     val selectedAppPackages: Set<String> = emptySet(),
     val hasUsagePermission: Boolean = true,
+    val hasOverlayPermission: Boolean = true,
     val hasConflict: Boolean = false,
     val conflictMessage: String? = null,
     val isGeneratingPlan: Boolean = false,
@@ -84,10 +85,11 @@ class PlannerViewModel @Inject constructor(
     private val _selectedAppPackages = MutableStateFlow<Set<String>>(emptySet())
     private val _availableApps = MutableStateFlow<List<RestrictableApp>>(emptyList())
     private val _hasUsagePermission = MutableStateFlow(true)
+    private val _hasOverlayPermission = MutableStateFlow(true)
 
     init {
         loadAvailableApps()
-        checkPermission()
+        checkPermissions()
     }
 
     val uiState: StateFlow<PlannerUiState> = combine(
@@ -102,13 +104,15 @@ class PlannerViewModel @Inject constructor(
     }.flatMapLatest { params ->
         combine(
             taskRepository.getAllTasks(params.userId),
-            _hasUsagePermission
-        ) { allTasks, hasPerm ->
+            _hasUsagePermission,
+            _hasOverlayPermission
+        ) { allTasks, hasPerm, hasOverlay ->
             val baseState = buildPlannerState(allTasks, params.date, params.isGenerating)
             baseState.copy(
                 availableApps = params.apps,
                 selectedAppPackages = params.selectedApps,
-                hasUsagePermission = hasPerm
+                hasUsagePermission = hasPerm,
+                hasOverlayPermission = hasOverlay
             )
         }
     }.stateIn(
@@ -143,15 +147,22 @@ class PlannerViewModel @Inject constructor(
         }
     }
 
-    fun checkPermission() {
+    fun checkPermissions() {
         viewModelScope.launch {
-            _hasUsagePermission.value = appRestrictionManager.hasRequiredPermission()
+            _hasUsagePermission.value = appRestrictionManager.hasUsagePermission()
+            _hasOverlayPermission.value = appRestrictionManager.hasOverlayPermission()
         }
     }
 
     fun requestUsagePermission() {
         viewModelScope.launch {
             appRestrictionManager.requestPermissionSetup()
+        }
+    }
+
+    fun requestOverlayPermission() {
+        viewModelScope.launch {
+            appRestrictionManager.requestOverlayPermission()
         }
     }
 

@@ -1,10 +1,6 @@
 package com.focusflow.app.service
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
@@ -13,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.focusflow.app.MainActivity
 import com.focusflow.app.R
 import com.focusflow.app.presentation.commitment.FocusBlockActivity
@@ -33,7 +30,9 @@ class AppBlockerService : Service() {
 
     companion object {
         const val CHANNEL_ID = "focusflow_blocker_channel"
+        const val CHANNEL_ALERT_ID = "focusflow_lock_alert_channel"
         const val NOTIFICATION_ID = 9001
+        const val NOTIFICATION_ALERT_ID = 9002
         const val ACTION_START = "com.focusflow.app.action.START_BLOCKER"
         const val ACTION_STOP = "com.focusflow.app.action.STOP_BLOCKER"
         const val EXTRA_RESTRICTED_APPS = "extra_restricted_apps"
@@ -60,7 +59,7 @@ class AppBlockerService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
+        createNotificationChannels()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -90,18 +89,18 @@ class AppBlockerService : Service() {
                     if (foregroundPackage != null && foregroundPackage != packageName) {
                         if (appRestrictionManager.isRestrictionActive(foregroundPackage)) {
                             val now = System.currentTimeMillis()
-                            // Avoid spamming launch within 1.5 seconds for the same package
-                            if (foregroundPackage != lastBlockedPackage || now - lastBlockTime > 1500) {
+                            // Throttle repeated triggers within 1.2s
+                            if (foregroundPackage != lastBlockedPackage || now - lastBlockTime > 1200) {
                                 lastBlockedPackage = foregroundPackage
                                 lastBlockTime = now
-                                launchBlockScreen(foregroundPackage)
+                                triggerAppLock(foregroundPackage)
                             }
                         }
                     }
                 } catch (e: Exception) {
-                    // Ignore transient exceptions
+                    // Non-fatal
                 }
-                delay(600) // Poll every 600ms for fast, responsive blocking
+                delay(500) // Poll every 500ms
             }
         }
     }
@@ -115,15 +114,14 @@ class AppBlockerService : Service() {
 
         while (events.hasNextEvent()) {
             events.getNextEvent(event)
-            if (event.eventType == UsageEvents.Event.ACTIVITY_RESUMED ||
-                event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+            if (event.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
                 lastForegroundApp = event.packageName
             }
         }
         return lastForegroundApp
     }
 
-    private fun launchBlockScreen(blockedPackage: String) {
+    private fun triggerAppLock(blockedPackage: String) {
         val pm = packageManager
         val appName = try {
             val appInfo = pm.getApplicationInfo(blockedPackage, 0)
@@ -132,21 +130,58 @@ class AppBlockerService : Service() {
             blockedPackage
         }
 
-        val intent = Intent(this, FocusBlockActivity::class.java).apply {
+        val lockIntent = Intent(this, FocusBlockActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra(FocusBlockActivity.EXTRA_BLOCKED_APP_NAME, appName)
             putExtra(FocusBlockActivity.EXTRA_BLOCKED_PACKAGE, blockedPackage)
         }
-        startActivity(intent)
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            blockedPackage.hashCode(),
+            lockIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // 1. Send High-Priority FullScreen Alert Notification (Supported on all Android versions)
+        val alertNotification = NotificationCompat.Builder(this, CHANNEL_ALERT_ID)
+            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setContentTitle("🔒 App Locked by FocusFlow")
+            .setContentText("$appName is restricted during your focus commitment.")
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setFullScreenIntent(pendingIntent, true)
+            .setAutoCancel(true)
+            .build()
+
+        try {
+            NotificationManagerCompat.from(this).notify(NOTIFICATION_ALERT_ID, alertNotification)
+        } catch (e: Exception) {}
+
+        // 2. Launch Activity directly with Background Activity Launch permission options
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                val options = ActivityOptions.makeBasic().apply {
+                    pendingIntentBackgroundActivityStartMode = ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                }.toBundle()
+                pendingIntent.send(this, 0, null, null, null, null, options)
+            } else {
+                pendingIntent.send()
+            }
+        } catch (e: Exception) {
+            try {
+                startActivity(lockIntent)
+            } catch (e2: Exception) {}
+        }
     }
 
     private fun stopMonitoring() {
         isMonitoring = false
     }
 
-    private fun createNotificationChannel() {
+    private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
+            val monitorChannel = NotificationChannel(
                 CHANNEL_ID,
                 "Focus Lock Monitoring",
                 NotificationManager.IMPORTANCE_LOW
@@ -154,8 +189,20 @@ class AppBlockerService : Service() {
                 description = "Monitors app restrictions during focus commitments"
                 setShowBadge(false)
             }
+
+            val alertChannel = NotificationChannel(
+                CHANNEL_ALERT_ID,
+                "Focus Lock Alerts",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Immediate alerts and lock screen when restricted apps are opened"
+                setBypassDnd(true)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            }
+
             val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
+            manager.createNotificationChannel(monitorChannel)
+            manager.createNotificationChannel(alertChannel)
         }
     }
 

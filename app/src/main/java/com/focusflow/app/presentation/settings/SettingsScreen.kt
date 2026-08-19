@@ -43,7 +43,7 @@ fun SettingsScreen(
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.checkUsagePermission()
+        viewModel.checkPermissions()
     }
 
     // Theme Selection Dialog
@@ -202,9 +202,16 @@ fun SettingsScreen(
                     SettingsRow(
                         icon = if (uiState.hasUsagePermission) Icons.Default.CheckCircle else Icons.Default.Warning,
                         title = "Usage Access Permission",
-                        subtitle = if (uiState.hasUsagePermission) "Granted · Focus monitoring active" else "Not Granted · Tap to allow monitoring",
+                        subtitle = if (uiState.hasUsagePermission) "Granted · App detection active" else "Not Granted · Tap to allow app detection",
                         iconColor = if (uiState.hasUsagePermission) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                         onClick = { viewModel.requestUsagePermission() }
+                    )
+                    SettingsRow(
+                        icon = if (uiState.hasOverlayPermission) Icons.Default.CheckCircle else Icons.Default.Warning,
+                        title = "Display Over Other Apps",
+                        subtitle = if (uiState.hasOverlayPermission) "Granted · Lock overlay active" else "Not Granted · Tap to allow lock screen",
+                        iconColor = if (uiState.hasOverlayPermission) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                        onClick = { viewModel.requestOverlayPermission() }
                     )
                 }
             }

@@ -43,6 +43,7 @@ data class CreateTaskUiState(
     val selectedAppPackages: Set<String> = emptySet(),
     val appSearchQuery: String = "",
     val hasUsagePermission: Boolean = true,
+    val hasOverlayPermission: Boolean = true,
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
     val error: String? = null,
@@ -65,7 +66,7 @@ class CreateTaskViewModel @Inject constructor(
 
     init {
         loadAvailableApps()
-        checkPermission()
+        checkPermissions()
     }
 
     fun updateTitle(title: String) = _uiState.update { it.copy(title = title, error = null) }
@@ -108,7 +109,7 @@ class CreateTaskViewModel @Inject constructor(
     fun toggleCommitment(enabled: Boolean) {
         _uiState.update { it.copy(commitmentEnabled = enabled) }
         if (enabled) {
-            checkPermission()
+            checkPermissions()
             loadAvailableApps()
         }
     }
@@ -124,16 +125,28 @@ class CreateTaskViewModel @Inject constructor(
         }
     }
 
-    fun checkPermission() {
+    fun checkPermissions() {
         viewModelScope.launch {
-            val hasPerm = appRestrictionManager.hasRequiredPermission()
-            _uiState.update { it.copy(hasUsagePermission = hasPerm) }
+            val hasUsage = appRestrictionManager.hasUsagePermission()
+            val hasOverlay = appRestrictionManager.hasOverlayPermission()
+            _uiState.update { 
+                it.copy(
+                    hasUsagePermission = hasUsage,
+                    hasOverlayPermission = hasOverlay
+                ) 
+            }
         }
     }
 
     fun requestUsagePermission() {
         viewModelScope.launch {
             appRestrictionManager.requestPermissionSetup()
+        }
+    }
+
+    fun requestOverlayPermission() {
+        viewModelScope.launch {
+            appRestrictionManager.requestOverlayPermission()
         }
     }
 

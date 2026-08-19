@@ -35,6 +35,7 @@ data class SettingsUiState(
     val userProfile: String = "User",
     val userEmail: String = "",
     val hasUsagePermission: Boolean = true,
+    val hasOverlayPermission: Boolean = true,
     val message: String? = null,
     val isSignedOut: Boolean = false
 )
@@ -51,19 +52,31 @@ class SettingsViewModel @Inject constructor(
 
     init {
         loadPreferences()
-        checkUsagePermission()
+        checkPermissions()
     }
 
-    fun checkUsagePermission() {
+    fun checkPermissions() {
         viewModelScope.launch {
-            val hasPerm = appRestrictionManager.hasRequiredPermission()
-            _uiState.update { it.copy(hasUsagePermission = hasPerm) }
+            val hasUsage = appRestrictionManager.hasUsagePermission()
+            val hasOverlay = appRestrictionManager.hasOverlayPermission()
+            _uiState.update { 
+                it.copy(
+                    hasUsagePermission = hasUsage,
+                    hasOverlayPermission = hasOverlay
+                ) 
+            }
         }
     }
 
     fun requestUsagePermission() {
         viewModelScope.launch {
             appRestrictionManager.requestPermissionSetup()
+        }
+    }
+
+    fun requestOverlayPermission() {
+        viewModelScope.launch {
+            appRestrictionManager.requestOverlayPermission()
         }
     }
 
