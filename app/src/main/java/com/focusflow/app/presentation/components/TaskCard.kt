@@ -2,6 +2,7 @@ package com.focusflow.app.presentation.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +16,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.focusflow.app.domain.model.Task
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -28,24 +31,27 @@ fun TaskCard(
     val isCompleted = task.isCompleted
     val backgroundColor by animateColorAsState(
         targetValue = if (isCompleted) 
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) 
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f) 
         else MaterialTheme.colorScheme.surface,
-        animationSpec = tween(300),
+        animationSpec = tween(250),
         label = "task_bg_color"
     )
 
-    Card(
+    Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(18.dp))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isCompleted) 0.dp else 2.dp)
+        shape = RoundedCornerShape(18.dp),
+        color = backgroundColor,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+        shadowElevation = if (isCompleted) 0.dp else 2.dp,
+        tonalElevation = 0.dp
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             Row(
                 verticalAlignment = Alignment.Top,
                 modifier = Modifier.fillMaxWidth()
@@ -53,31 +59,35 @@ fun TaskCard(
                 Checkbox(
                     checked = isCompleted,
                     onCheckedChange = { onComplete(it) },
-                    modifier = Modifier.padding(end = 8.dp)
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = MaterialTheme.colorScheme.outline
+                    ),
+                    modifier = Modifier.padding(end = 4.dp)
                 )
                 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = task.title,
                         style = MaterialTheme.typography.titleMedium,
-                        color = if (isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface,
+                        color = if (isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
                         textDecoration = if (isCompleted) TextDecoration.LineThrough else TextDecoration.None,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     
                     if (task.description.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(3.dp))
                         Text(
                             text = task.description,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
                     
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -88,9 +98,11 @@ fun TaskCard(
                         
                         Spacer(modifier = Modifier.weight(1f))
                         
-                        task.dueDate?.let { dueDate ->
+                        task.dueDate?.let { dueDateMillis ->
+                            val formatter = SimpleDateFormat("MMM d", Locale.getDefault())
+                            val dateStr = formatter.format(Date(dueDateMillis))
                             Text(
-                                text = "Due: $dueDate", // Simplified date formatting assumption
+                                text = "Due: $dateStr",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -100,7 +112,7 @@ fun TaskCard(
             }
             
             if (task.subtasks.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 val completedSubtasks = task.subtasks.count { it.isCompleted }
                 val progress = completedSubtasks.toFloat() / task.subtasks.size
                 

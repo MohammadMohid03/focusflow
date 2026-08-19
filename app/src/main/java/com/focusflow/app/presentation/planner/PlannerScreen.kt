@@ -1,6 +1,6 @@
 package com.focusflow.app.presentation.planner
 
-import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,11 +11,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,11 +25,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.focusflow.app.presentation.components.CompactTopBar
+import com.focusflow.app.presentation.theme.FocusFlowCorners
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -41,44 +42,34 @@ data class ScheduleItem(
     val isCompleted: Boolean
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlannerScreen(
     onNavigateBack: () -> Unit = {}
 ) {
-    var selectedDate by remember { mutableStateOf(LocalDate.of(2026, 4, 15)) } // Dummy April 2026 date
-    val weekDays = (0..6).map { selectedDate.minusDays(selectedDate.dayOfWeek.value.toLong() - 1).plusDays(it.toLong()) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    val weekDays = remember(selectedDate) {
+        val startOfWeek = selectedDate.minusDays(selectedDate.dayOfWeek.value.toLong() - 1)
+        (0..6).map { startOfWeek.plusDays(it.toLong()) }
+    }
     
     val scheduleItems = remember {
         mutableStateListOf(
-            ScheduleItem("1", "Calculus Assignment", "Mathematics", "10:00 AM · 60 min", false),
-            ScheduleItem("2", "Read Chapter 5", "Physics", "2:00 PM · 45 min", false),
-            ScheduleItem("3", "Practice Problems", "Chemistry", "4:00 PM · 30 min", true)
+            ScheduleItem("1", "Calculus & Derivatives Practice", "Mathematics", "10:00 AM · 60 min", false),
+            ScheduleItem("2", "Physics: Thermodynamics Notes", "Physics", "02:00 PM · 45 min", false),
+            ScheduleItem("3", "Organic Chemistry Problem Set", "Chemistry", "04:30 PM · 30 min", true),
+            ScheduleItem("4", "Data Structures Revision", "Computer Science", "07:00 PM · 50 min", false)
         )
     }
+
+    val pendingCount = scheduleItems.count { !it.isCompleted }
+    val totalCount = scheduleItems.size
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack, modifier = Modifier.padding(start = 8.dp)) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", modifier = Modifier.size(28.dp))
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = { /* Toggle theme */ },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .background(MaterialTheme.colorScheme.surface, CircleShape)
-                            .size(44.dp)
-                    ) {
-                        Icon(Icons.Default.Settings, contentDescription = "Theme", tint = MaterialTheme.colorScheme.onSurface)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            CompactTopBar(
+                title = "Study Planner",
+                onBackClick = onNavigateBack
             )
         }
     ) { paddingValues ->
@@ -87,213 +78,279 @@ fun PlannerScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
+                .padding(bottom = 100.dp)
         ) {
-            // Heading
-            Text(
-                text = "Study\nPlanner !",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp,
-                    lineHeight = 36.sp
-                ),
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-            )
-
-            // Calendar Navigation
+            // Month Navigation
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { /* Previous month */ }) {
-                    Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Previous")
+                Surface(
+                    onClick = { selectedDate = selectedDate.minusWeeks(1) },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.size(34.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Previous Week",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
+
                 Text(
-                    text = "April 2026",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp
+                    text = selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                IconButton(onClick = { /* Next month */ }) {
-                    Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Next")
+
+                Surface(
+                    onClick = { selectedDate = selectedDate.plusWeeks(1) },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.size(34.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = "Next Week",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
 
-            // Week Selector
+            // Week Days Selector
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(weekDays) { date ->
                     val isSelected = date == selectedDate
+                    val isToday = date == LocalDate.now()
                     val dayName = date.format(DateTimeFormatter.ofPattern("EEE")).take(3)
                     
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Surface(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                            .clickable { selectedDate = date }
-                            .padding(horizontal = 12.dp, vertical = 16.dp)
+                            .width(46.dp)
+                            .height(64.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                        border = if (!isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)) else null,
+                        shadowElevation = if (isSelected) 3.dp else 0.dp,
+                        onClick = { selectedDate = date }
                     ) {
-                        Text(
-                            text = dayName,
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 12.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = date.dayOfMonth.toString(),
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(4.dp)
+                        ) {
+                            Text(
+                                text = dayName,
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = date.dayOfMonth.toString(),
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Summary Cards Row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Pending Card
-                Card(
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text("2", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                        Text("Tasks", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        Text("Pending", fontSize = 14.sp, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha=0.7f))
-                    }
-                }
-
-                // Total Card
-                Card(
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer) // light pink pastel
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text("135", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
-                        Text("Time", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSecondaryContainer)
-                        Text("Total min", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha=0.7f))
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Today's Schedule Section
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Today's Schedule",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                IconButton(
-                    onClick = { /* Add task */ },
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
-                        .size(40.dp)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Task", tint = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Timeline
+            // Summary Cards Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Pending Card
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(96.dp),
+                    shape = FocusFlowCorners.Card,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                    shadowElevation = 1.dp
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "$pendingCount",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Pending Tasks",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+
+                // Total Card
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(96.dp),
+                    shape = FocusFlowCorners.Card,
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
+                    shadowElevation = 1.dp
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "$totalCount",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            text = "Total Scheduled",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Section Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Timeline Schedule",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                
+                Text(
+                    text = "${scheduleItems.count { it.isCompleted }}/$totalCount completed",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Schedule Timeline Items
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
+                    .padding(horizontal = 20.dp)
             ) {
                 scheduleItems.forEachIndexed { index, item ->
-                    val isLast = index == scheduleItems.size - 1
-                    TimelineItem(
+                    ScheduleItemRow(
                         item = item,
-                        isLast = isLast,
-                        onToggle = { 
-                            val updatedItem = item.copy(isCompleted = !item.isCompleted)
-                            scheduleItems[index] = updatedItem
+                        isLast = index == scheduleItems.size - 1,
+                        onToggle = {
+                            val idx = scheduleItems.indexOfFirst { it.id == item.id }
+                            if (idx != -1) {
+                                scheduleItems[idx] = item.copy(isCompleted = !item.isCompleted)
+                            }
                         }
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
-fun TimelineItem(
+fun ScheduleItemRow(
     item: ScheduleItem,
     isLast: Boolean,
     onToggle: () -> Unit
 ) {
+    val timelineColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+    val activeDotColor = MaterialTheme.colorScheme.primary
+
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min)
+        modifier = Modifier.fillMaxWidth()
     ) {
-        // Timeline graphic
+        // Timeline Dot & Line
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(24.dp)
+            modifier = Modifier
+                .width(28.dp)
+                .drawBehind {
+                    if (!isLast) {
+                        drawLine(
+                            color = timelineColor,
+                            start = Offset(size.width / 2, 28.dp.toPx()),
+                            end = Offset(size.width / 2, size.height),
+                            strokeWidth = 2.dp.toPx()
+                        )
+                    }
+                }
         ) {
             Box(
                 modifier = Modifier
-                    .padding(top = 28.dp)
-                    .size(12.dp)
+                    .padding(top = 18.dp)
+                    .size(10.dp)
                     .clip(CircleShape)
-                    .background(if (item.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha=0.5f) else MaterialTheme.colorScheme.primary)
+                    .background(if (item.isCompleted) activeDotColor.copy(alpha = 0.4f) else activeDotColor)
             )
-            if (!isLast) {
-                Box(
-                    modifier = Modifier
-                        .width(2.dp)
-                        .fillMaxHeight()
-                        .padding(top = 4.dp, bottom = 4.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                )
-            }
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
-        // Content Card
-        Card(
+        // Schedule Item Card
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = if (isLast) 0.dp else 16.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                .padding(bottom = if (isLast) 0.dp else 12.dp),
+            shape = FocusFlowCorners.CardSmall,
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+            shadowElevation = 1.dp,
+            tonalElevation = 0.dp
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val borderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 Box(
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(22.dp)
                         .clip(CircleShape)
                         .background(if (item.isCompleted) MaterialTheme.colorScheme.primary else Color.Transparent)
                         .drawBehind {
@@ -309,17 +366,22 @@ fun TimelineItem(
                     contentAlignment = Alignment.Center
                 ) {
                     if (item.isCompleted) {
-                        Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(16.dp))
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(14.dp)
+                        )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.title,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
                         color = if (item.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                         textDecoration = if (item.isCompleted) TextDecoration.LineThrough else TextDecoration.None
                     )
@@ -332,14 +394,14 @@ fun TimelineItem(
                         ) {
                             Text(
                                 text = item.subject,
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = if (item.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
                         Text(
                             text = item.time,
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

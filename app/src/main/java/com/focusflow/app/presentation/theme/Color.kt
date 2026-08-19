@@ -2,132 +2,135 @@ package com.focusflow.app.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary palette - Soft pastel lavender
-val Lavender10 = Color(0xFF1F103A)
-val Lavender20 = Color(0xFF331D5A)
-val Lavender30 = Color(0xFF4C3080)
-val Lavender40 = Color(0xFF6A47A5)
-val Lavender50 = Color(0xFF8B6CC1) // Primary
-val Lavender60 = Color(0xFFA58BD2)
-val Lavender70 = Color(0xFFBCA6E1)
-val Lavender80 = Color(0xFFD4C4EF)
-val Lavender90 = Color(0xFFEBE1F8)
-val Lavender95 = Color(0xFFF8F5FF)
-val Lavender99 = Color(0xFFFCFBFF)
+// Primary palette - Soft Sage Green / Muted Emerald
+val Sage10 = Color(0xFF0F2412)
+val Sage20 = Color(0xFF1D3B20)
+val Sage30 = Color(0xFF2E5332)
+val Sage40 = Color(0xFF456F49)
+val Sage50 = Color(0xFF5E8C61) // Primary Accent
+val Sage60 = Color(0xFF78A57B)
+val Sage70 = Color(0xFF94BE97)
+val Sage80 = Color(0xFFB2D7B4)
+val Sage90 = Color(0xFFD2EBD4)
+val Sage95 = Color(0xFFE7F0E5) // Accent Light
+val Sage99 = Color(0xFFF5FAF4)
 
-// Secondary palette - Pink/Lilac
-val Lilac10 = Color(0xFF3A1832)
-val Lilac20 = Color(0xFF5A2A4F)
-val Lilac30 = Color(0xFF804272)
-val Lilac40 = Color(0xFFA56095)
-val Lilac50 = Color(0xFFD4A5CC) // Secondary
-val Lilac60 = Color(0xFFDFB9D8)
-val Lilac70 = Color(0xFFE8CBE3)
-val Lilac80 = Color(0xFFF1DEEE)
-val Lilac90 = Color(0xFFF9EEF7)
-val Lilac95 = Color(0xFFFCF6FB)
+// Secondary palette - Warm Beige / Soft Sand
+val Sand10 = Color(0xFF262019)
+val Sand20 = Color(0xFF3F362C)
+val Sand30 = Color(0xFF594D40)
+val Sand40 = Color(0xFF756656)
+val Sand50 = Color(0xFF92806D)
+val Sand60 = Color(0xFFAFA08E)
+val Sand70 = Color(0xFFCCC0B1)
+val Sand80 = Color(0xFFE2D9CE)
+val Sand90 = Color(0xFFF3EDE3) // Secondary Accent (Warm beige / soft sand)
+val Sand95 = Color(0xFFFAF6F0)
+val Sand99 = Color(0xFFFDFBF7)
 
-// Tertiary palette - Warm amber/orange
-val Amber10 = Color(0xFF3A1C00)
-val Amber20 = Color(0xFF5C2E00)
-val Amber30 = Color(0xFF804200)
-val Amber40 = Color(0xFFA65800)
-val Amber50 = Color(0xFFCC7000)
-val Amber60 = Color(0xFFE89030)
-val Amber70 = Color(0xFFF5AD5A)
-val Amber80 = Color(0xFFFFCC8A)
-val Amber90 = Color(0xFFFFE4C0)
-val Amber95 = Color(0xFFFFF2E0)
+// Tertiary palette - Warm Amber / Muted Gold
+val Amber10 = Color(0xFF361E00)
+val Amber20 = Color(0xFF573200)
+val Amber30 = Color(0xFF7D4A00)
+val Amber40 = Color(0xFFA86600)
+val Amber50 = Color(0xFFD99A3D) // Warning / Muted Amber
+val Amber60 = Color(0xFFE4AD5E)
+val Amber70 = Color(0xFFEEC080)
+val Amber80 = Color(0xFFF6D4A4)
+val Amber90 = Color(0xFFFDF3E3)
+val Amber95 = Color(0xFFFEF8EE)
 
-// Error palette
+// Error palette - Soft Muted Red
 val Red10 = Color(0xFF410002)
 val Red20 = Color(0xFF690005)
 val Red30 = Color(0xFF93000A)
 val Red40 = Color(0xFFBA1A1A)
-val Red50 = Color(0xFFDE3730)
-val Red60 = Color(0xFFFF5449)
-val Red70 = Color(0xFFFF897D)
-val Red80 = Color(0xFFFFB4AB)
-val Red90 = Color(0xFFFFDAD6)
-val Red95 = Color(0xFFFFEDEA)
+val Red50 = Color(0xFFD65C5C) // Error
+val Red60 = Color(0xFFDE7878)
+val Red70 = Color(0xFFE79696)
+val Red80 = Color(0xFFF0B6B6)
+val Red90 = Color(0xFFFCEAEA)
+val Red95 = Color(0xFFFDF5F5)
 
-// Neutral palette
+// Neutral palette - Clean, warm minimal neutrals
 val Neutral0 = Color(0xFF000000)
-val Neutral10 = Color(0xFF1A1A2E) // Near-black for primary text
-val Neutral20 = Color(0xFF2D2D3F)
-val Neutral30 = Color(0xFF414152)
-val Neutral40 = Color(0xFF6B7280) // Muted gray for secondary text
-val Neutral50 = Color(0xFF77777A)
-val Neutral60 = Color(0xFF919094)
-val Neutral70 = Color(0xFFABABAF)
-val Neutral80 = Color(0xFFC7C6CA)
-val Neutral90 = Color(0xFFE5E7EB)
-val Neutral95 = Color(0xFFF3F4F6)
-val Neutral98 = Color(0xFFF8F5FF) // Near-white lavender background
-val Neutral99 = Color(0xFFFCFBFF)
-val Neutral100 = Color(0xFFFFFFFF)
+val Neutral10 = Color(0xFF171717) // Primary Text
+val Neutral20 = Color(0xFF262626)
+val Neutral30 = Color(0xFF3D3D3D)
+val Neutral40 = Color(0xFF6B6B6B) // Secondary Text
+val Neutral50 = Color(0xFF858585)
+val Neutral60 = Color(0xFFA1A1A1)
+val Neutral70 = Color(0xFFBEBEBE)
+val Neutral80 = Color(0xFFD6D6D3)
+val Neutral90 = Color(0xFFE6E6E2) // Border
+val Neutral95 = Color(0xFFF1F2EF) // Secondary Surface
+val Neutral98 = Color(0xFFF7F7F5) // Primary Background (Soft warm white)
+val Neutral99 = Color(0xFFFAF9F7)
+val Neutral100 = Color(0xFFFFFFFF) // Surface
 
-// Neutral variant
-val NeutralVariant10 = Color(0xFF1C1A22)
-val NeutralVariant20 = Color(0xFF312F37)
-val NeutralVariant30 = Color(0xFF48454E)
-val NeutralVariant40 = Color(0xFF605D67)
-val NeutralVariant50 = Color(0xFF797680)
-val NeutralVariant60 = Color(0xFF938F9A)
-val NeutralVariant70 = Color(0xFFAEAAB5)
-val NeutralVariant80 = Color(0xFFCAC5D0)
-val NeutralVariant90 = Color(0xFFE6E1EC)
-val NeutralVariant95 = Color(0xFFF5EFFA)
+// Neutral variant - Warm Gray tones
+val NeutralVariant10 = Color(0xFF1A1A19)
+val NeutralVariant20 = Color(0xFF2D2D2B)
+val NeutralVariant30 = Color(0xFF444441)
+val NeutralVariant40 = Color(0xFF5C5C59)
+val NeutralVariant50 = Color(0xFF757571)
+val NeutralVariant60 = Color(0xFF8F8F8A)
+val NeutralVariant70 = Color(0xFFAAABA5)
+val NeutralVariant80 = Color(0xFFC7C7C1)
+val NeutralVariant90 = Color(0xFFE6E6E2)
+val NeutralVariant95 = Color(0xFFF1F2EF)
 
 // Semantic colors
-val SuccessGreen = Color(0xFF2ECC71)
-val SuccessGreenDark = Color(0xFF27AE60)
-val WarningOrange = Color(0xFFF39C12)
-val InfoBlue = Color(0xFF3498DB)
+val SuccessGreen = Color(0xFF5E8C61)
+val SuccessGreenDark = Color(0xFF456F49)
+val WarningOrange = Color(0xFFD99A3D)
+val InfoBlue = Color(0xFF4A7C82)
 
-// Focus mode colors
-val FocusDeep = Color(0xFF1A1A2E)
-val FocusAccent = Color(0xFF6C63FF)
-val FocusProgress = Color(0xFF00E676)
+// Focus mode colors - Calm, minimal
+val FocusDeep = Color(0xFF171717)
+val FocusAccent = Color(0xFF5E8C61)
+val FocusProgress = Color(0xFF5E8C61)
 
 // Commitment Lock colors
-val CommitmentActive = Color(0xFF7B52C9)
-val CommitmentWarning = Color(0xFFF39C12)
-val CommitmentMissed = Color(0xFFE74C3C)
-val CommitmentRecovery = Color(0xFF3498DB)
-val CommitmentRestored = Color(0xFF2ECC71)
+val CommitmentActive = Color(0xFF5E8C61)
+val CommitmentWarning = Color(0xFFD99A3D)
+val CommitmentMissed = Color(0xFFD65C5C)
+val CommitmentRecovery = Color(0xFF4A7C82)
+val CommitmentRestored = Color(0xFF5E8C61)
 
 // Priority colors
-val PriorityUrgent = Color(0xFFE74C3C)
-val PriorityHigh = Color(0xFFF39C12)
-val PriorityMedium = Color(0xFF3498DB)
-val PriorityLow = Color(0xFF95A5A6)
+val PriorityUrgent = Color(0xFFD65C5C)
+val PriorityHigh = Color(0xFFD99A3D)
+val PriorityMedium = Color(0xFF5E8C61)
+val PriorityLow = Color(0xFF8C9188)
 
-// Category colors
-val CategoryWork = Color(0xFF6C63FF)
-val CategoryStudy = Color(0xFF00BCD4)
-val CategoryPersonal = Color(0xFFFF6B6B)
-val CategoryHealth = Color(0xFF2ECC71)
-val CategoryCreative = Color(0xFFFFAB40)
-val CategoryOther = Color(0xFF9E9E9E)
+// Category colors - Harmonious natural tones
+val CategoryWork = Color(0xFF5E8C61)
+val CategoryStudy = Color(0xFF4A7C82)
+val CategoryPersonal = Color(0xFFD99A3D)
+val CategoryHealth = Color(0xFF6A8E4E)
+val CategoryCreative = Color(0xFFA87C5E)
+val CategoryOther = Color(0xFF8C9188)
 
 object FocusFlowDesign {
-    val StatCardPurple = Color(0xFFF0EBF8)
-    val StatCardPink = Color(0xFFF8EBF4)
-    val StatCardBlue = Color(0xFFEBF2F8)
+    val StatCardGreen = Color(0xFFE7F0E5)
+    val StatCardSand = Color(0xFFF3EDE3)
+    val StatCardWarm = Color(0xFFF1F2EF)
     
-    val AiCardGradientStart = Lavender50
-    val AiCardGradientEnd = Lilac50
+    val AiCardGradientStart = Color(0xFFE7F0E5)
+    val AiCardGradientEnd = Color(0xFFF3EDE3)
     
-    val ChatBubbleUser = Lavender50
+    val ChatBubbleUser = Color(0xFF5E8C61)
     val ChatBubbleUserText = Color.White
-    val ChatBubbleAi = Color(0xFFF0EBF8)
-    val ChatBubbleAiText = Neutral10
+    val ChatBubbleAi = Color(0xFFF1F2EF)
+    val ChatBubbleAiText = Color(0xFF171717)
     
-    val TimelineIndicator = Lilac50
-    val TimelineLine = Neutral90
+    val TimelineIndicator = Color(0xFF5E8C61)
+    val TimelineLine = Color(0xFFE6E6E2)
     
-    val BottomNavBackground = Color.White
-    val BottomNavSelected = Lavender50
-    val BottomNavUnselected = Neutral40
+    val FloatingNavBackground = Color.White
+    val FloatingNavBorder = Color(0xFFE6E6E2)
+    val FloatingNavSelectedBg = Color(0xFFE7F0E5)
+    val FloatingNavSelectedTint = Color(0xFF5E8C61)
+    val FloatingNavUnselected = Color(0xFF6B6B6B)
 }

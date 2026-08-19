@@ -1,5 +1,6 @@
 package com.focusflow.app.presentation.goals
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,8 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.focusflow.app.presentation.components.CompactTopBar
+import com.focusflow.app.presentation.theme.FocusFlowCorners
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalsScreen(
     onNavigateToCreateGoal: () -> Unit,
@@ -27,13 +29,18 @@ fun GoalsScreen(
     val goals by viewModel.goals.collectAsState()
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text("Goals") }
-            )
+            CompactTopBar(title = "Goals")
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToCreateGoal) {
+            FloatingActionButton(
+                onClick = onNavigateToCreateGoal,
+                shape = FocusFlowCorners.FloatingActionButton,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.padding(bottom = 60.dp)
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Create Goal")
             }
         }
@@ -49,13 +56,13 @@ fun GoalsScreen(
                     Icon(
                         Icons.Default.Flag,
                         contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        modifier = Modifier.size(56.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "No goals yet.",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -66,16 +73,15 @@ fun GoalsScreen(
                     .fillMaxSize()
                     .padding(padding)
                     .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 100.dp)
             ) {
-                item { Spacer(modifier = Modifier.height(8.dp)) }
                 items(goals) { goal ->
                     GoalCard(
                         goal = goal,
                         onClick = { onNavigateToGoalDetail(goal.id) }
                     )
                 }
-                item { Spacer(modifier = Modifier.height(88.dp)) }
             }
         }
     }
@@ -86,11 +92,14 @@ fun GoalCard(
     goal: GoalUiModel,
     onClick: () -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = MaterialTheme.shapes.medium
+        shape = FocusFlowCorners.CardSmall,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+        shadowElevation = 1.dp
     ) {
         Row(
             modifier = Modifier
@@ -102,33 +111,40 @@ fun GoalCard(
                 Text(
                     text = goal.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = goal.descriptionPreview,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2
-                )
+                if (goal.descriptionPreview.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = goal.descriptionPreview,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2
+                    )
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Target: ${goal.targetDate} • ${goal.linkedTasksCount} tasks",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Box(contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
                     progress = { goal.progress },
-                    modifier = Modifier.size(48.dp),
+                    modifier = Modifier.size(44.dp),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.primaryContainer,
+                    strokeWidth = 4.dp
                 )
                 Text(
                     text = "${(goal.progress * 100).toInt()}%",
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }

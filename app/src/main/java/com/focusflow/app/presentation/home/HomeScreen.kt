@@ -39,8 +39,11 @@ import kotlinx.coroutines.delay
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToTasks: () -> Unit,
-    onNavigateToCreateTask: () -> Unit
+    onNavigateToTasks: () -> Unit = {},
+    onNavigateToCreateTask: () -> Unit = {},
+    onNavigateToPlanner: () -> Unit = {},
+    onNavigateToAiChat: () -> Unit = {},
+    onNavigateToFocus: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -112,7 +115,10 @@ fun HomeScreen(
             ) {
                 QuickActionsSection(
                     onNavigateToTasks = onNavigateToTasks,
-                    onNavigateToCreateTask = onNavigateToCreateTask
+                    onNavigateToCreateTask = onNavigateToCreateTask,
+                    onNavigateToPlanner = onNavigateToPlanner,
+                    onNavigateToAiChat = onNavigateToAiChat,
+                    onNavigateToFocus = onNavigateToFocus
                 )
             }
         }
@@ -345,7 +351,13 @@ fun AiStudyTipCard(recommendation: String) {
 }
 
 @Composable
-fun QuickActionsSection(onNavigateToTasks: () -> Unit, onNavigateToCreateTask: () -> Unit) {
+fun QuickActionsSection(
+    onNavigateToTasks: () -> Unit,
+    onNavigateToCreateTask: () -> Unit,
+    onNavigateToPlanner: () -> Unit,
+    onNavigateToAiChat: () -> Unit,
+    onNavigateToFocus: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -369,7 +381,7 @@ fun QuickActionsSection(onNavigateToTasks: () -> Unit, onNavigateToCreateTask: (
                 icon = Icons.Outlined.ChatBubbleOutline,
                 iconBgColor = MaterialTheme.colorScheme.primaryContainer,
                 iconTint = MaterialTheme.colorScheme.primary,
-                onClick = {}
+                onClick = onNavigateToAiChat
             )
             QuickActionCard(
                 modifier = Modifier.weight(1f),
@@ -377,7 +389,7 @@ fun QuickActionsSection(onNavigateToTasks: () -> Unit, onNavigateToCreateTask: (
                 icon = Icons.Outlined.Timer,
                 iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
                 iconTint = MaterialTheme.colorScheme.tertiary,
-                onClick = {}
+                onClick = onNavigateToFocus
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -388,10 +400,10 @@ fun QuickActionsSection(onNavigateToTasks: () -> Unit, onNavigateToCreateTask: (
             QuickActionCard(
                 modifier = Modifier.weight(1f),
                 title = "Study Plan",
-                icon = Icons.Outlined.MenuBook,
+                icon = Icons.Outlined.DateRange,
                 iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
                 iconTint = MaterialTheme.colorScheme.secondary,
-                onClick = {}
+                onClick = onNavigateToPlanner
             )
             QuickActionCard(
                 modifier = Modifier.weight(1f),

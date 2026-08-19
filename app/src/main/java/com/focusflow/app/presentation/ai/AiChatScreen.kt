@@ -2,6 +2,7 @@ package com.focusflow.app.presentation.ai
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,9 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.launch
+import com.focusflow.app.presentation.components.CompactTopBar
+import com.focusflow.app.presentation.theme.FocusFlowCorners
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiChatScreen(
     viewModel: AiChatViewModel = viewModel(),
@@ -36,7 +38,6 @@ fun AiChatScreen(
     val inputText by viewModel.inputText.collectAsState()
     
     val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
     
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
@@ -46,26 +47,18 @@ fun AiChatScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("AI Assistant", fontWeight = FontWeight.SemiBold) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* Menu */ }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "More")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+            CompactTopBar(
+                title = "AI Study Assistant",
+                onBackClick = onNavigateBack
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(bottom = 8.dp)
+            ) {
                 SuggestionChips(
                     onChipClick = { text -> viewModel.onInputTextChanged(text) }
                 )
@@ -86,7 +79,7 @@ fun AiChatScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
+            contentPadding = PaddingValues(vertical = 12.dp)
         ) {
             items(messages, key = { it.id }) { message ->
                 AnimatedVisibility(
@@ -124,34 +117,34 @@ fun ChatMessageItem(message: ChatMessage) {
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = "AI",
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
         }
 
-        val bubbleColor = if (message.isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-        val textColor = if (message.isUser) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+        val bubbleColor = if (message.isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+        val textColor = if (message.isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+        val border = if (!message.isUser) BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)) else null
         
-        Box(
-            modifier = Modifier
-                .weight(1f, fill = false)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 20.dp,
-                        topEnd = 20.dp,
-                        bottomStart = if (message.isUser) 20.dp else 4.dp,
-                        bottomEnd = if (message.isUser) 4.dp else 20.dp
-                    )
-                )
-                .background(bubbleColor)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+        Surface(
+            modifier = Modifier.weight(1f, fill = false),
+            shape = RoundedCornerShape(
+                topStart = 18.dp,
+                topEnd = 18.dp,
+                bottomStart = if (message.isUser) 18.dp else 4.dp,
+                bottomEnd = if (message.isUser) 4.dp else 18.dp
+            ),
+            color = bubbleColor,
+            border = border,
+            shadowElevation = 1.dp
         ) {
             Text(
                 text = message.content,
                 color = textColor,
-                fontSize = 15.sp,
-                lineHeight = 22.sp
+                fontSize = 14.sp,
+                lineHeight = 20.sp,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
         }
     }
@@ -159,29 +152,32 @@ fun ChatMessageItem(message: ChatMessage) {
 
 @Composable
 fun SuggestionChips(onChipClick: (String) -> Unit) {
-    val suggestions = listOf("Study tips for exams", "Help with calculus", "Summarize notes")
+    val suggestions = listOf("Study tips for exams", "Help with calculus", "Summarize notes", "Create 2-hour study plan")
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(suggestions) { suggestion ->
-            SuggestionChip(
+            Surface(
                 onClick = { onChipClick(suggestion) },
-                label = { Text(suggestion, color = MaterialTheme.colorScheme.primary) },
-                colors = SuggestionChipDefaults.suggestionChipColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                ),
-                border = SuggestionChipDefaults.suggestionChipBorder(
-                    enabled = true,
-                    borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                shape = FocusFlowCorners.Chip,
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+                shadowElevation = 0.dp
+            ) {
+                Text(
+                    text = suggestion,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
-            )
+            }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatInputBar(
     text: String,
@@ -191,37 +187,32 @@ fun ChatInputBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp)
+            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 4.dp)
             .imePadding(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
             shadowElevation = 2.dp,
             modifier = Modifier.weight(1f)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)
             ) {
-                IconButton(onClick = { /* Add */ }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add attachment", tint = Color.Gray)
-                }
-                
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { /* deep think options */ }.padding(4.dp)
-                ) {
-                    Text("Deep Think", fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-                }
-
                 TextField(
                     value = text,
                     onValueChange = onTextChanged,
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Ask anything...", fontSize = 14.sp) },
+                    placeholder = { 
+                        Text(
+                            "Ask study assistant anything...", 
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        ) 
+                    },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -230,29 +221,27 @@ fun ChatInputBar(
                     ),
                     maxLines = 4
                 )
-                
-                IconButton(onClick = { /* Mic */ }) {
-                    Icon(Icons.Default.Mic, contentDescription = "Voice input", tint = Color.Gray)
-                }
             }
         }
         
         Spacer(modifier = Modifier.width(8.dp))
         
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(if (text.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
-                .clickable(enabled = text.isNotBlank(), onClick = onSendClicked),
-            contentAlignment = Alignment.Center
+        Surface(
+            onClick = onSendClicked,
+            enabled = text.isNotBlank(),
+            shape = CircleShape,
+            color = if (text.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.size(44.dp),
+            shadowElevation = if (text.isNotBlank()) 2.dp else 0.dp
         ) {
-            Icon(
-                imageVector = Icons.Default.Send,
-                contentDescription = "Send",
-                tint = if (text.isNotBlank()) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.surface,
-                modifier = Modifier.size(20.dp)
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    contentDescription = "Send",
+                    tint = if (text.isNotBlank()) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }
@@ -260,7 +249,7 @@ fun ChatInputBar(
 @Composable
 fun TypingIndicator() {
     Row(
-        modifier = Modifier.padding(start = 40.dp, top = 8.dp),
+        modifier = Modifier.padding(start = 40.dp, top = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -281,7 +270,7 @@ fun TypingIndicator() {
                 modifier = Modifier
                     .size(8.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
             )
         }
     }

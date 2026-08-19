@@ -17,6 +17,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -26,11 +27,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import com.focusflow.app.presentation.components.BottomNavItemData
+import com.focusflow.app.presentation.components.FocusFlowBottomNav
 import com.focusflow.app.presentation.ai.AiChatScreen
 import com.focusflow.app.presentation.ai.AiTaskBreakdownScreen
 import com.focusflow.app.presentation.analytics.AnalyticsScreen
@@ -88,51 +91,29 @@ fun FocusFlowNavHost() {
     
     val showBottomBar = currentDestination?.route in bottomBarRoutes
 
+    val navItems = remember {
+        BottomNavItem.entries.map { 
+            BottomNavItemData(it.route, it.icon, it.selectedIcon, it.label) 
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             if (showBottomBar) {
-                Surface(
-                    shadowElevation = 16.dp,
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                    modifier = Modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                ) {
-                    NavigationBar(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        tonalElevation = 0.dp
-                    ) {
-                        bottomNavItems.forEach { item ->
-                            val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
-                            NavigationBarItem(
-                                icon = {
-                                    Icon(
-                                        imageVector = if (selected) item.selectedIcon else item.icon,
-                                        contentDescription = item.label
-                                    )
-                                },
-                                label = { Text(item.label) },
-                                selected = selected,
-                                onClick = {
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            )
+                FocusFlowBottomNav(
+                    items = navItems,
+                    currentRoute = currentDestination?.route,
+                    onNavigate = { route ->
+                        navController.navigate(route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                     }
-                }
+                )
             }
         }
     ) { paddingValues ->
@@ -217,7 +198,10 @@ fun FocusFlowNavHost() {
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNavigateToTasks = { navController.navigate(Screen.Tasks.route) },
-                    onNavigateToCreateTask = { navController.navigate(Screen.CreateTask.route) }
+                    onNavigateToCreateTask = { navController.navigate(Screen.CreateTask.route) },
+                    onNavigateToPlanner = { navController.navigate(Screen.Planner.route) },
+                    onNavigateToAiChat = { navController.navigate(Screen.AiChat.route) },
+                    onNavigateToFocus = { navController.navigate(Screen.Focus.route) }
                 )
             }
 
