@@ -85,9 +85,17 @@ class AppBlockerService : Service() {
             val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
             while (isActive && isMonitoring) {
                 try {
+                    val activeApps = appRestrictionManager.getActiveRestrictedApps()
+                    if (activeApps.isEmpty()) {
+                        stopMonitoring()
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                        stopSelf()
+                        break
+                    }
+
                     val foregroundPackage = getForegroundPackage(usageStatsManager)
                     if (foregroundPackage != null && foregroundPackage != packageName) {
-                        if (appRestrictionManager.isRestrictionActive(foregroundPackage)) {
+                        if (activeApps.contains(foregroundPackage)) {
                             val now = System.currentTimeMillis()
                             // Throttle repeated triggers within 1.2s
                             if (foregroundPackage != lastBlockedPackage || now - lastBlockTime > 1200) {

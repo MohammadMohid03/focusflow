@@ -78,23 +78,21 @@ class TaskRepositoryImpl @Inject constructor(
         taskDao.deleteTask(taskId)
         val now = System.currentTimeMillis()
         val commitments = commitmentDao.getCommitmentsForTaskSync(taskId).map { it.toDomain() }
-        commitments.filter { it.status == CommitmentStatus.ACTIVE || it.status == CommitmentStatus.WARNING }.forEach { commitment ->
-            val updated = commitment.copy(
-                status = CommitmentStatus.CANCELLED,
-                cancelledAt = now
-            )
-            commitmentDao.update(updated.toEntity())
-
-            if (updated.selectedAppPackages.isNotEmpty()) {
-                val remainingActive = commitmentDao.getAllActiveCommitmentsSync().map { it.toDomain() }
-                    .filter { it.id != updated.id }
-                val remainingActiveApps = remainingActive.flatMap { it.selectedAppPackages }.toSet()
-                val appsToUnlock = updated.selectedAppPackages.filter { !remainingActiveApps.contains(it) }
-                if (appsToUnlock.isNotEmpty()) {
-                    appRestrictionManager.disableRestriction(appsToUnlock)
-                }
+        commitments.forEach { commitment ->
+            if (commitment.status == CommitmentStatus.ACTIVE || commitment.status == CommitmentStatus.WARNING) {
+                val updated = commitment.copy(
+                    status = CommitmentStatus.CANCELLED,
+                    cancelledAt = now
+                )
+                commitmentDao.update(updated.toEntity())
             }
         }
+
+        val remainingActive = commitmentDao.getAllActiveCommitmentsSync().map { it.toDomain() }
+        val remainingActiveApps = remainingActive.flatMap { it.selectedAppPackages }.toSet()
+        val allUnlocked = commitments.flatMap { it.selectedAppPackages }.filter { !remainingActiveApps.contains(it) }
+        appRestrictionManager.disableRestriction(allUnlocked)
+        Unit
     }
 
     override suspend fun completeTask(taskId: String) = withContext(ioDispatcher) {
@@ -102,23 +100,21 @@ class TaskRepositoryImpl @Inject constructor(
         taskDao.completeTask(taskId, now, now)
 
         val commitments = commitmentDao.getCommitmentsForTaskSync(taskId).map { it.toDomain() }
-        commitments.filter { it.status == CommitmentStatus.ACTIVE || it.status == CommitmentStatus.WARNING }.forEach { commitment ->
-            val updated = commitment.copy(
-                status = CommitmentStatus.COMPLETED,
-                completedAt = now
-            )
-            commitmentDao.update(updated.toEntity())
-
-            if (updated.selectedAppPackages.isNotEmpty()) {
-                val remainingActive = commitmentDao.getAllActiveCommitmentsSync().map { it.toDomain() }
-                    .filter { it.id != updated.id }
-                val remainingActiveApps = remainingActive.flatMap { it.selectedAppPackages }.toSet()
-                val appsToUnlock = updated.selectedAppPackages.filter { !remainingActiveApps.contains(it) }
-                if (appsToUnlock.isNotEmpty()) {
-                    appRestrictionManager.disableRestriction(appsToUnlock)
-                }
+        commitments.forEach { commitment ->
+            if (commitment.status == CommitmentStatus.ACTIVE || commitment.status == CommitmentStatus.WARNING) {
+                val updated = commitment.copy(
+                    status = CommitmentStatus.COMPLETED,
+                    completedAt = now
+                )
+                commitmentDao.update(updated.toEntity())
             }
         }
+
+        val remainingActive = commitmentDao.getAllActiveCommitmentsSync().map { it.toDomain() }
+        val remainingActiveApps = remainingActive.flatMap { it.selectedAppPackages }.toSet()
+        val allUnlocked = commitments.flatMap { it.selectedAppPackages }.filter { !remainingActiveApps.contains(it) }
+        appRestrictionManager.disableRestriction(allUnlocked)
+        Unit
     }
 
     override suspend fun restoreTask(taskId: String) = withContext(ioDispatcher) {

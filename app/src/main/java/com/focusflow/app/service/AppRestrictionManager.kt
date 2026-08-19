@@ -17,6 +17,8 @@ interface AppRestrictionManager {
         apps: List<String>
     ): RestrictionResult
 
+    suspend fun getActiveRestrictedApps(): Set<String>
+
     suspend fun isRestrictionActive(packageName: String): Boolean
 
     suspend fun checkCapability(): RestrictionCapability

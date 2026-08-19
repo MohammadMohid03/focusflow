@@ -9,6 +9,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
+import com.focusflow.app.data.local.dao.CommitmentDao
+import com.focusflow.app.data.local.mapper.toDomain
 import com.focusflow.app.domain.model.RestrictableApp
 import com.focusflow.app.domain.model.RestrictionCapability
 import com.focusflow.app.domain.model.RestrictionResult
@@ -20,15 +22,17 @@ import javax.inject.Singleton
 
 @Singleton
 class AppRestrictionManagerImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val commitmentDao: CommitmentDao
 ) : AppRestrictionManager {
 
-    private val restrictedApps = mutableSetOf<String>()
+    private val inMemoryRestrictedApps = mutableSetOf<String>()
     private val restrictionReasons = mutableMapOf<String, String>()
 
     override suspend fun getAvailableApps(): List<RestrictableApp> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
         val installedApps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        val activeApps = getActiveRestrictedApps()
 
         installedApps
             .filter { app ->
@@ -42,11 +46,23 @@ class AppRestrictionManagerImpl @Inject constructor(
                     packageName = app.packageName,
                     appName = pm.getApplicationLabel(app).toString(),
                     icon = try { pm.getApplicationIcon(app) } catch (e: Exception) { null },
-                    isSelected = restrictedApps.contains(app.packageName),
+                    isSelected = activeApps.contains(app.packageName),
                     isSystemApp = (app.flags and ApplicationInfo.FLAG_SYSTEM) != 0
                 )
             }
             .sortedBy { it.appName.lowercase() }
+    }
+
+    override suspend fun getActiveRestrictedApps(): Set<String> = withContext(Dispatchers.IO) {
+        val dbActiveApps = try {
+            commitmentDao.getAllActiveCommitmentsSync()
+                .map { it.toDomain() }
+                .flatMap { it.selectedAppPackages }
+                .toSet()
+        } catch (e: Exception) {
+            emptySet()
+        }
+        return@withContext (inMemoryRestrictedApps + dbActiveApps)
     }
 
     override suspend fun enableRestriction(
@@ -54,11 +70,12 @@ class AppRestrictionManagerImpl @Inject constructor(
         reason: String
     ): RestrictionResult = withContext(Dispatchers.IO) {
         return@withContext try {
-            restrictedApps.addAll(apps)
+            inMemoryRestrictedApps.addAll(apps)
             apps.forEach { restrictionReasons[it] = reason }
 
-            if (apps.isNotEmpty()) {
-                AppBlockerService.start(context, ArrayList(restrictedApps))
+            val totalActive = getActiveRestrictedApps()
+            if (totalActive.isNotEmpty()) {
+                AppBlockerService.start(context, ArrayList(totalActive))
             }
 
             val capability = checkCapability()
@@ -80,13 +97,14 @@ class AppRestrictionManagerImpl @Inject constructor(
         apps: List<String>
     ): RestrictionResult = withContext(Dispatchers.IO) {
         return@withContext try {
-            restrictedApps.removeAll(apps.toSet())
+            inMemoryRestrictedApps.removeAll(apps.toSet())
             apps.forEach { restrictionReasons.remove(it) }
 
-            if (restrictedApps.isEmpty()) {
+            val remainingActive = getActiveRestrictedApps()
+            if (remainingActive.isEmpty()) {
                 AppBlockerService.stop(context)
             } else {
-                AppBlockerService.start(context, ArrayList(restrictedApps))
+                AppBlockerService.start(context, ArrayList(remainingActive))
             }
 
             RestrictionResult(
@@ -102,8 +120,8 @@ class AppRestrictionManagerImpl @Inject constructor(
         }
     }
 
-    override suspend fun isRestrictionActive(packageName: String): Boolean {
-        return restrictedApps.contains(packageName)
+    override suspend fun isRestrictionActive(packageName: String): Boolean = withContext(Dispatchers.IO) {
+        return@withContext getActiveRestrictedApps().contains(packageName)
     }
 
     override suspend fun checkCapability(): RestrictionCapability {
