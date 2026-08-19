@@ -243,10 +243,12 @@ class CommitmentViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val commitment = commitmentRepository.getCommitmentById(commitmentId).firstOrNull()
+                commitmentRepository.deleteCommitment(commitmentId)
                 if (commitment != null && commitment.selectedAppPackages.isNotEmpty()) {
                     appRestrictionManager.disableRestriction(commitment.selectedAppPackages)
+                } else {
+                    appRestrictionManager.disableRestriction(emptyList())
                 }
-                commitmentRepository.deleteCommitment(commitmentId)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }
             }

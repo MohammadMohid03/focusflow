@@ -26,9 +26,6 @@ class AppRestrictionManagerImpl @Inject constructor(
     private val commitmentDao: CommitmentDao
 ) : AppRestrictionManager {
 
-    private val inMemoryRestrictedApps = mutableSetOf<String>()
-    private val restrictionReasons = mutableMapOf<String, String>()
-
     override suspend fun getAvailableApps(): List<RestrictableApp> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
         val installedApps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
@@ -54,7 +51,7 @@ class AppRestrictionManagerImpl @Inject constructor(
     }
 
     override suspend fun getActiveRestrictedApps(): Set<String> = withContext(Dispatchers.IO) {
-        val dbActiveApps = try {
+        return@withContext try {
             commitmentDao.getAllActiveCommitmentsSync()
                 .map { it.toDomain() }
                 .flatMap { it.selectedAppPackages }
@@ -62,7 +59,6 @@ class AppRestrictionManagerImpl @Inject constructor(
         } catch (e: Exception) {
             emptySet()
         }
-        return@withContext (inMemoryRestrictedApps + dbActiveApps)
     }
 
     override suspend fun enableRestriction(
@@ -70,10 +66,7 @@ class AppRestrictionManagerImpl @Inject constructor(
         reason: String
     ): RestrictionResult = withContext(Dispatchers.IO) {
         return@withContext try {
-            inMemoryRestrictedApps.addAll(apps)
-            apps.forEach { restrictionReasons[it] = reason }
-
-            val totalActive = getActiveRestrictedApps()
+            val totalActive = getActiveRestrictedApps() + apps
             if (totalActive.isNotEmpty()) {
                 AppBlockerService.start(context, ArrayList(totalActive))
             }
@@ -97,9 +90,6 @@ class AppRestrictionManagerImpl @Inject constructor(
         apps: List<String>
     ): RestrictionResult = withContext(Dispatchers.IO) {
         return@withContext try {
-            inMemoryRestrictedApps.removeAll(apps.toSet())
-            apps.forEach { restrictionReasons.remove(it) }
-
             val remainingActive = getActiveRestrictedApps()
             if (remainingActive.isEmpty()) {
                 AppBlockerService.stop(context)
@@ -109,7 +99,7 @@ class AppRestrictionManagerImpl @Inject constructor(
 
             RestrictionResult(
                 success = true,
-                message = "Restrictions removed for ${apps.size} apps"
+                message = "Restrictions updated"
             )
         } catch (e: Exception) {
             RestrictionResult(
