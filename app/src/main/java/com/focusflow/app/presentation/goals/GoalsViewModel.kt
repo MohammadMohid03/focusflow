@@ -1,12 +1,18 @@
 package com.focusflow.app.presentation.goals
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.focusflow.app.domain.model.Goal
+import com.focusflow.app.domain.repository.AuthRepository
+import com.focusflow.app.domain.repository.GoalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
@@ -24,54 +30,82 @@ data class GoalUiModel(
 
 @HiltViewModel
 class GoalsViewModel @Inject constructor(
+    private val goalRepository: GoalRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _goals = MutableStateFlow<List<GoalUiModel>>(
-        listOf(
-            GoalUiModel(
-                id = "1",
-                title = "Learn Jetpack Compose",
-                descriptionPreview = "Master the modern Android UI toolkit.",
-                targetDate = "Dec 31, 2026",
-                linkedTasksCount = 5,
-                progress = 0.4f,
-                linkedTasks = listOf(
-                    TaskStub("t1", "Read documentation", true),
-                    TaskStub("t2", "Build sample app", false)
-                )
-            ),
-            GoalUiModel(
-                id = "2",
-                title = "Fitness Challenge",
-                descriptionPreview = "Run 100km this month.",
-                targetDate = "Aug 31, 2026",
-                linkedTasksCount = 10,
-                progress = 0.8f,
-                linkedTasks = listOf(
-                    TaskStub("t3", "Morning run", true)
-                )
-            )
-        )
-    )
+    private val _goals = MutableStateFlow<List<GoalUiModel>>(emptyList())
     val goals: StateFlow<List<GoalUiModel>> = _goals.asStateFlow()
 
+    private val userId: String
+        get() = authRepository.getCurrentUser()?.id ?: ""
+
+    init {
+        loadGoals()
+    }
+
+    private fun loadGoals() {
+        viewModelScope.launch {
+            goalRepository.getAllGoals(userId)
+                .catch { /* Handle error */ }
+                .collect { domainGoals ->
+                    _goals.value = domainGoals.map { goal ->
+                        GoalUiModel(
+                            id = goal.id,
+                            title = goal.title,
+                            descriptionPreview = goal.description,
+                            targetDate = goal.targetDate?.toString() ?: "",
+                            linkedTasksCount = goal.linkedTaskIds.size,
+                            progress = goal.progress,
+                            linkedTasks = emptyList()
+                        )
+                    }
+                }
+        }
+    }
+
     fun getGoal(id: String): Flow<GoalUiModel?> {
-        return _goals.map { list -> list.find { it.id == id } }
+        return goalRepository.getGoalById(id).map { goal ->
+            goal?.let {
+                GoalUiModel(
+                    id = it.id,
+                    title = it.title,
+                    descriptionPreview = it.description,
+                    targetDate = it.targetDate?.toString() ?: "",
+                    linkedTasksCount = it.linkedTaskIds.size,
+                    progress = it.progress,
+                    linkedTasks = emptyList()
+                )
+            }
+        }
     }
 
     fun createGoal(title: String, description: String, targetDate: String, linkedTaskIds: List<String>) {
-        val newGoal = GoalUiModel(
-            id = UUID.randomUUID().toString(),
-            title = title,
-            descriptionPreview = description,
-            targetDate = targetDate,
-            linkedTasksCount = linkedTaskIds.size,
-            progress = 0f
-        )
-        _goals.value = _goals.value + newGoal
+        viewModelScope.launch {
+            try {
+                val newGoal = Goal(
+                    id = UUID.randomUUID().toString(),
+                    title = title,
+                    description = description,
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis(),
+                    userId = userId,
+                    linkedTaskIds = linkedTaskIds
+                )
+                goalRepository.insertGoal(newGoal)
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
     }
 
     fun deleteGoal(id: String) {
-        _goals.value = _goals.value.filterNot { it.id == id }
+        viewModelScope.launch {
+            try {
+                goalRepository.deleteGoal(id)
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
     }
 }

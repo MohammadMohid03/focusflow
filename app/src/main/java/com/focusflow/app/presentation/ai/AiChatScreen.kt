@@ -117,21 +117,21 @@ fun ChatMessageItem(message: ChatMessage) {
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = "AI",
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
         }
 
-        val bubbleColor = if (message.isUser) MaterialTheme.colorScheme.primary else Color.White
-        val textColor = if (message.isUser) Color.White else Color(0xFF1D1B20)
+        val bubbleColor = if (message.isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+        val textColor = if (message.isUser) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
         
         Box(
             modifier = Modifier
@@ -168,9 +168,9 @@ fun SuggestionChips(onChipClick: (String) -> Unit) {
         items(suggestions) { suggestion ->
             SuggestionChip(
                 onClick = { onChipClick(suggestion) },
-                label = { Text(suggestion) },
+                label = { Text(suggestion, color = MaterialTheme.colorScheme.primary) },
                 colors = SuggestionChipDefaults.suggestionChipColors(
-                    containerColor = Color.Transparent
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 ),
                 border = SuggestionChipDefaults.suggestionChipBorder(
                     enabled = true,
@@ -197,7 +197,7 @@ fun ChatInputBar(
     ) {
         Surface(
             shape = RoundedCornerShape(28.dp),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.surface,
             shadowElevation = 2.dp,
             modifier = Modifier.weight(1f)
         ) {
@@ -243,14 +243,14 @@ fun ChatInputBar(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(if (text.isNotBlank()) MaterialTheme.colorScheme.primary else Color.Gray)
+                .background(if (text.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                 .clickable(enabled = text.isNotBlank(), onClick = onSendClicked),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Send,
                 contentDescription = "Send",
-                tint = Color.White,
+                tint = if (text.isNotBlank()) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.surface,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -281,7 +281,7 @@ fun TypingIndicator() {
                 modifier = Modifier
                     .size(8.dp)
                     .clip(CircleShape)
-                    .background(Color.Gray.copy(alpha = alpha))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
             )
         }
     }

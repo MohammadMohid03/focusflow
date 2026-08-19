@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.focusflow.app.domain.model.TaskCategory
+import com.focusflow.app.presentation.theme.WarningOrange
 
 @Composable
 fun CategoryChip(
@@ -40,11 +41,11 @@ fun CategoryChip(
 @Composable
 fun getCategoryColors(categoryName: String): Pair<Color, Color> {
     return when (categoryName.lowercase()) {
-        "work" -> Pair(Color(0xFFE3F2FD), Color(0xFF1976D2))
-        "study" -> Pair(Color(0xFFF3E5F5), Color(0xFF7B1FA2))
-        "personal" -> Pair(Color(0xFFE8F5E9), Color(0xFF388E3C))
-        "health" -> Pair(Color(0xFFFFEBEE), Color(0xFFD32F2F))
-        "creative" -> Pair(Color(0xFFFFF3E0), Color(0xFFF57C00))
+        "work" -> Pair(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.primary)
+        "study" -> Pair(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.secondary)
+        "personal" -> Pair(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.tertiary)
+        "health" -> Pair(MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
+        "creative" -> Pair(WarningOrange.copy(alpha = 0.2f), WarningOrange)
         else -> Pair(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

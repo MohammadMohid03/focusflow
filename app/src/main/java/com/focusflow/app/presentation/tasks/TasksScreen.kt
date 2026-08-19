@@ -8,11 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
-
-
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,7 +45,7 @@ fun TasksScreen(
                                 expanded = sortMenuExpanded,
                                 onDismissRequest = { sortMenuExpanded = false }
                             ) {
-                                TaskSortOrder.values().forEach { order ->
+                                TaskSortOrder.entries.forEach { order ->
                                     DropdownMenuItem(
                                         text = { Text(order.name.replace("_", " ")) },
                                         onClick = {
@@ -80,7 +77,7 @@ fun TasksScreen(
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(TaskFilter.values()) { filter ->
+                    items(TaskFilter.entries.toTypedArray()) { filter ->
                         FilterChip(
                             selected = uiState.selectedFilter == filter,
                             onClick = { viewModel.onFilterSelect(filter) },
@@ -119,12 +116,11 @@ fun TasksScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(uiState.tasks, key = { it.id }) { task ->
-                            // TODO: Add SwipeToDismiss here
                             TaskCard(
                                 task = task,
                                 onClick = { onNavigateToTaskDetail(task.id) },
                                 onComplete = { isCompleted -> viewModel.toggleTaskCompletion(task, isCompleted) },
-                                onLongClick = { /* show context menu */ }
+                                onLongClick = { viewModel.deleteTask(task) }
                             )
                         }
                     }

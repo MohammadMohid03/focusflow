@@ -144,7 +144,7 @@ fun HabitCard(
                 contentAlignment = Alignment.Center
             ) {
                 if (isCompleted) {
-                    Icon(Icons.Default.Check, contentDescription = null, tint = Color.White)
+                    Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }

@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.delay
 
 @Composable
 fun FocusSessionScreen(
@@ -27,13 +26,14 @@ fun FocusSessionScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState.isRunning, uiState.isPaused) {
-        while (uiState.isRunning && !uiState.isPaused && uiState.timeRemaining > 0) {
-            delay(1000L)
-            viewModel.tick()
+    LaunchedEffect(Unit) {
+        if (!uiState.isRunning) {
+            viewModel.startSession()
         }
-        if (uiState.timeRemaining == 0 && uiState.isRunning) {
-            viewModel.endSession()
+    }
+
+    LaunchedEffect(uiState.timeRemaining, uiState.isRunning) {
+        if (uiState.timeRemaining <= 0 && !uiState.isRunning) {
             onSessionEnd()
         }
     }
@@ -43,17 +43,20 @@ fun FocusSessionScreen(
         label = "Progress"
     )
 
+    val trackColor = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.1f)
+    val primaryColor = MaterialTheme.colorScheme.primary
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF1A1A2E)) // FocusDeep
+            .background(MaterialTheme.colorScheme.inverseSurface)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = if (uiState.isBreak) "Break Phase" else "Work Phase",
-            color = Color.White.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.7f),
             style = MaterialTheme.typography.titleMedium
         )
         
@@ -61,7 +64,7 @@ fun FocusSessionScreen(
         
         Text(
             text = "Round ${uiState.currentRound}/4",
-            color = Color.White.copy(alpha = 0.5f),
+            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -71,10 +74,9 @@ fun FocusSessionScreen(
             contentAlignment = Alignment.Center,
             modifier = Modifier.size(300.dp)
         ) {
-            val primaryColor = MaterialTheme.colorScheme.primary
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawArc(
-                    color = Color.White.copy(alpha = 0.1f),
+                    color = trackColor,
                     startAngle = 0f,
                     sweepAngle = 360f,
                     useCenter = false,
@@ -95,7 +97,7 @@ fun FocusSessionScreen(
                 text = String.format("%02d:%02d", minutes, seconds),
                 style = MaterialTheme.typography.displayLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.inverseOnSurface
                 )
             )
         }

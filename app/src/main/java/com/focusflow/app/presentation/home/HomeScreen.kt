@@ -28,6 +28,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.domain.model.Task
 import com.focusflow.app.domain.model.TaskCategory
+import com.focusflow.app.presentation.theme.CategoryCreative
+import com.focusflow.app.presentation.theme.CategoryHealth
+import com.focusflow.app.presentation.theme.CategoryOther
+import com.focusflow.app.presentation.theme.CategoryPersonal
+import com.focusflow.app.presentation.theme.CategoryStudy
+import com.focusflow.app.presentation.theme.CategoryWork
 import kotlinx.coroutines.delay
 
 @Composable
@@ -47,7 +53,7 @@ fun HomeScreen(
 
     if (uiState.isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Color(0xFFC084FC))
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
         return
     }
@@ -55,13 +61,13 @@ fun HomeScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F5FB)), // soft lavender background
+            .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(bottom = 80.dp)
     ) {
         item {
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(tween(500)) + slideInVertically(tween(500), initialOffsetY = { 50 })
+                enter = fadeIn(tween(500)) + slideInVertically(tween(500), initialOffsetY = { 30 })
             ) {
                 ProfileHeaderArea(
                     userName = uiState.userName,
@@ -72,7 +78,7 @@ fun HomeScreen(
         item {
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(tween(500, delayMillis = 100)) + slideInVertically(tween(500, delayMillis = 100), initialOffsetY = { 50 })
+                enter = fadeIn(tween(500, delayMillis = 100)) + slideInVertically(tween(500, delayMillis = 100), initialOffsetY = { 30 })
             ) {
                 HeroTitle()
             }
@@ -80,7 +86,7 @@ fun HomeScreen(
         item {
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(tween(500, delayMillis = 200)) + slideInVertically(tween(500, delayMillis = 200), initialOffsetY = { 50 })
+                enter = fadeIn(tween(500, delayMillis = 200)) + slideInVertically(tween(500, delayMillis = 200), initialOffsetY = { 30 })
             ) {
                 StatsRow(
                     focusMinutes = uiState.focusMinutesToday,
@@ -92,7 +98,7 @@ fun HomeScreen(
         item {
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(tween(500, delayMillis = 300)) + slideInVertically(tween(500, delayMillis = 300), initialOffsetY = { 50 })
+                enter = fadeIn(tween(500, delayMillis = 300)) + slideInVertically(tween(500, delayMillis = 300), initialOffsetY = { 30 })
             ) {
                 AiStudyTipCard(
                     recommendation = uiState.aiRecommendation
@@ -102,7 +108,7 @@ fun HomeScreen(
         item {
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(tween(500, delayMillis = 400)) + slideInVertically(tween(500, delayMillis = 400), initialOffsetY = { 50 })
+                enter = fadeIn(tween(500, delayMillis = 400)) + slideInVertically(tween(500, delayMillis = 400), initialOffsetY = { 30 })
             ) {
                 QuickActionsSection(
                     onNavigateToTasks = onNavigateToTasks,
@@ -113,7 +119,7 @@ fun HomeScreen(
         item {
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(tween(500, delayMillis = 500)) + slideInVertically(tween(500, delayMillis = 500), initialOffsetY = { 50 })
+                enter = fadeIn(tween(500, delayMillis = 500)) + slideInVertically(tween(500, delayMillis = 500), initialOffsetY = { 30 })
             ) {
                 UpcomingSessionsSection(tasks = uiState.todayTasks)
             }
@@ -135,13 +141,13 @@ fun ProfileHeaderArea(userName: String, greeting: String) {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFC084FC)), // purple
+                    .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = userName.firstOrNull()?.uppercase() ?: "U",
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -150,13 +156,13 @@ fun ProfileHeaderArea(userName: String, greeting: String) {
                 Text(
                     text = greeting,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "Hi, $userName",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -165,15 +171,15 @@ fun ProfileHeaderArea(userName: String, greeting: String) {
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surface)
                 .clickable { /* Toggle theme */ },
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Outlined.DarkMode,
                 contentDescription = "Dark Mode",
-                tint = Color.Gray
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -185,7 +191,7 @@ fun HeroTitle() {
         text = "Ready to study\nToday?",
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.ExtraBold,
-        color = Color(0xFF1E1E2C),
+        color = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
     )
 }
@@ -211,27 +217,27 @@ fun StatsRow(focusMinutes: Int, completedTasks: Int, currentStreak: Int) {
             title = "Study Time",
             value = timeString,
             icon = Icons.Outlined.AccessTime,
-            iconBgColor = Color(0xFFE8D5FF),
-            bgColor = Color(0xFFF3E8FF),
-            iconTint = Color(0xFF9333EA)
+            iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+            bgColor = MaterialTheme.colorScheme.surface,
+            iconTint = MaterialTheme.colorScheme.primary
         )
         StatCard(
             modifier = Modifier.weight(1f),
             title = "Completed",
             value = "$animatedTasks Task",
             icon = Icons.Outlined.CheckCircle,
-            iconBgColor = Color(0xFFFFD5F0),
-            bgColor = Color(0xFFFCE7F3),
-            iconTint = Color(0xFFDB2777)
+            iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
+            bgColor = MaterialTheme.colorScheme.surface,
+            iconTint = MaterialTheme.colorScheme.secondary
         )
         StatCard(
             modifier = Modifier.weight(1f),
             title = "Current Streak",
             value = "$animatedStreak Days",
             icon = Icons.Outlined.LocalFireDepartment,
-            iconBgColor = Color(0xFFBAE6FD),
-            bgColor = Color(0xFFE0F2FE),
-            iconTint = Color(0xFF0284C7)
+            iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
+            bgColor = MaterialTheme.colorScheme.surface,
+            iconTint = MaterialTheme.colorScheme.tertiary
         )
     }
 }
@@ -246,38 +252,42 @@ fun StatCard(
     bgColor: Color,
     iconTint: Color
 ) {
-    Column(
+    Card(
         modifier = modifier
-            .shadow(4.dp, RoundedCornerShape(20.dp), spotColor = Color(0x1A000000))
-            .background(bgColor, RoundedCornerShape(20.dp))
-            .padding(12.dp),
-        horizontalAlignment = Alignment.Start
+            .shadow(4.dp, MaterialTheme.shapes.large, spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = bgColor)
     ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .background(iconBgColor, CircleShape),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.Start
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(18.dp)
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(iconBgColor, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E1E2C)
-        )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF64748B)
-        )
     }
 }
 
@@ -287,12 +297,15 @@ fun AiStudyTipCard(recommendation: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 16.dp)
-            .shadow(8.dp, RoundedCornerShape(24.dp), spotColor = Color(0x1A9333EA))
+            .shadow(6.dp, MaterialTheme.shapes.large, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
             .background(
                 brush = Brush.linearGradient(
-                    colors = listOf(Color(0xFFE8D5FF), Color(0xFFFFD5F0))
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.secondaryContainer
+                    )
                 ),
-                shape = RoundedCornerShape(24.dp)
+                shape = MaterialTheme.shapes.large
             )
             .padding(20.dp)
     ) {
@@ -301,13 +314,13 @@ fun AiStudyTipCard(recommendation: String) {
                 Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .background(Color.White.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), MaterialTheme.shapes.medium),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.AutoAwesome,
                         contentDescription = "AI Tip",
-                        tint = Color(0xFF9333EA),
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -316,7 +329,7 @@ fun AiStudyTipCard(recommendation: String) {
                     text = "AI Study Tip",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E1E2C)
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -324,7 +337,7 @@ fun AiStudyTipCard(recommendation: String) {
                 text = recommendation.takeIf { it.isNotBlank() }
                     ?: "You're most productive from 10 AM to 12 PM. Schedule difficult topics then for better retention.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF475569),
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                 lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.2f
             )
         }
@@ -342,7 +355,7 @@ fun QuickActionsSection(onNavigateToTasks: () -> Unit, onNavigateToCreateTask: (
             text = "Quick Actions",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E1E2C),
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         
@@ -354,16 +367,16 @@ fun QuickActionsSection(onNavigateToTasks: () -> Unit, onNavigateToCreateTask: (
                 modifier = Modifier.weight(1f),
                 title = "AI Chat",
                 icon = Icons.Outlined.ChatBubbleOutline,
-                iconBgColor = Color(0xFFF3E8FF),
-                iconTint = Color(0xFF9333EA),
+                iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                iconTint = MaterialTheme.colorScheme.primary,
                 onClick = {}
             )
             QuickActionCard(
                 modifier = Modifier.weight(1f),
                 title = "Focus Timer",
                 icon = Icons.Outlined.Timer,
-                iconBgColor = Color(0xFFDCFCE7),
-                iconTint = Color(0xFF16A34A),
+                iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
+                iconTint = MaterialTheme.colorScheme.tertiary,
                 onClick = {}
             )
         }
@@ -376,16 +389,16 @@ fun QuickActionsSection(onNavigateToTasks: () -> Unit, onNavigateToCreateTask: (
                 modifier = Modifier.weight(1f),
                 title = "Study Plan",
                 icon = Icons.Outlined.MenuBook,
-                iconBgColor = Color(0xFFFCE7F3),
-                iconTint = Color(0xFFDB2777),
+                iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
+                iconTint = MaterialTheme.colorScheme.secondary,
                 onClick = {}
             )
             QuickActionCard(
                 modifier = Modifier.weight(1f),
                 title = "Tasks",
                 icon = Icons.Outlined.Checklist,
-                iconBgColor = Color(0xFFE0F2FE),
-                iconTint = Color(0xFF0284C7),
+                iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                iconTint = MaterialTheme.colorScheme.primary,
                 onClick = onNavigateToTasks
             )
         }
@@ -401,34 +414,38 @@ fun QuickActionCard(
     iconTint: Color,
     onClick: () -> Unit
 ) {
-    Row(
+    Card(
         modifier = modifier
-            .shadow(4.dp, RoundedCornerShape(20.dp), spotColor = Color(0x0D000000))
-            .background(Color.White, RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .shadow(2.dp, MaterialTheme.shapes.large, spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .background(iconBgColor, CircleShape),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(20.dp)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(iconBgColor, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF1E1E2C)
-        )
     }
 }
 
@@ -450,12 +467,12 @@ fun UpcomingSessionsSection(tasks: List<Task>) {
                 text = "Upcoming Sessions",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E1E2C)
+                color = MaterialTheme.colorScheme.onBackground
             )
             TextButton(onClick = { /* View all */ }) {
                 Text(
                     text = "View all",
-                    color = Color(0xFF9333EA),
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -468,14 +485,14 @@ fun UpcomingSessionsSection(tasks: List<Task>) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
-                    .background(Color.White, RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.large)
                     .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "No upcoming sessions. Relax or add a new one!",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         } else {
@@ -494,60 +511,64 @@ fun UpcomingSessionsSection(tasks: List<Task>) {
 @Composable
 fun SessionCard(task: Task) {
     val categoryColor = when (task.category) {
-        TaskCategory.WORK -> Color(0xFF3B82F6) // Blue
-        TaskCategory.STUDY -> Color(0xFF8B5CF6) // Purple
-        TaskCategory.PERSONAL -> Color(0xFF10B981) // Green
-        TaskCategory.HEALTH -> Color(0xFFEF4444) // Red
-        TaskCategory.CREATIVE -> Color(0xFFF59E0B) // Orange
-        else -> Color(0xFF6B7280) // Gray
+        TaskCategory.WORK -> CategoryWork
+        TaskCategory.STUDY -> CategoryStudy
+        TaskCategory.PERSONAL -> CategoryPersonal
+        TaskCategory.HEALTH -> CategoryHealth
+        TaskCategory.CREATIVE -> CategoryCreative
+        else -> CategoryOther
     }
 
-    Column(
+    Card(
         modifier = Modifier
             .width(200.dp)
-            .shadow(4.dp, RoundedCornerShape(20.dp), spotColor = Color(0x0D000000))
-            .background(Color.White, RoundedCornerShape(20.dp))
-            .padding(16.dp)
+            .shadow(4.dp, MaterialTheme.shapes.large, spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .background(categoryColor, CircleShape)
-            )
-            Icon(
-                imageVector = Icons.Outlined.MoreVert,
-                contentDescription = "Options",
-                tint = Color.Gray,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = task.title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E1E2C),
-            maxLines = 1
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Outlined.Schedule,
-                contentDescription = null,
-                tint = Color.Gray,
-                modifier = Modifier.size(14.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .background(categoryColor, CircleShape)
+                )
+                Icon(
+                    imageVector = Icons.Outlined.MoreVert,
+                    contentDescription = "Options",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "${task.estimatedDurationMinutes ?: 30} mins",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
+                text = task.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1
             )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.Schedule,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "${task.estimatedDurationMinutes ?: 30} mins",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

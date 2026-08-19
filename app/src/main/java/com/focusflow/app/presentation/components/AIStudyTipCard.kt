@@ -22,8 +22,8 @@ fun AIStudyTipCard(
     modifier: Modifier = Modifier
 ) {
     val gradientColors = listOf(
-        Color(0xFFE8DDFF), // Light Purple
-        Color(0xFFFFE3EE)  // Light Pink
+        MaterialTheme.colorScheme.primaryContainer,
+        MaterialTheme.colorScheme.secondaryContainer
     )
 
     Card(
@@ -57,7 +57,7 @@ fun AIStudyTipCard(
                         Icon(
                             imageVector = Icons.Default.AutoAwesome,
                             contentDescription = "AI Tip",
-                            tint = Color(0xFF8B6CC1),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -68,14 +68,14 @@ fun AIStudyTipCard(
                         text = "AI Study Tip",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4A4A4A)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 
                 Text(
                     text = tipText,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFF333333),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
                 )
             }

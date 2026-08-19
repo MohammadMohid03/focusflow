@@ -29,10 +29,10 @@ fun OnboardingScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val pages = listOf(
-        OnboardingPage("Smart Planning", "Organize your tasks and calendar efficiently.", Color(0xFF6200EE), Color(0xFFBB86FC)),
-        OnboardingPage("AI Assistant", "Get personalized recommendations and insights.", Color(0xFF009688), Color(0xFF80CBC4)),
-        OnboardingPage("Deep Focus", "Achieve more with zen mode and focus timers.", Color(0xFFFFC107), Color(0xFFFFE082)),
-        OnboardingPage("Track Progress", "Visualize your growth and celebrate wins.", Color(0xFFE91E63), Color(0xFFF48FB1))
+        OnboardingPage("Smart Planning", "Organize your tasks and calendar efficiently.", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.inversePrimary),
+        OnboardingPage("AI Assistant", "Get personalized recommendations and insights.", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondaryContainer),
+        OnboardingPage("Deep Focus", "Achieve more with zen mode and focus timers.", MaterialTheme.colorScheme.tertiary, MaterialTheme.colorScheme.tertiaryContainer),
+        OnboardingPage("Track Progress", "Visualize your growth and celebrate wins.", MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.errorContainer)
     )
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {

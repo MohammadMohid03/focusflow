@@ -72,7 +72,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF1B0A3C)),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -86,7 +86,7 @@ fun SplashScreen(
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "FocusFlow Logo",
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .size(120.dp)
                         .scale(scale.value)
@@ -105,13 +105,13 @@ fun SplashScreen(
                         text = "FocusFlow",
                         style = MaterialTheme.typography.displayMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Plan. Focus. Progress.",
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color(0xFFD0C3EB) // Lighter purple
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
                 }
             }

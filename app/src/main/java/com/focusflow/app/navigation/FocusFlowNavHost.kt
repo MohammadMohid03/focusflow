@@ -32,17 +32,21 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.focusflow.app.presentation.ai.AiChatScreen
+import com.focusflow.app.presentation.ai.AiTaskBreakdownScreen
 import com.focusflow.app.presentation.analytics.AnalyticsScreen
 import com.focusflow.app.presentation.auth.ForgotPasswordScreen
 import com.focusflow.app.presentation.auth.LoginScreen
 import com.focusflow.app.presentation.auth.RegisterScreen
+import com.focusflow.app.presentation.calendar.CalendarScreen
 import com.focusflow.app.presentation.commitment.AppSelectionScreen
 import com.focusflow.app.presentation.commitment.CommitmentConfigScreen
+import com.focusflow.app.presentation.commitment.CommitmentHistoryScreen
 import com.focusflow.app.presentation.commitment.CommitmentMissedScreen
 import com.focusflow.app.presentation.commitment.CommitmentRecoveryScreen
 import com.focusflow.app.presentation.commitment.CommitmentReviewScreen
 import com.focusflow.app.presentation.focus.FocusHistoryScreen
 import com.focusflow.app.presentation.focus.FocusScreen
+import com.focusflow.app.presentation.focus.FocusSessionScreen
 import com.focusflow.app.presentation.goals.CreateGoalScreen
 import com.focusflow.app.presentation.goals.GoalDetailScreen
 import com.focusflow.app.presentation.goals.GoalsScreen
@@ -51,6 +55,7 @@ import com.focusflow.app.presentation.habits.HabitDetailScreen
 import com.focusflow.app.presentation.habits.HabitsScreen
 import com.focusflow.app.presentation.home.HomeScreen
 import com.focusflow.app.presentation.onboarding.OnboardingScreen
+import com.focusflow.app.presentation.planner.AiPlannerScreen
 import com.focusflow.app.presentation.planner.PlannerScreen
 import com.focusflow.app.presentation.profile.ProfileScreen
 import com.focusflow.app.presentation.settings.AboutScreen
@@ -89,12 +94,12 @@ fun FocusFlowNavHost() {
             if (showBottomBar) {
                 Surface(
                     shadowElevation = 16.dp,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                     modifier = Modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                 ) {
                     NavigationBar(
-                        containerColor = Color.White,
+                        containerColor = MaterialTheme.colorScheme.surface,
                         tonalElevation = 0.dp
                     ) {
                         bottomNavItems.forEach { item ->
@@ -273,11 +278,22 @@ fun FocusFlowNavHost() {
                 )
             }
             
+            composable(Screen.AiPlanner.route) {
+                AiPlannerScreen(
+                    viewModel = hiltViewModel()
+                )
+            }
+            
             // AI Chat
             composable(Screen.AiChat.route) {
                 AiChatScreen(
-                    viewModel = viewModel(),
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            
+            composable(Screen.AiTaskBreakdown.route) {
+                AiTaskBreakdownScreen(
+                    viewModel = hiltViewModel()
                 )
             }
 
@@ -288,6 +304,18 @@ fun FocusFlowNavHost() {
                 )
             }
 
+            composable(
+                route = Screen.FocusSession.route,
+                arguments = listOf(navArgument("taskId") { 
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                })
+            ) {
+                FocusSessionScreen(
+                    onSessionEnd = { navController.popBackStack() }
+                )
+            }
 
             composable(Screen.FocusHistory.route) {
                 FocusHistoryScreen()
@@ -323,7 +351,18 @@ fun FocusFlowNavHost() {
                 AnalyticsScreen()
             }
 
+            // Calendar
+            composable(Screen.Calendar.route) {
+                CalendarScreen()
+            }
+
             // Commitment Lock Flow
+            composable(Screen.CommitmentHistory.route) {
+                CommitmentHistoryScreen(
+                    viewModel = hiltViewModel()
+                )
+            }
+
             composable(
                 route = Screen.CommitmentConfig.route,
                 arguments = listOf(navArgument("taskId") { type = NavType.StringType })

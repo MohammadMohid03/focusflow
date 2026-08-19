@@ -57,11 +57,8 @@ fun PlannerScreen(
         )
     }
 
-    val backgroundColor = Color(0xFFF6F4FB)
-    val purplePrimary = Color(0xFF7B52F4)
-
     Scaffold(
-        containerColor = backgroundColor,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {},
@@ -75,10 +72,10 @@ fun PlannerScreen(
                         onClick = { /* Toggle theme */ },
                         modifier = Modifier
                             .padding(end = 16.dp)
-                            .background(Color.White, CircleShape)
+                            .background(MaterialTheme.colorScheme.surface, CircleShape)
                             .size(44.dp)
                     ) {
-                        Icon(Icons.Default.Settings, contentDescription = "Theme", tint = Color.Black)
+                        Icon(Icons.Default.Settings, contentDescription = "Theme", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -137,19 +134,19 @@ fun PlannerScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .clip(RoundedCornerShape(24.dp))
-                            .background(if (isSelected) purplePrimary else Color.Transparent)
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
                             .clickable { selectedDate = date }
                             .padding(horizontal = 12.dp, vertical = 16.dp)
                     ) {
                         Text(
                             text = dayName,
-                            color = if (isSelected) Color.White.copy(alpha = 0.8f) else Color.Gray,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = date.dayOfMonth.toString(),
-                            color = if (isSelected) Color.White else Color.Black,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
@@ -170,12 +167,12 @@ fun PlannerScreen(
                 Card(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8DFFE))
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text("2", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = purplePrimary)
-                        Text("Tasks", fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                        Text("Pending", fontSize = 14.sp, color = Color.Gray)
+                        Text("2", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                        Text("Tasks", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text("Pending", fontSize = 14.sp, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha=0.7f))
                     }
                 }
 
@@ -183,12 +180,12 @@ fun PlannerScreen(
                 Card(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE4E6)) // light pink pastel
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer) // light pink pastel
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text("135", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = Color(0xFFE04F69))
-                        Text("Time", fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                        Text("Total min", fontSize = 14.sp, color = Color.Gray)
+                        Text("135", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+                        Text("Time", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                        Text("Total min", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha=0.7f))
                     }
                 }
             }
@@ -211,10 +208,10 @@ fun PlannerScreen(
                 IconButton(
                     onClick = { /* Add task */ },
                     modifier = Modifier
-                        .background(Color.White, CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
                         .size(40.dp)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Task")
+                    Icon(Icons.Default.Add, contentDescription = "Add Task", tint = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
             }
 
@@ -249,9 +246,6 @@ fun TimelineItem(
     isLast: Boolean,
     onToggle: () -> Unit
 ) {
-    val purplePrimary = Color(0xFF7B52F4)
-    val lightGray = Color(0xFFE0E0E0)
-    
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -267,7 +261,7 @@ fun TimelineItem(
                     .padding(top = 28.dp)
                     .size(12.dp)
                     .clip(CircleShape)
-                    .background(if (item.isCompleted) lightGray else purplePrimary)
+                    .background(if (item.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha=0.5f) else MaterialTheme.colorScheme.primary)
             )
             if (!isLast) {
                 Box(
@@ -275,7 +269,7 @@ fun TimelineItem(
                         .width(2.dp)
                         .fillMaxHeight()
                         .padding(top = 4.dp, bottom = 4.dp)
-                        .background(lightGray)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                 )
             }
         }
@@ -288,7 +282,7 @@ fun TimelineItem(
                 .fillMaxWidth()
                 .padding(bottom = if (isLast) 0.dp else 16.dp),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Row(
                 modifier = Modifier
@@ -296,16 +290,16 @@ fun TimelineItem(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Checkbox
+                val borderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 Box(
                     modifier = Modifier
                         .size(24.dp)
                         .clip(CircleShape)
-                        .background(if (item.isCompleted) purplePrimary else Color.Transparent)
+                        .background(if (item.isCompleted) MaterialTheme.colorScheme.primary else Color.Transparent)
                         .drawBehind {
                             if (!item.isCompleted) {
                                 drawCircle(
-                                    color = Color.LightGray,
+                                    color = borderColor,
                                     radius = size.minDimension / 2,
                                     style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx())
                                 )
@@ -315,7 +309,7 @@ fun TimelineItem(
                     contentAlignment = Alignment.Center
                 ) {
                     if (item.isCompleted) {
-                        Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(16.dp))
                     }
                 }
 
@@ -326,27 +320,27 @@ fun TimelineItem(
                         text = item.title,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = if (item.isCompleted) Color.Gray else Color.Black,
+                        color = if (item.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                         textDecoration = if (item.isCompleted) TextDecoration.LineThrough else TextDecoration.None
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = Color(0xFFF3F0FA),
+                            color = if (item.isCompleted) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primaryContainer,
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
                             Text(
                                 text = item.subject,
                                 fontSize = 12.sp,
-                                color = purplePrimary,
+                                color = if (item.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
                         Text(
                             text = item.time,
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
