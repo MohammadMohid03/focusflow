@@ -22,6 +22,12 @@ interface CommitmentDao {
     @Query("SELECT * FROM commitments WHERE taskId = :taskId ORDER BY createdAt DESC")
     fun getCommitmentForTask(taskId: String): Flow<List<CommitmentEntity>>
 
+    @Query("SELECT * FROM commitments WHERE taskId = :taskId")
+    suspend fun getCommitmentsForTaskSync(taskId: String): List<CommitmentEntity>
+
+    @Query("SELECT * FROM commitments WHERE status IN ('ACTIVE', 'WARNING')")
+    suspend fun getAllActiveCommitmentsSync(): List<CommitmentEntity>
+
     @Query("SELECT * FROM commitments WHERE userId = :userId AND status = :status ORDER BY deadline DESC")
     fun getCommitmentsByStatus(userId: String, status: String): Flow<List<CommitmentEntity>>
 
