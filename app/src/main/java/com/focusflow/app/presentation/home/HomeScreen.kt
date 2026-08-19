@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,23 +45,12 @@ fun HomeScreen(
     onNavigateToCreateTask: () -> Unit = {},
     onNavigateToPlanner: () -> Unit = {},
     onNavigateToAiChat: () -> Unit = {},
-    onNavigateToFocus: () -> Unit = {}
+    onNavigateToFocus: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToTaskDetail: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-    var visible by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        delay(50)
-        visible = true
-    }
-
-    if (uiState.isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
-        return
-    }
 
     LazyColumn(
         modifier = Modifier
@@ -68,100 +59,87 @@ fun HomeScreen(
         contentPadding = PaddingValues(bottom = 80.dp)
     ) {
         item {
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(tween(500)) + slideInVertically(tween(500), initialOffsetY = { 30 })
-            ) {
-                ProfileHeaderArea(
-                    userName = uiState.userName,
-                    greeting = uiState.greeting
-                )
-            }
+            ProfileHeaderArea(
+                userName = uiState.userName,
+                greeting = uiState.greeting,
+                onProfileClick = onNavigateToProfile,
+                onSettingsClick = onNavigateToSettings
+            )
         }
         item {
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(tween(500, delayMillis = 100)) + slideInVertically(tween(500, delayMillis = 100), initialOffsetY = { 30 })
-            ) {
-                HeroTitle()
-            }
+            HeroTitle()
         }
         item {
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(tween(500, delayMillis = 200)) + slideInVertically(tween(500, delayMillis = 200), initialOffsetY = { 30 })
-            ) {
-                StatsRow(
-                    focusMinutes = uiState.focusMinutesToday,
-                    completedTasks = uiState.completedCount,
-                    currentStreak = uiState.currentStreak
-                )
-            }
+            StatsRow(
+                focusMinutes = uiState.focusMinutesToday,
+                completedTasks = uiState.completedCount,
+                currentStreak = uiState.currentStreak
+            )
         }
         item {
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(tween(500, delayMillis = 300)) + slideInVertically(tween(500, delayMillis = 300), initialOffsetY = { 30 })
-            ) {
-                AiStudyTipCard(
-                    recommendation = uiState.aiRecommendation
-                )
-            }
+            AiStudyTipCard(
+                recommendation = uiState.aiRecommendation
+            )
         }
         item {
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(tween(500, delayMillis = 400)) + slideInVertically(tween(500, delayMillis = 400), initialOffsetY = { 30 })
-            ) {
-                QuickActionsSection(
-                    onNavigateToTasks = onNavigateToTasks,
-                    onNavigateToCreateTask = onNavigateToCreateTask,
-                    onNavigateToPlanner = onNavigateToPlanner,
-                    onNavigateToAiChat = onNavigateToAiChat,
-                    onNavigateToFocus = onNavigateToFocus
-                )
-            }
+            QuickActionsSection(
+                onNavigateToTasks = onNavigateToTasks,
+                onNavigateToCreateTask = onNavigateToCreateTask,
+                onNavigateToPlanner = onNavigateToPlanner,
+                onNavigateToAiChat = onNavigateToAiChat,
+                onNavigateToFocus = onNavigateToFocus
+            )
         }
         item {
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(tween(500, delayMillis = 500)) + slideInVertically(tween(500, delayMillis = 500), initialOffsetY = { 30 })
-            ) {
-                UpcomingSessionsSection(tasks = uiState.todayTasks)
-            }
+            UpcomingSessionsSection(
+                tasks = uiState.todayTasks,
+                onViewAllClick = onNavigateToTasks,
+                onTaskClick = onNavigateToTaskDetail
+            )
         }
     }
 }
 
 @Composable
-fun ProfileHeaderArea(userName: String, greeting: String) {
+fun ProfileHeaderArea(
+    userName: String,
+    greeting: String,
+    onProfileClick: () -> Unit,
+    onSettingsClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 24.dp),
+            .padding(horizontal = 20.dp, vertical = 18.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
-                contentAlignment = Alignment.Center
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .clickable(onClick = onProfileClick)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
+                modifier = Modifier.size(46.dp)
             ) {
-                Text(
-                    text = userName.firstOrNull()?.uppercase() ?: "U",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = userName.firstOrNull()?.uppercase() ?: "U",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(14.dp))
             Column {
                 Text(
                     text = greeting,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
@@ -173,20 +151,21 @@ fun ProfileHeaderArea(userName: String, greeting: String) {
             }
         }
         
-        // Moon/theme toggle
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.surface)
-                .clickable { /* Toggle theme */ },
-            contentAlignment = Alignment.Center
+        Surface(
+            onClick = onSettingsClick,
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
+            modifier = Modifier.size(40.dp)
         ) {
-            Icon(
-                imageVector = Icons.Outlined.DarkMode,
-                contentDescription = "Dark Mode",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
@@ -462,7 +441,11 @@ fun QuickActionCard(
 }
 
 @Composable
-fun UpcomingSessionsSection(tasks: List<Task>) {
+fun UpcomingSessionsSection(
+    tasks: List<Task>,
+    onViewAllClick: () -> Unit = {},
+    onTaskClick: (String) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -481,7 +464,7 @@ fun UpcomingSessionsSection(tasks: List<Task>) {
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            TextButton(onClick = { /* View all */ }) {
+            TextButton(onClick = onViewAllClick) {
                 Text(
                     text = "View all",
                     color = MaterialTheme.colorScheme.primary,
@@ -512,8 +495,11 @@ fun UpcomingSessionsSection(tasks: List<Task>) {
                 contentPadding = PaddingValues(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(tasks) { task ->
-                    SessionCard(task = task)
+                items(tasks, key = { it.id }) { task ->
+                    SessionCard(
+                        task = task,
+                        onClick = { onTaskClick(task.id) }
+                    )
                 }
             }
         }
@@ -521,7 +507,10 @@ fun UpcomingSessionsSection(tasks: List<Task>) {
 }
 
 @Composable
-fun SessionCard(task: Task) {
+fun SessionCard(
+    task: Task,
+    onClick: () -> Unit = {}
+) {
     val categoryColor = when (task.category) {
         TaskCategory.WORK -> CategoryWork
         TaskCategory.STUDY -> CategoryStudy
@@ -534,9 +523,11 @@ fun SessionCard(task: Task) {
     Card(
         modifier = Modifier
             .width(200.dp)
-            .shadow(4.dp, MaterialTheme.shapes.large, spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
+            .clickable(onClick = onClick)
+            .shadow(2.dp, MaterialTheme.shapes.large, spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

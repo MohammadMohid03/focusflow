@@ -80,23 +80,31 @@ val NeutralVariant80 = Color(0xFFC7C7C1)
 val NeutralVariant90 = Color(0xFFE6E6E2)
 val NeutralVariant95 = Color(0xFFF1F2EF)
 
+// Off-White Minimalist Theme Palette
+val OffWhiteBg = Color(0xFFFAF9F6)
+val OffWhiteSurface = Color(0xFFFFFFFF)
+val OffWhiteSurfaceVar = Color(0xFFF3F1EC)
+val OffWhiteBorder = Color(0xFFE9E5DD)
+val OffWhitePrimary = Color(0xFF333D35)
+val OffWhitePrimaryContainer = Color(0xFFEBE7DD)
+val OffWhiteText = Color(0xFF1E201E)
+val OffWhiteSecondaryText = Color(0xFF6B6E6A)
+
+// Slate Indigo Theme Palette
+val SlateBg = Color(0xFFF6F8FA)
+val SlateSurface = Color(0xFFFFFFFF)
+val SlateSurfaceVar = Color(0xFFEDF1F5)
+val SlateBorder = Color(0xFFE1E5EA)
+val SlatePrimary = Color(0xFF3E5C76)
+val SlatePrimaryContainer = Color(0xFFE2EAF0)
+val SlateText = Color(0xFF1B263B)
+val SlateSecondaryText = Color(0xFF5A6B7C)
+
 // Semantic colors
 val SuccessGreen = Color(0xFF5E8C61)
 val SuccessGreenDark = Color(0xFF456F49)
 val WarningOrange = Color(0xFFD99A3D)
 val InfoBlue = Color(0xFF4A7C82)
-
-// Focus mode colors - Calm, minimal
-val FocusDeep = Color(0xFF171717)
-val FocusAccent = Color(0xFF5E8C61)
-val FocusProgress = Color(0xFF5E8C61)
-
-// Commitment Lock colors
-val CommitmentActive = Color(0xFF5E8C61)
-val CommitmentWarning = Color(0xFFD99A3D)
-val CommitmentMissed = Color(0xFFD65C5C)
-val CommitmentRecovery = Color(0xFF4A7C82)
-val CommitmentRestored = Color(0xFF5E8C61)
 
 // Priority colors
 val PriorityUrgent = Color(0xFFD65C5C)

@@ -18,53 +18,57 @@ data class TasksUiState(
     val selectedFilter: TaskFilter = TaskFilter.ALL,
     val sortOrder: TaskSortOrder = TaskSortOrder.DUE_DATE,
     val searchQuery: String = "",
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = false,
     val error: String? = null
 )
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class TasksViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(TasksUiState())
-    val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
+    private val _filter = MutableStateFlow(TaskFilter.ALL)
+    private val _sort = MutableStateFlow(TaskSortOrder.DUE_DATE)
+    private val _query = MutableStateFlow("")
 
-    init {
-        loadTasks()
-    }
-
-    private fun loadTasks() {
+    val uiState: StateFlow<TasksUiState> = combine(
+        authRepository.observeAuthState(),
+        _filter,
+        _sort,
+        _query
+    ) { _, filter, sort, query ->
         val userId = authRepository.getCurrentUser()?.id ?: ""
-        viewModelScope.launch {
-            taskRepository.getAllTasks(userId)
-                .catch { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "Error loading tasks") }
-                }
-                .collect { allTasks ->
-                    val state = _uiState.value
-                    val filteredAndSorted = applyFiltersAndSort(
-                        allTasks, state.selectedFilter, state.sortOrder, state.searchQuery
-                    )
-                    _uiState.update { it.copy(tasks = filteredAndSorted, isLoading = false) }
-                }
+        Triple(userId, filter, Pair(sort, query))
+    }.flatMapLatest { (userId, filter, sortAndQuery) ->
+        val (sort, query) = sortAndQuery
+        taskRepository.getAllTasks(userId).map { allTasks ->
+            val filteredAndSorted = applyFiltersAndSort(allTasks, filter, sort, query)
+            TasksUiState(
+                tasks = filteredAndSorted,
+                selectedFilter = filter,
+                sortOrder = sort,
+                searchQuery = query,
+                isLoading = false
+            )
         }
-    }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = TasksUiState(isLoading = false)
+    )
 
     fun onSearchQueryChange(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
-        refreshTasks()
+        _query.value = query
     }
 
     fun onFilterSelect(filter: TaskFilter) {
-        _uiState.update { it.copy(selectedFilter = filter) }
-        refreshTasks()
+        _filter.value = filter
     }
 
     fun onSortOrderSelect(sortOrder: TaskSortOrder) {
-        _uiState.update { it.copy(sortOrder = sortOrder) }
-        refreshTasks()
+        _sort.value = sortOrder
     }
 
     fun toggleTaskCompletion(task: Task, isCompleted: Boolean) {
@@ -83,13 +87,9 @@ class TasksViewModel @Inject constructor(
         }
     }
 
-    private fun refreshTasks() {
-        val userId = authRepository.getCurrentUser()?.id ?: ""
+    fun updateTask(task: Task) {
         viewModelScope.launch {
-            val allTasks = taskRepository.getAllTasks(userId).first()
-            val state = _uiState.value
-            val filteredAndSorted = applyFiltersAndSort(allTasks, state.selectedFilter, state.sortOrder, state.searchQuery)
-            _uiState.update { it.copy(tasks = filteredAndSorted) }
+            taskRepository.updateTask(task)
         }
     }
 
@@ -101,20 +101,36 @@ class TasksViewModel @Inject constructor(
     ): List<Task> {
         var result = tasks
         if (query.isNotBlank()) {
-            result = result.filter { it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true) }
+            result = result.filter { 
+                it.title.contains(query, ignoreCase = true) || 
+                it.description.contains(query, ignoreCase = true) ||
+                it.category.name.contains(query, ignoreCase = true)
+            }
         }
+        val now = System.currentTimeMillis()
         result = when (filter) {
             TaskFilter.ALL -> result
-            TaskFilter.TODAY -> result.filter { !it.isCompleted }
-            TaskFilter.UPCOMING -> result.filter { !it.isCompleted && it.dueDate != null }
+            TaskFilter.TODAY -> result.filter { 
+                !it.isCompleted && (it.dueDate == null || it.dueDate <= now + 86400000)
+            }
+            TaskFilter.UPCOMING -> result.filter { !it.isCompleted && it.dueDate != null && it.dueDate > now }
             TaskFilter.COMPLETED -> result.filter { it.isCompleted }
             TaskFilter.HIGH_PRIORITY -> result.filter { it.priority == TaskPriority.HIGH || it.priority == TaskPriority.URGENT }
+            TaskFilter.OVERDUE -> result.filter { it.isOverdue }
         }
         result = when (sortOrder) {
-            TaskSortOrder.DUE_DATE -> result.sortedBy { it.dueDate ?: Long.MAX_VALUE }
-            TaskSortOrder.PRIORITY -> result.sortedByDescending { it.priority.ordinal }
+            TaskSortOrder.DUE_DATE -> result.sortedWith(
+                compareBy<Task> { it.isCompleted }
+                    .thenBy { it.dueDate ?: Long.MAX_VALUE }
+                    .thenByDescending { it.priority.ordinal }
+            )
+            TaskSortOrder.PRIORITY -> result.sortedWith(
+                compareBy<Task> { it.isCompleted }
+                    .thenByDescending { it.priority.ordinal }
+                    .thenBy { it.dueDate ?: Long.MAX_VALUE }
+            )
             TaskSortOrder.CREATED_DATE -> result.sortedByDescending { it.createdAt }
-            TaskSortOrder.TITLE -> result.sortedBy { it.title }
+            TaskSortOrder.TITLE -> result.sortedBy { it.title.lowercase() }
         }
         return result
     }

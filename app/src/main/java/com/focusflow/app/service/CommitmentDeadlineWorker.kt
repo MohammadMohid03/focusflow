@@ -11,12 +11,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 
-/**
- * WorkManager worker that evaluates commitment deadlines.
- * Scheduled when a commitment becomes active and runs at the deadline time.
- * Checks if the linked task is completed and transitions the commitment
- * to COMPLETED or MISSED accordingly.
- */
 @HiltWorker
 class CommitmentDeadlineWorker @AssistedInject constructor(
     @Assisted context: Context,
@@ -30,14 +24,15 @@ class CommitmentDeadlineWorker @AssistedInject constructor(
     companion object {
         const val KEY_COMMITMENT_ID = "commitment_id"
         const val KEY_NOTIFICATION_TYPE = "notification_type"
-        const val TYPE_WARNING_30 = "warning_30"
-        const val TYPE_WARNING_10 = "warning_10"
+        const val KEY_MINUTES_REMAINING = "minutes_remaining"
+        const val TYPE_WARNING = "warning"
         const val TYPE_DEADLINE = "deadline"
     }
 
     override suspend fun doWork(): Result {
         val commitmentId = inputData.getString(KEY_COMMITMENT_ID) ?: return Result.failure()
         val notificationType = inputData.getString(KEY_NOTIFICATION_TYPE) ?: TYPE_DEADLINE
+        val minutesRemaining = inputData.getInt(KEY_MINUTES_REMAINING, 5)
 
         return try {
             val commitment = commitmentRepository.getCommitmentById(commitmentId).first()
@@ -50,13 +45,12 @@ class CommitmentDeadlineWorker @AssistedInject constructor(
             }
 
             when (notificationType) {
-                TYPE_WARNING_30 -> {
-                    // 30-minute warning
+                TYPE_WARNING -> {
                     val task = taskRepository.getTaskById(commitment.taskId).first()
                     notificationHelper.showCommitmentWarning(
                         commitmentId = commitmentId,
-                        taskName = task?.title ?: "Your task",
-                        minutesRemaining = 30
+                        taskName = task?.title ?: "Focus Session",
+                        minutesRemaining = minutesRemaining
                     )
                     // Update status to WARNING
                     commitmentRepository.updateCommitment(
@@ -64,16 +58,6 @@ class CommitmentDeadlineWorker @AssistedInject constructor(
                             status = CommitmentStatus.WARNING,
                             warningAt = System.currentTimeMillis()
                         )
-                    )
-                    Result.success()
-                }
-
-                TYPE_WARNING_10 -> {
-                    val task = taskRepository.getTaskById(commitment.taskId).first()
-                    notificationHelper.showCommitmentWarning(
-                        commitmentId = commitmentId,
-                        taskName = task?.title ?: "Your task",
-                        minutesRemaining = 10
                     )
                     Result.success()
                 }
@@ -134,7 +118,6 @@ class CommitmentDeadlineWorker @AssistedInject constructor(
     }
 
     private fun calculateRecoveryMinutes(estimatedDuration: Int): Int {
-        // Recovery requires 25% of estimated duration, minimum 15 minutes
         return maxOf(15, estimatedDuration / 4)
     }
 }

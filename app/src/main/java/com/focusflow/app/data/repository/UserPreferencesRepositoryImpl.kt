@@ -30,4 +30,20 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.setOnboardingCompleted(completed)
     }
+
+    override fun getUserName(): Flow<String> {
+        return dataStore.getUserName()
+    }
+
+    override suspend fun setUserName(name: String) {
+        dataStore.setUserName(name)
+    }
+
+    override fun getUserEmail(): Flow<String> {
+        return dataStore.getUserEmail()
+    }
+
+    override suspend fun setUserEmail(email: String) {
+        dataStore.setUserEmail(email)
+    }
 }

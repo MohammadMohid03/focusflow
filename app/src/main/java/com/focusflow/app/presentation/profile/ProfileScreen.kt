@@ -106,9 +106,19 @@ fun ProfileScreen(
                 color = MaterialTheme.colorScheme.onSurface
             )
             
+            if (uiState.userEmail.isNotBlank()) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = uiState.userEmail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Productivity Level: Focus Champion",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium
             )

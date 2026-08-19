@@ -10,37 +10,37 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
-    @Query("SELECT * FROM tasks WHERE userId = :userId ORDER BY createdAt DESC")
+    @Query("SELECT * FROM tasks WHERE userId = :userId OR :userId = '' OR userId = '' ORDER BY createdAt DESC")
     fun getAllTasks(userId: String): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE id = :taskId")
     fun getTaskById(taskId: String): Flow<TaskEntity?>
 
-    @Query("SELECT * FROM tasks WHERE userId = :userId AND category = :category ORDER BY createdAt DESC")
+    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND category = :category ORDER BY createdAt DESC")
     fun getTasksByCategory(userId: String, category: String): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE userId = :userId AND isCompleted = 1 ORDER BY completedAt DESC")
+    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND isCompleted = 1 ORDER BY completedAt DESC")
     fun getCompletedTasks(userId: String): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE userId = :userId AND isCompleted = 0 ORDER BY dueDate ASC")
+    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND isCompleted = 0 ORDER BY dueDate ASC")
     fun getIncompleteTasks(userId: String): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE userId = :userId AND dueDate >= :startOfDay AND dueDate <= :endOfDay ORDER BY dueDate ASC")
+    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND dueDate >= :startOfDay AND dueDate <= :endOfDay ORDER BY dueDate ASC")
     fun getTasksDueToday(userId: String, startOfDay: Long, endOfDay: Long): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE userId = :userId AND dueDate > :now ORDER BY dueDate ASC")
+    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND dueDate > :now ORDER BY dueDate ASC")
     fun getUpcomingTasks(userId: String, now: Long): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE userId = :userId AND isCompleted = 0 AND (priority = 'URGENT' OR priority = 'HIGH') ORDER BY priority ASC, dueDate ASC")
+    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND isCompleted = 0 AND (priority = 'URGENT' OR priority = 'HIGH') ORDER BY priority ASC, dueDate ASC")
     fun getHighPriorityTasks(userId: String): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE userId = :userId AND (title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%')")
+    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND (title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%')")
     fun searchTasks(userId: String, query: String): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE goalId = :goalId")
     fun getTasksForGoal(goalId: String): Flow<List<TaskEntity>>
 
-    @Query("SELECT COUNT(*) FROM tasks WHERE userId = :userId AND isCompleted = 1")
+    @Query("SELECT COUNT(*) FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND isCompleted = 1")
     fun getCompletedTasksCount(userId: String): Flow<Int>
 
     @Query("SELECT * FROM tasks WHERE isSynced = 0")

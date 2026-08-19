@@ -105,12 +105,14 @@ fun FocusFlowNavHost() {
                     items = navItems,
                     currentRoute = currentDestination?.route,
                     onNavigate = { route ->
-                        navController.navigate(route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                        if (route != currentDestination?.route) {
+                            navController.navigate(route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
                     }
                 )
@@ -121,18 +123,10 @@ fun FocusFlowNavHost() {
             navController = navController,
             startDestination = Screen.Splash.route,
             modifier = Modifier.padding(paddingValues),
-            enterTransition = {
-                slideInHorizontally(initialOffsetX = { 1000 }, animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
-            },
-            exitTransition = {
-                slideOutHorizontally(targetOffsetX = { -1000 }, animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
-            },
-            popEnterTransition = {
-                slideInHorizontally(initialOffsetX = { -1000 }, animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
-            },
-            popExitTransition = {
-                slideOutHorizontally(targetOffsetX = { 1000 }, animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
-            }
+            enterTransition = { fadeIn(animationSpec = tween(150)) },
+            exitTransition = { fadeOut(animationSpec = tween(150)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(150)) },
+            popExitTransition = { fadeOut(animationSpec = tween(150)) }
         ) {
             // Splash & Auth
             composable(Screen.Splash.route) {
@@ -201,7 +195,10 @@ fun FocusFlowNavHost() {
                     onNavigateToCreateTask = { navController.navigate(Screen.CreateTask.route) },
                     onNavigateToPlanner = { navController.navigate(Screen.Planner.route) },
                     onNavigateToAiChat = { navController.navigate(Screen.AiChat.route) },
-                    onNavigateToFocus = { navController.navigate(Screen.Focus.route) }
+                    onNavigateToFocus = { navController.navigate(Screen.Focus.route) },
+                    onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
+                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                    onNavigateToTaskDetail = { taskId -> navController.navigate("task_detail/$taskId") }
                 )
             }
 
@@ -258,7 +255,8 @@ fun FocusFlowNavHost() {
             // Planner
             composable(Screen.Planner.route) {
                 PlannerScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
                 )
             }
             
@@ -343,7 +341,8 @@ fun FocusFlowNavHost() {
             // Commitment Lock Flow
             composable(Screen.CommitmentHistory.route) {
                 CommitmentHistoryScreen(
-                    viewModel = hiltViewModel()
+                    viewModel = hiltViewModel(),
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
@@ -353,6 +352,7 @@ fun FocusFlowNavHost() {
             ) { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId") ?: ""
                 CommitmentConfigScreen(
+                    taskId = taskId,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateNext = { navController.navigate("app_selection/$taskId") },
                     viewModel = hiltViewModel()
@@ -416,13 +416,21 @@ fun FocusFlowNavHost() {
                     onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
                     onNavigateToPrivacy = { navController.navigate(Screen.PrivacyPolicy.route) },
                     onNavigateToTerms = { navController.navigate(Screen.Terms.route) },
-                    onNavigateToAbout = { navController.navigate(Screen.About.route) }
+                    onNavigateToAbout = { navController.navigate(Screen.About.route) },
+                    onNavigateToAppSelection = { navController.navigate("app_selection/general") },
+                    onNavigateToCommitmentHistory = { navController.navigate(Screen.CommitmentHistory.route) },
+                    onSignOut = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
                 )
             }
 
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
                 )
             }
 

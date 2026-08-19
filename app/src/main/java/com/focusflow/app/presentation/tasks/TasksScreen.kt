@@ -155,7 +155,7 @@ fun TasksScreen(
                 shape = FocusFlowCorners.FloatingActionButton,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.padding(bottom = 60.dp),
+                modifier = Modifier.padding(bottom = 12.dp),
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Task")

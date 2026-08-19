@@ -24,13 +24,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.presentation.components.CompactTopBar
 import com.focusflow.app.presentation.theme.FocusFlowCorners
 
 @Composable
 fun AiChatScreen(
-    viewModel: AiChatViewModel = viewModel(),
+    viewModel: AiChatViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {}
 ) {
     val messages by viewModel.messages.collectAsState()

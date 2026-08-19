@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.focusflow.app.domain.model.ThemeMode
 import com.focusflow.app.domain.repository.AuthRepository
 import com.focusflow.app.domain.repository.UserPreferencesRepository
+import com.focusflow.app.service.AppRestrictionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,20 +26,24 @@ data class NotificationsState(
 )
 
 data class SettingsUiState(
-    val themeMode: String = "System Default",
+    val themeMode: String = "LIGHT_SAGE",
     val notifications: NotificationsState = NotificationsState(),
     val focusDuration: Int = 25,
     val breakDuration: Int = 5,
     val workingHours: String = "09:00 - 17:00",
     val syncEnabled: Boolean = true,
     val userProfile: String = "User",
-    val message: String? = null
+    val userEmail: String = "",
+    val hasUsagePermission: Boolean = true,
+    val message: String? = null,
+    val isSignedOut: Boolean = false
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val appRestrictionManager: AppRestrictionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -45,6 +51,20 @@ class SettingsViewModel @Inject constructor(
 
     init {
         loadPreferences()
+        checkUsagePermission()
+    }
+
+    fun checkUsagePermission() {
+        viewModelScope.launch {
+            val hasPerm = appRestrictionManager.hasRequiredPermission()
+            _uiState.update { it.copy(hasUsagePermission = hasPerm) }
+        }
+    }
+
+    fun requestUsagePermission() {
+        viewModelScope.launch {
+            appRestrictionManager.requestPermissionSetup()
+        }
     }
 
     private fun loadPreferences() {
@@ -55,9 +75,24 @@ class SettingsViewModel @Inject constructor(
                     _uiState.update { it.copy(themeMode = themeMode.name) }
                 }
         }
-        val user = authRepository.getCurrentUser()
-        if (user != null) {
-            _uiState.update { it.copy(userProfile = user.displayName.ifEmpty { "User" }) }
+        
+        viewModelScope.launch {
+            combine(
+                userPreferencesRepository.getUserName(),
+                userPreferencesRepository.getUserEmail()
+            ) { name, email ->
+                val authUser = authRepository.getCurrentUser()
+                val finalName = name.takeIf { it.isNotBlank() } ?: authUser?.displayName?.takeIf { it.isNotBlank() } ?: "User"
+                val finalEmail = email.takeIf { it.isNotBlank() } ?: authUser?.email ?: ""
+                finalName to finalEmail
+            }.collect { (finalName, finalEmail) ->
+                _uiState.update { 
+                    it.copy(
+                        userProfile = finalName,
+                        userEmail = finalEmail
+                    ) 
+                }
+            }
         }
     }
 
@@ -91,7 +126,7 @@ class SettingsViewModel @Inject constructor(
                 userPreferencesRepository.setThemeMode(mode)
                 _uiState.update { it.copy(themeMode = theme) }
             } catch (e: Exception) {
-                // Fallback or error handling
+                // Fallback
             }
         }
     }
@@ -105,23 +140,35 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun exportData() {
-        // TODO: Implement export logic
         _uiState.update { it.copy(message = "Data exported successfully") }
     }
 
-    fun signOut() {
+    fun signOut(onComplete: () -> Unit = {}) {
         viewModelScope.launch {
             try {
                 authRepository.signOut()
+                userPreferencesRepository.setUserName("")
+                userPreferencesRepository.setUserEmail("")
+                _uiState.update { it.copy(isSignedOut = true) }
+                onComplete()
             } catch (e: Exception) {
                 _uiState.update { it.copy(message = "Error signing out") }
             }
         }
     }
 
-    fun deleteAccount() {
-        // TODO: Implement delete account logic
-        _uiState.update { it.copy(message = "Account deletion not supported yet") }
+    fun deleteAccount(onComplete: () -> Unit = {}) {
+        viewModelScope.launch {
+            try {
+                authRepository.signOut()
+                userPreferencesRepository.setUserName("")
+                userPreferencesRepository.setUserEmail("")
+                _uiState.update { it.copy(isSignedOut = true) }
+                onComplete()
+            } catch (e: Exception) {
+                _uiState.update { it.copy(message = "Error deleting account") }
+            }
+        }
     }
     
     fun clearMessage() {

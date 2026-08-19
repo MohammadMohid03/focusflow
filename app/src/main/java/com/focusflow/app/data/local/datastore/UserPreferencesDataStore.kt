@@ -14,6 +14,8 @@ class UserPreferencesDataStore @Inject constructor(
     companion object {
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val USER_NAME = stringPreferencesKey("user_name")
+        val USER_EMAIL = stringPreferencesKey("user_email")
         val DEFAULT_FOCUS_DURATION = intPreferencesKey("default_focus_duration")
         val DEFAULT_BREAK_DURATION = intPreferencesKey("default_break_duration")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
@@ -32,7 +34,11 @@ class UserPreferencesDataStore @Inject constructor(
     fun getThemeMode(): Flow<ThemeMode> {
         return dataStore.data.map { preferences ->
             val modeString = preferences[THEME_MODE] ?: ThemeMode.SYSTEM.name
-            try { ThemeMode.valueOf(modeString) } catch (e: Exception) { ThemeMode.SYSTEM }
+            try { 
+                ThemeMode.valueOf(modeString) 
+            } catch (e: Exception) { 
+                ThemeMode.SYSTEM 
+            }
         }
     }
 
@@ -51,6 +57,30 @@ class UserPreferencesDataStore @Inject constructor(
     suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.edit { preferences ->
             preferences[ONBOARDING_COMPLETED] = completed
+        }
+    }
+
+    fun getUserName(): Flow<String> {
+        return dataStore.data.map { preferences ->
+            preferences[USER_NAME] ?: ""
+        }
+    }
+
+    suspend fun setUserName(name: String) {
+        dataStore.edit { preferences ->
+            preferences[USER_NAME] = name
+        }
+    }
+
+    fun getUserEmail(): Flow<String> {
+        return dataStore.data.map { preferences ->
+            preferences[USER_EMAIL] ?: ""
+        }
+    }
+
+    suspend fun setUserEmail(email: String) {
+        dataStore.edit { preferences ->
+            preferences[USER_EMAIL] = email
         }
     }
 

@@ -2,6 +2,7 @@ package com.focusflow.app.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.focusflow.app.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    // private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _onboardingCompleted = MutableStateFlow(false)
@@ -46,9 +47,7 @@ class OnboardingViewModel @Inject constructor(
 
     fun completeOnboarding() {
         viewModelScope.launch {
-            // Save preferences to DataStore
-            // userPreferencesRepository.saveOnboardingCompleted(true)
-            // userPreferencesRepository.savePreferences(goal, areas, time)
+            userPreferencesRepository.setOnboardingCompleted(true)
             _onboardingCompleted.value = true
         }
     }

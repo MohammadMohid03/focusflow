@@ -17,43 +17,96 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-
 import com.focusflow.app.domain.model.ThemeMode
 
 val LocalSpacing = staticCompositionLocalOf { Spacing }
 
-private val LightColorScheme = lightColorScheme(
+// 1. Warm Sage (Default)
+val LightSageColorScheme = lightColorScheme(
     primary = Sage50, // #5E8C61 (Soft sage green)
     onPrimary = Color.White,
     primaryContainer = Sage95, // #E7F0E5 (Accent light)
-    onPrimaryContainer = Sage20, // #1D3B20
-    secondary = Sand50, // #92806D (Warm earthy tone)
+    onPrimaryContainer = Sage20,
+    secondary = Sand50,
     onSecondary = Color.White,
-    secondaryContainer = Sand90, // #F3EDE3 (Warm beige / soft sand)
+    secondaryContainer = Sand90, // #F3EDE3
     onSecondaryContainer = Sand20,
-    tertiary = Amber50, // #D99A3D (Warm gold/amber)
+    tertiary = Amber50,
     onTertiary = Color.White,
     tertiaryContainer = Amber90,
     onTertiaryContainer = Amber20,
-    error = Red50, // #D65C5C (Soft red)
+    error = Red50,
     errorContainer = Red90,
     onError = Color.White,
     onErrorContainer = Red20,
-    background = Neutral98, // #F7F7F5 (Soft warm white)
-    onBackground = Neutral10, // #171717 (Primary text)
-    surface = Neutral100, // #FFFFFF (Clean white surface)
+    background = Neutral98, // #F7F7F5
+    onBackground = Neutral10,
+    surface = Neutral100, // #FFFFFF
     onSurface = Neutral10,
-    surfaceVariant = Neutral95, // #F1F2EF (Secondary surface)
-    onSurfaceVariant = Neutral40, // #6B6B6B (Secondary text)
-    outline = Neutral90, // #E6E6E2 (Border)
-    outlineVariant = NeutralVariant90,
-    inverseOnSurface = Neutral95,
-    inverseSurface = Neutral20,
-    inversePrimary = Sage80,
-    surfaceTint = Sage50,
+    surfaceVariant = Neutral95, // #F1F2EF
+    onSurfaceVariant = Neutral40,
+    outline = Neutral90, // #E6E6E2
+    outlineVariant = NeutralVariant90
 )
 
-private val DarkColorScheme = darkColorScheme(
+// 2. Minimalist Off-White & Charcoal
+val LightOffWhiteColorScheme = lightColorScheme(
+    primary = OffWhitePrimary, // #333D35
+    onPrimary = Color.White,
+    primaryContainer = OffWhitePrimaryContainer, // #EBE7DD
+    onPrimaryContainer = OffWhiteText,
+    secondary = Sand50,
+    onSecondary = Color.White,
+    secondaryContainer = OffWhiteSurfaceVar, // #F3F1EC
+    onSecondaryContainer = OffWhiteText,
+    tertiary = Amber50,
+    onTertiary = Color.White,
+    tertiaryContainer = Amber90,
+    onTertiaryContainer = Amber20,
+    error = Red50,
+    errorContainer = Red90,
+    onError = Color.White,
+    onErrorContainer = Red20,
+    background = OffWhiteBg, // #FAF9F6
+    onBackground = OffWhiteText,
+    surface = OffWhiteSurface, // #FFFFFF
+    onSurface = OffWhiteText,
+    surfaceVariant = OffWhiteSurfaceVar, // #F3F1EC
+    onSurfaceVariant = OffWhiteSecondaryText,
+    outline = OffWhiteBorder, // #E9E5DD
+    outlineVariant = NeutralVariant90
+)
+
+// 3. Clean Slate & Navy
+val LightSlateColorScheme = lightColorScheme(
+    primary = SlatePrimary, // #3E5C76
+    onPrimary = Color.White,
+    primaryContainer = SlatePrimaryContainer, // #E2EAF0
+    onPrimaryContainer = SlateText,
+    secondary = Sand50,
+    onSecondary = Color.White,
+    secondaryContainer = SlateSurfaceVar,
+    onSecondaryContainer = SlateText,
+    tertiary = Amber50,
+    onTertiary = Color.White,
+    tertiaryContainer = Amber90,
+    onTertiaryContainer = Amber20,
+    error = Red50,
+    errorContainer = Red90,
+    onError = Color.White,
+    onErrorContainer = Red20,
+    background = SlateBg, // #F6F8FA
+    onBackground = SlateText,
+    surface = SlateSurface, // #FFFFFF
+    onSurface = SlateText,
+    surfaceVariant = SlateSurfaceVar, // #EDF1F5
+    onSurfaceVariant = SlateSecondaryText,
+    outline = SlateBorder, // #E1E5EA
+    outlineVariant = NeutralVariant90
+)
+
+// 4. Dark Theme
+val DarkColorScheme = darkColorScheme(
     primary = Sage70,
     onPrimary = Sage10,
     primaryContainer = Sage30,
@@ -77,11 +130,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = Neutral30,
     onSurfaceVariant = Neutral70,
     outline = Neutral40,
-    outlineVariant = Neutral30,
-    inverseOnSurface = Neutral10,
-    inverseSurface = Neutral90,
-    inversePrimary = Sage40,
-    surfaceTint = Sage70,
+    outlineVariant = Neutral30
 )
 
 @Composable
@@ -90,19 +139,22 @@ fun FocusFlowTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val darkTheme = when (themeMode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.LIGHT -> false
+    val systemInDark = isSystemInDarkTheme()
+    val isDark = when (themeMode) {
+        ThemeMode.SYSTEM -> systemInDark
         ThemeMode.DARK -> true
+        else -> false
     }
     
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        isDark -> DarkColorScheme
+        themeMode == ThemeMode.LIGHT_OFFWHITE -> LightOffWhiteColorScheme
+        themeMode == ThemeMode.LIGHT_SLATE -> LightSlateColorScheme
+        else -> LightSageColorScheme
     }
     
     val view = LocalView.current
@@ -111,8 +163,8 @@ fun FocusFlowTheme(
             val window = (view.context as Activity).window
             window.statusBarColor = Color.Transparent.toArgb()
             window.navigationBarColor = Color.Transparent.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDark
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !isDark
         }
     }
 

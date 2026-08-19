@@ -46,6 +46,7 @@ class TaskRepositoryImpl @Inject constructor(
             TaskFilter.UPCOMING -> taskDao.getUpcomingTasks(userId, System.currentTimeMillis()).map { list -> list.map { it.toDomain(emptyList()) } }
             TaskFilter.COMPLETED -> taskDao.getCompletedTasks(userId).map { list -> list.map { it.toDomain(emptyList()) } }
             TaskFilter.HIGH_PRIORITY -> taskDao.getHighPriorityTasks(userId).map { list -> list.map { it.toDomain(emptyList()) } }
+            TaskFilter.OVERDUE -> getAllTasks(userId).map { list -> list.filter { it.isOverdue } }
         }
     }
 

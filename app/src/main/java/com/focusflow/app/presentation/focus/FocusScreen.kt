@@ -32,9 +32,8 @@ fun FocusScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-                .padding(bottom = 90.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Stats Row in Surface
             Surface(

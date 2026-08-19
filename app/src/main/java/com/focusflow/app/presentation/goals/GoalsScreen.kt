@@ -39,7 +39,7 @@ fun GoalsScreen(
                 shape = FocusFlowCorners.FloatingActionButton,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.padding(bottom = 60.dp)
+                modifier = Modifier.padding(bottom = 12.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Create Goal")
             }

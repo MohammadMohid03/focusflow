@@ -9,5 +9,9 @@ interface UserPreferencesRepository {
     suspend fun setThemeMode(mode: ThemeMode)
     fun isOnboardingCompleted(): Flow<Boolean>
     suspend fun setOnboardingCompleted(completed: Boolean)
+    fun getUserName(): Flow<String>
+    suspend fun setUserName(name: String)
+    fun getUserEmail(): Flow<String>
+    suspend fun setUserEmail(email: String)
     fun getUserPreferences(): Flow<UserPreferences>
 }

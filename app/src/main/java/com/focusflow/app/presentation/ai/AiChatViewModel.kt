@@ -2,6 +2,7 @@ package com.focusflow.app.presentation.ai
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
+import javax.inject.Inject
 
 data class ChatMessage(
     val id: String = UUID.randomUUID().toString(),
@@ -17,7 +19,8 @@ data class ChatMessage(
     val timestamp: Long = System.currentTimeMillis()
 )
 
-class AiChatViewModel : ViewModel() {
+@HiltViewModel
+class AiChatViewModel @Inject constructor() : ViewModel() {
     private val _messages = MutableStateFlow<List<ChatMessage>>(
         listOf(
             ChatMessage(
@@ -48,7 +51,7 @@ class AiChatViewModel : ViewModel() {
         _isLoading.value = true
 
         viewModelScope.launch {
-            delay(1000)
+            delay(500)
             _isLoading.value = false
             
             val lower = text.lowercase()

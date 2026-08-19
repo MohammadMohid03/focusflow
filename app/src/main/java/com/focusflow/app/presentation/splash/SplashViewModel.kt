@@ -28,15 +28,17 @@ class SplashViewModel @Inject constructor(
 
     private fun checkInitialState() {
         viewModelScope.launch {
-            delay(1500) // Splash animation display duration
+            delay(1200) // Splash animation duration
             
             val hasCompletedOnboarding = userPreferencesDataStore.isOnboardingCompleted().first()
-            val isUserLoggedIn = authRepository.isUserLoggedIn()
+            val hasLocalUser = userPreferencesDataStore.getUserName().first().isNotBlank()
+            val isUserLoggedIn = authRepository.isUserLoggedIn() || hasLocalUser
 
             _navigationTarget.value = when {
-                !hasCompletedOnboarding -> NavigationTarget.Onboarding
-                !isUserLoggedIn -> NavigationTarget.Login
-                else -> NavigationTarget.Home
+                hasCompletedOnboarding && isUserLoggedIn -> NavigationTarget.Home
+                hasCompletedOnboarding -> NavigationTarget.Login
+                isUserLoggedIn -> NavigationTarget.Home
+                else -> NavigationTarget.Onboarding
             }
         }
     }

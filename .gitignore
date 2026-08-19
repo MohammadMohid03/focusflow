@@ -22,3 +22,12 @@ app/build/
 *.keystore
 # Google Services
 google-services.json
+
+# Ignored prompt, specification, and document files
+*.doc
+*.docx
+*.txt
+prompt.txt
+spec.txt
+extract_docx.ps1
+

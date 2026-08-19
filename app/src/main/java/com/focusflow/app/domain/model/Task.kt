@@ -2,6 +2,8 @@ package com.focusflow.app.domain.model
 
 import java.util.UUID
 
+enum class TaskStatus { TODO, IN_PROGRESS, COMPLETED, OVERDUE, CANCELLED }
+
 data class Task(
     val id: String = UUID.randomUUID().toString(),
     val title: String,
@@ -19,7 +21,17 @@ data class Task(
     val subtasks: List<Subtask> = emptyList(),
     val userId: String = "",
     val isSynced: Boolean = false
-)
+) {
+    val isOverdue: Boolean
+        get() = !isCompleted && dueDate != null && dueDate < System.currentTimeMillis()
+
+    val derivedStatus: TaskStatus
+        get() = when {
+            isCompleted -> TaskStatus.COMPLETED
+            isOverdue -> TaskStatus.OVERDUE
+            else -> TaskStatus.TODO
+        }
+}
 
 data class Subtask(
     val id: String = UUID.randomUUID().toString(),
@@ -30,5 +42,5 @@ data class Subtask(
 
 enum class TaskCategory { WORK, STUDY, PERSONAL, HEALTH, CREATIVE, OTHER }
 enum class TaskPriority { URGENT, HIGH, MEDIUM, LOW }
-enum class TaskFilter { ALL, TODAY, UPCOMING, COMPLETED, HIGH_PRIORITY }
+enum class TaskFilter { ALL, TODAY, UPCOMING, COMPLETED, HIGH_PRIORITY, OVERDUE }
 enum class TaskSortOrder { DUE_DATE, PRIORITY, CREATED_DATE, TITLE }

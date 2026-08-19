@@ -19,20 +19,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.focusflow.app.presentation.theme.FocusFlowCorners
 import kotlinx.coroutines.launch
 
 @Composable
 fun OnboardingScreen(
-    onNavigateToPreferences: () -> Unit
+    onNavigateToPreferences: () -> Unit,
+    viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
 
     val pages = listOf(
-        OnboardingPage("Smart Planning", "Organize your tasks and calendar efficiently.", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.inversePrimary),
-        OnboardingPage("AI Assistant", "Get personalized recommendations and insights.", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondaryContainer),
-        OnboardingPage("Deep Focus", "Achieve more with zen mode and focus timers.", MaterialTheme.colorScheme.tertiary, MaterialTheme.colorScheme.tertiaryContainer),
-        OnboardingPage("Track Progress", "Visualize your growth and celebrate wins.", MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.errorContainer)
+        OnboardingPage("Smart Planning", "Organize your study goals, schedules, and daily milestones.", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer),
+        OnboardingPage("AI Assistant", "Get personalized recommendations, problem-solving, and study tips.", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondaryContainer),
+        OnboardingPage("Deep Focus", "Achieve more with customizable Pomodoro sessions and Zen Mode.", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiaryContainer),
+        OnboardingPage("Track Progress", "Visualize your daily streaks, completion rates, and focus analytics.", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
     )
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -50,20 +53,36 @@ fun OnboardingScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(240.dp)
+                        .size(200.dp)
                         .clip(CircleShape)
                         .background(
-                            brush = Brush.linearGradient(listOf(page.colorStart, page.colorEnd))
+                            brush = Brush.linearGradient(listOf(page.colorStart.copy(alpha = 0.3f), page.colorEnd))
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${position + 1}",
+                            style = MaterialTheme.typography.displayMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
                         )
-                )
-                Spacer(modifier = Modifier.height(48.dp))
+                    }
+                }
+                Spacer(modifier = Modifier.height(40.dp))
                 Text(
                     text = page.title,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = page.description,
                     style = MaterialTheme.typography.bodyMedium,
@@ -81,7 +100,10 @@ fun OnboardingScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(
-                onClick = onNavigateToPreferences,
+                onClick = {
+                    viewModel.completeOnboarding()
+                    onNavigateToPreferences()
+                },
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Skip", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -113,13 +135,18 @@ fun OnboardingScreen(
                     if (pagerState.currentPage < 3) {
                         coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
                     } else {
+                        viewModel.completeOnboarding()
                         onNavigateToPreferences()
                     }
                 },
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp)
+                shape = FocusFlowCorners.Button,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
             ) {
-                Text(if (pagerState.currentPage == 3) "Get Started" else "Next")
+                Text(if (pagerState.currentPage == 3) "Get Started" else "Next", fontWeight = FontWeight.Bold)
             }
         }
     }
