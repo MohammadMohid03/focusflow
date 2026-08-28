@@ -21,8 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,7 +28,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.domain.model.Habit
 import com.focusflow.app.presentation.components.CompactTopBar
-import com.focusflow.app.presentation.theme.*
+import com.focusflow.app.presentation.theme.FocusFlowCorners
+import com.focusflow.app.presentation.theme.FramerSprings
+import com.focusflow.app.presentation.theme.pressSpring3D
 import kotlinx.coroutines.launch
 
 @Composable
@@ -47,77 +47,51 @@ fun HabitsScreen(
         topBar = {
             Column {
                 CompactTopBar(title = "Habits & Routines")
-                // 3D Segmented Filter Pill Row
+                // Segmented Tabs
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     listOf("Today's Routines", "All Habits").forEachIndexed { index, title ->
                         val isSelected = selectedTab == index
                         val pillShape = FocusFlowCorners.Chip
 
-                        Box(
+                        Surface(
+                            onClick = { selectedTab = index },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(40.dp)
-                                .pressSpring3D(pressScale = 0.94f) { selectedTab = index }
-                                .shadow(
-                                    elevation = if (isSelected) 4.dp else 0.dp,
-                                    shape = pillShape,
-                                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
-                                )
-                                .clip(pillShape)
-                                .background(
-                                    if (isSelected) {
-                                        Brush.linearGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.primary,
-                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                                            )
-                                        )
-                                    } else {
-                                        Brush.linearGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.surface,
-                                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                            )
-                                        )
-                                    }
-                                ),
-                            contentAlignment = Alignment.Center
+                                .height(38.dp)
+                                .pressSpring3D(pressScale = 0.96f),
+                            shape = pillShape,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                            border = if (!isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)) else null,
+                            shadowElevation = if (isSelected) 1.dp else 0.dp
                         ) {
-                            Text(
-                                text = title,
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }
             }
         },
         floatingActionButton = {
-            Box(
-                modifier = Modifier
-                    .padding(bottom = 12.dp)
-                    .size(56.dp)
-                    .pressSpring3D(pressScale = 0.9f, onClick = onCreateHabit)
-                    .shadow(8.dp, CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                    .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.Center
+            FloatingActionButton(
+                onClick = onCreateHabit,
+                shape = FocusFlowCorners.FloatingActionButton,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.White,
+                modifier = Modifier.padding(bottom = 12.dp),
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Create Habit", tint = Color.White)
+                Icon(Icons.Default.Add, contentDescription = "Create Habit")
             }
         }
     ) { paddingValues ->
@@ -126,22 +100,25 @@ fun HabitsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 3D Glass Stats Banner
-            Box(
+            // Stats Banner
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                    .tilt3D(maxTiltDegrees = 6f, scaleOnTouch = 1.02f, shape = FocusFlowCorners.Card)
-                    .glass3D(shape = FocusFlowCorners.Card, elevation = 4.dp)
-                    .padding(vertical = 14.dp)
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                shape = FocusFlowCorners.Card,
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+                shadowElevation = 1.dp
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 14.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    HabitStatItem3D("Active Habits", uiState.allHabits.size.toString())
-                    HabitStatItem3D("Streak", "3 Days")
-                    HabitStatItem3D("Completion", "85%")
+                    HabitStatItem("Active Habits", uiState.allHabits.size.toString())
+                    HabitStatItem("Streak", "3 Days")
+                    HabitStatItem("Completion", "85%")
                 }
             }
 
@@ -158,25 +135,24 @@ fun HabitsScreen(
                         Icon(
                             Icons.Default.Repeat,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
-                            modifier = Modifier.size(56.dp)
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                            modifier = Modifier.size(48.dp)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = if (selectedTab == 0) "No habits scheduled for today." else "Build your first habit routine.",
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 100.dp),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 100.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(habitsToShow) { habit ->
-                        HabitCard3D(
+                        HabitCard(
                             habit = habit,
                             isCompleted = false,
                             onComplete = { viewModel.completeHabit(habit.id) },
@@ -190,26 +166,28 @@ fun HabitsScreen(
 }
 
 @Composable
-fun HabitStatItem3D(label: String, value: String) {
+fun HabitStatItem(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = (-0.5).sp
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
+// Backwards compatibility alias
 @Composable
-fun HabitCard3D(
+fun HabitStatItem3D(label: String, value: String) = HabitStatItem(label, value)
+
+@Composable
+fun HabitCard(
     habit: Habit,
     isCompleted: Boolean,
     onComplete: () -> Unit,
@@ -219,36 +197,37 @@ fun HabitCard3D(
     val checkScale = remember { Animatable(1f) }
     val cardShape = FocusFlowCorners.Card
 
-    Box(
+    Surface(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .tilt3D(maxTiltDegrees = 6f, scaleOnTouch = 1.02f, shape = cardShape)
-            .pressSpring3D(pressScale = 0.98f, onClick = onClick)
-            .glass3D(shape = cardShape, elevation = 3.dp)
-            .padding(14.dp)
+            .pressSpring3D(pressScale = 0.985f),
+        shape = cardShape,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+        shadowElevation = 1.dp
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 3D Bouncy Custom Checkbox
+            // Tactile Checkbox
             Box(
                 modifier = Modifier
-                    .size(28.dp)
+                    .size(24.dp)
                     .scale(checkScale.value)
-                    .shadow(
-                        elevation = if (isCompleted) 0.dp else 2.dp,
-                        shape = CircleShape,
-                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                    )
                     .clip(CircleShape)
-                    .background(
-                        if (isCompleted) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    .background(if (isCompleted) MaterialTheme.colorScheme.primary else Color.Transparent)
+                    .border(
+                        1.5.dp,
+                        if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                        CircleShape
                     )
                     .clickable {
                         scope.launch {
-                            checkScale.animateTo(1.35f, FramerSprings.Snappy)
+                            checkScale.animateTo(1.2f, FramerSprings.Snappy)
                             checkScale.animateTo(1f, FramerSprings.Bouncy)
                         }
                         onComplete()
@@ -260,18 +239,18 @@ fun HabitCard3D(
                         Icons.Default.Check,
                         contentDescription = "Completed",
                         tint = Color.White,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(14.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = habit.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 if (habit.description.isNotBlank()) {
@@ -285,18 +264,18 @@ fun HabitCard3D(
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(6.dp),
                         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Icon(
                                 Icons.Default.LocalFireDepartment,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(13.dp)
+                                modifier = Modifier.size(12.dp)
                             )
                             Spacer(modifier = Modifier.width(3.dp))
                             Text(

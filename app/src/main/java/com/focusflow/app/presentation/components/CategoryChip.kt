@@ -12,7 +12,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.focusflow.app.domain.model.TaskCategory
-import com.focusflow.app.presentation.theme.WarningOrange
 
 @Composable
 fun CategoryChip(
@@ -23,17 +22,18 @@ fun CategoryChip(
     
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(6.dp),
         color = backgroundColor
     ) {
         Text(
             text = category.name,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.5.sp
+                letterSpacing = 0.3.sp,
+                fontSize = 10.5.sp
             ),
             color = textColor,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
         )
     }
 }
@@ -45,7 +45,7 @@ fun getCategoryColors(categoryName: String): Pair<Color, Color> {
         "study" -> Pair(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.secondary)
         "personal" -> Pair(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.tertiary)
         "health" -> Pair(MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
-        "creative" -> Pair(WarningOrange.copy(alpha = 0.2f), WarningOrange)
+        "creative" -> Pair(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f), MaterialTheme.colorScheme.tertiary)
         else -> Pair(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

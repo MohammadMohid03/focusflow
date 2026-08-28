@@ -8,10 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.focusflow.app.domain.model.TaskPriority
-import com.focusflow.app.presentation.theme.WarningOrange
 
 @Composable
 fun PriorityIndicator(
@@ -20,14 +18,14 @@ fun PriorityIndicator(
 ) {
     val color = when (priority) {
         TaskPriority.URGENT -> MaterialTheme.colorScheme.error
-        TaskPriority.HIGH -> WarningOrange
-        TaskPriority.MEDIUM -> MaterialTheme.colorScheme.tertiary
-        TaskPriority.LOW -> MaterialTheme.colorScheme.primary
+        TaskPriority.HIGH -> MaterialTheme.colorScheme.tertiary
+        TaskPriority.MEDIUM -> MaterialTheme.colorScheme.primary
+        TaskPriority.LOW -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
     }
 
     Box(
         modifier = modifier
-            .size(12.dp)
+            .size(8.dp)
             .clip(CircleShape)
             .background(color)
     )

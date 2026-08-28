@@ -2,8 +2,6 @@ package com.focusflow.app.presentation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,15 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.focusflow.app.presentation.theme.FocusFlowCorners
-import com.focusflow.app.presentation.theme.glass3D
 import com.focusflow.app.presentation.theme.pressSpring3D
 
 @Composable
@@ -36,40 +31,16 @@ fun PrimaryButton(
 ) {
     val buttonShape = FocusFlowCorners.Button
 
-    val gradientBrush = Brush.verticalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primary,
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-        )
-    )
-
-    val specularBorder = Brush.linearGradient(
-        colors = listOf(
-            Color.White.copy(alpha = 0.35f),
-            Color.Transparent,
-            Color.White.copy(alpha = 0.1f)
-        ),
-        start = Offset(0f, 0f),
-        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-    )
-
-    Box(
+    Surface(
+        onClick = if (enabled) onClick else { {} },
         modifier = modifier
             .fillMaxWidth()
-            .height(54.dp)
-            .pressSpring3D(pressScale = if (enabled) 0.96f else 1f, onClick = if (enabled) onClick else null)
-            .shadow(
-                elevation = if (enabled) 6.dp else 0.dp,
-                shape = buttonShape,
-                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
-                ambientColor = Color.Transparent
-            )
-            .clip(buttonShape)
-            .background(
-                if (enabled) gradientBrush else Brush.linearGradient(listOf(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.surfaceVariant))
-            )
-            .border(BorderStroke(1.dp, if (enabled) specularBorder else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))), buttonShape),
-        contentAlignment = Alignment.Center
+            .height(50.dp)
+            .pressSpring3D(pressScale = if (enabled) 0.975f else 1f),
+        shape = buttonShape,
+        color = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+        shadowElevation = if (enabled) 1.5.dp else 0.dp
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -80,15 +51,13 @@ fun PrimaryButton(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     modifier = Modifier.size(18.dp).padding(end = 6.dp)
                 )
             }
             Text(
                 text = text,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.2.sp
             )
         }
@@ -104,13 +73,17 @@ fun SecondaryButton(
 ) {
     val buttonShape = FocusFlowCorners.Button
 
-    Box(
+    Surface(
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(54.dp)
-            .pressSpring3D(pressScale = 0.96f, onClick = onClick)
-            .glass3D(shape = buttonShape, elevation = 2.dp),
-        contentAlignment = Alignment.Center
+            .height(50.dp)
+            .pressSpring3D(pressScale = 0.975f),
+        shape = buttonShape,
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.primary,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+        shadowElevation = 0.5.dp
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -121,15 +94,13 @@ fun SecondaryButton(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp).padding(end = 6.dp)
                 )
             }
             Text(
                 text = text,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
@@ -142,21 +113,22 @@ fun IconActionButton(
     contentDescription: String?,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Surface(
+        onClick = onClick,
         modifier = modifier
-            .size(46.dp)
-            .pressSpring3D(pressScale = 0.92f, onClick = onClick)
-            .shadow(3.dp, CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.secondaryContainer),
-        contentAlignment = Alignment.Center
+            .size(40.dp)
+            .pressSpring3D(pressScale = 0.92f),
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier.size(20.dp)
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 
@@ -166,20 +138,21 @@ fun ThemeToggleButton(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Surface(
+        onClick = onToggle,
         modifier = modifier
-            .size(46.dp)
-            .pressSpring3D(pressScale = 0.92f, onClick = onToggle)
-            .shadow(2.dp, CircleShape)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-        contentAlignment = Alignment.Center
+            .size(40.dp)
+            .pressSpring3D(pressScale = 0.92f),
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     ) {
-        Icon(
-            imageVector = Icons.Default.DarkMode,
-            contentDescription = "Toggle Theme",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp)
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = Icons.Default.DarkMode,
+                contentDescription = "Toggle Theme",
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }

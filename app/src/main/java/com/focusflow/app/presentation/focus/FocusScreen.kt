@@ -11,7 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,7 +19,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.domain.model.FocusSessionType
 import com.focusflow.app.presentation.components.CompactTopBar
 import com.focusflow.app.presentation.components.PrimaryButton
-import com.focusflow.app.presentation.theme.*
+import com.focusflow.app.presentation.theme.FocusFlowCorners
+import com.focusflow.app.presentation.theme.pressSpring3D
 
 @Composable
 fun FocusScreen(
@@ -41,39 +41,41 @@ fun FocusScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 3D Glassmorphic Stats Banner
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .tilt3D(maxTiltDegrees = 6f, scaleOnTouch = 1.02f, shape = FocusFlowCorners.Card)
-                    .glass3D(shape = FocusFlowCorners.Card, elevation = 6.dp)
-                    .padding(vertical = 18.dp)
+            // Stats Banner
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = FocusFlowCorners.Card,
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+                shadowElevation = 1.dp
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    StatItem3D("Daily Focus", "${uiState.totalFocusToday}m")
-                    StatItem3D("Sessions", "${uiState.recentSessions.size}")
-                    StatItem3D("Streak", "3 Days")
+                    StatItem("Daily Focus", "${uiState.totalFocusToday}m")
+                    StatItem("Sessions", "${uiState.recentSessions.size}")
+                    StatItem("Streak", "3 Days")
                 }
             }
 
             Text(
                 text = "Select Focus Mode",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.ExtraBold,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            // 3D Session Type Cards
+            // Session Type Cards
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                SessionTypeCard3D(
+                SessionTypeCard(
                     title = "Pomodoro",
                     subtitle = "25 / 5 min",
                     icon = Icons.Outlined.Bolt,
@@ -84,7 +86,7 @@ fun FocusScreen(
                     },
                     modifier = Modifier.weight(1f)
                 )
-                SessionTypeCard3D(
+                SessionTypeCard(
                     title = "Deep Work",
                     subtitle = "50 / 10 min",
                     icon = Icons.Outlined.Psychology,
@@ -95,7 +97,7 @@ fun FocusScreen(
                     },
                     modifier = Modifier.weight(1f)
                 )
-                SessionTypeCard3D(
+                SessionTypeCard(
                     title = "Custom",
                     subtitle = "Flexible",
                     icon = Icons.Outlined.Tune,
@@ -117,33 +119,35 @@ fun FocusScreen(
                     onNavigateToSession()
                 }
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun StatItem3D(label: String, value: String) {
+fun StatItem(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = (-0.5).sp
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
+// Backwards compatibility alias
 @Composable
-fun SessionTypeCard3D(
+fun StatItem3D(label: String, value: String) = StatItem(label, value)
+
+@Composable
+fun SessionTypeCard(
     title: String,
     subtitle: String,
     icon: ImageVector,
@@ -151,22 +155,25 @@ fun SessionTypeCard3D(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val cardShape = FocusFlowCorners.CardSmall
+    val cardShape = FocusFlowCorners.Card
 
-    Box(
+    Surface(
+        onClick = onClick,
         modifier = modifier
-            .aspectRatio(0.92f)
-            .tilt3D(maxTiltDegrees = 8f, scaleOnTouch = 1.04f, shape = cardShape)
-            .pressSpring3D(pressScale = 0.94f, onClick = onClick)
-            .glass3D(
-                shape = cardShape,
-                backgroundColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else null,
-                elevation = if (isSelected) 6.dp else 2.dp
-            )
-            .padding(10.dp)
+            .aspectRatio(0.95f)
+            .pressSpring3D(pressScale = 0.96f),
+        shape = cardShape,
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
+            1.dp,
+            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+        ),
+        shadowElevation = if (isSelected) 1.5.dp else 0.5.dp
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -174,20 +181,20 @@ fun SessionTypeCard3D(
                 imageVector = icon,
                 contentDescription = null,
                 tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(22.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.labelSmall,
-                color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

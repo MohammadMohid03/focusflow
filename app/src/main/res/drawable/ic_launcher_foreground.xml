@@ -6,28 +6,37 @@
     <group
         android:pivotX="54"
         android:pivotY="54"
-        android:scaleX="0.45"
-        android:scaleY="0.45">
-        <!-- Focus ring outer -->
+        android:scaleX="0.55"
+        android:scaleY="0.55">
+        
+        <!-- Outer Precision Focus Ring -->
         <path
-            android:pathData="M54,14A40,40 0,1 1,14,54A40,40 0,0 1,54,14z"
-            android:strokeWidth="3"
-            android:strokeColor="#FFFFFF"
+            android:pathData="M54,16 A38,38 0 1,1 16,54 A38,38 0 0,1 54,16 Z"
+            android:strokeWidth="3.5"
+            android:strokeColor="#3E7B62"
             android:fillColor="#00000000"/>
-        <!-- Focus ring progress arc -->
+
+        <!-- Active Focus Progress Arc -->
         <path
-            android:pathData="M54,14A40,40 0,0 1,94,54"
-            android:strokeWidth="4"
-            android:strokeColor="#B99AEA"
+            android:pathData="M54,16 A38,38 0 0,1 92,54"
+            android:strokeWidth="5"
+            android:strokeColor="#74C69D"
             android:fillColor="#00000000"
             android:strokeLineCap="round"/>
-        <!-- Inner circle -->
+
+        <!-- Inner Elevation Disc -->
         <path
-            android:pathData="M54,30A24,24 0,1 1,30,54A24,24 0,0 1,54,30z"
-            android:fillColor="#7B52C9"/>
-        <!-- Play/Flow arrow -->
+            android:pathData="M54,28 A26,26 0 1,1 28,54 A26,26 0 0,1 54,28 Z"
+            android:fillColor="#2D6A4F"/>
+
+        <!-- Dynamic Flow Aperture Lines / Play Arrow -->
         <path
-            android:pathData="M46,40L46,68L68,54z"
+            android:pathData="M48,40 L48,68 L70,54 Z"
             android:fillColor="#FFFFFF"/>
+            
+        <!-- Small Radiant Focus Dot -->
+        <path
+            android:pathData="M54,24 A4,4 0 1,1 50,24 A4,4 0 0,1 54,24 Z"
+            android:fillColor="#D8F3DC"/>
     </group>
 </vector>

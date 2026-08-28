@@ -28,7 +28,7 @@ class SplashViewModel @Inject constructor(
 
     private fun checkInitialState() {
         viewModelScope.launch {
-            delay(1200) // Splash animation duration
+            delay(3000L) // 3-second splash experience
             
             val hasCompletedOnboarding = userPreferencesDataStore.isOnboardingCompleted().first()
             val hasLocalUser = userPreferencesDataStore.getUserName().first().isNotBlank()

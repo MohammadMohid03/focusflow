@@ -7,78 +7,65 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.focusflow.app.presentation.theme.FocusFlowCorners
-import com.focusflow.app.presentation.theme.glass3D
 import com.focusflow.app.presentation.theme.pressSpring3D
-import com.focusflow.app.presentation.theme.tilt3D
 
 @Composable
 fun AIChatBubble(
     text: String,
     modifier: Modifier = Modifier
 ) {
-    val bubbleShape = RoundedCornerShape(22.dp, 22.dp, 22.dp, 6.dp)
+    val bubbleShape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp),
+            .padding(vertical = 6.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.Bottom
     ) {
         Box(
             modifier = Modifier
-                .size(34.dp)
-                .shadow(3.dp, CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                .size(30.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.primaryContainer,
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-                        )
-                    )
-                ),
+                .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.AutoAwesome,
                 contentDescription = "AI",
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(17.dp)
+                modifier = Modifier.size(15.dp)
             )
         }
 
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
-        Box(
-            modifier = Modifier
-                .widthIn(max = 290.dp)
-                .tilt3D(maxTiltDegrees = 4f, scaleOnTouch = 1.01f, shape = bubbleShape)
-                .glass3D(shape = bubbleShape, elevation = 3.dp)
-                .padding(16.dp)
+        Surface(
+            shape = bubbleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
+            modifier = Modifier.widthIn(max = 290.dp)
         ) {
             Text(
                 text = text,
+                modifier = Modifier.padding(14.dp),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                lineHeight = 22.sp
+                lineHeight = 21.sp
             )
         }
     }
@@ -89,36 +76,26 @@ fun UserChatBubble(
     text: String,
     modifier: Modifier = Modifier
 ) {
-    val bubbleShape = RoundedCornerShape(22.dp, 22.dp, 6.dp, 22.dp)
+    val bubbleShape = RoundedCornerShape(16.dp, 16.dp, 4.dp, 16.dp)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp),
+            .padding(vertical = 6.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.End
     ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 290.dp)
-                .tilt3D(maxTiltDegrees = 4f, scaleOnTouch = 1.01f, shape = bubbleShape)
-                .shadow(4.dp, bubbleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
-                .clip(bubbleShape)
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                        )
-                    )
-                )
-                .padding(16.dp)
+        Surface(
+            shape = bubbleShape,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.widthIn(max = 290.dp)
         ) {
             Text(
                 text = text,
+                modifier = Modifier.padding(14.dp),
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Normal,
                 color = Color.White,
-                lineHeight = 22.sp
+                lineHeight = 21.sp
             )
         }
     }
@@ -130,19 +107,18 @@ fun SuggestionChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val chipShape = RoundedCornerShape(18.dp)
-
-    Box(
-        modifier = modifier
-            .tilt3D(maxTiltDegrees = 5f, scaleOnTouch = 1.04f, shape = chipShape)
-            .pressSpring3D(pressScale = 0.94f, onClick = onClick)
-            .glass3D(shape = chipShape, elevation = 2.dp)
-            .padding(horizontal = 14.dp, vertical = 8.dp)
+    Surface(
+        onClick = onClick,
+        modifier = modifier.pressSpring3D(pressScale = 0.94f),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f))
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.primary
         )
     }
@@ -156,30 +132,31 @@ fun ChatInput(
     onSend: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val inputShape = RoundedCornerShape(28.dp)
-
-    Box(
+    Surface(
         modifier = modifier
             .fillMaxWidth()
             .imePadding()
-            .padding(16.dp)
-            .glass3D(shape = inputShape, elevation = 8.dp)
-            .padding(6.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+        shadowElevation = 1.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 6.dp),
+                .padding(horizontal = 6.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
                 onClick = { /* Attachment action */ },
-                modifier = Modifier.pressSpring3D(pressScale = 0.9f)
+                modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
@@ -187,7 +164,7 @@ fun ChatInput(
                 value = value,
                 onValueChange = onValueChange,
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Ask your AI study mentor...", style = MaterialTheme.typography.bodyMedium) },
+                placeholder = { Text("Ask anything...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)) },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -200,37 +177,32 @@ fun ChatInput(
             if (value.isEmpty()) {
                 IconButton(
                     onClick = { /* Voice note */ },
-                    modifier = Modifier.pressSpring3D(pressScale = 0.9f)
+                    modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Mic,
                         contentDescription = "Microphone",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             } else {
-                Box(
+                Surface(
+                    onClick = onSend,
                     modifier = Modifier
-                        .size(42.dp)
-                        .pressSpring3D(pressScale = 0.9f, onClick = onSend)
-                        .shadow(4.dp, CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
+                        .size(36.dp)
+                        .pressSpring3D(pressScale = 0.9f),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "Send",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Send,
+                            contentDescription = "Send",
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -244,23 +216,26 @@ fun AITypingIndicator(modifier: Modifier = Modifier) {
         initialValue = 0.3f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = LinearEasing),
+            animation = tween(700, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "alpha"
     )
 
-    Box(
-        modifier = modifier
-            .padding(16.dp)
-            .glass3D(shape = RoundedCornerShape(16.dp), elevation = 2.dp)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+    Surface(
+        modifier = modifier.padding(16.dp),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            repeat(3) { index ->
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            repeat(3) {
                 Box(
                     modifier = Modifier
-                        .size(9.dp)
+                        .size(6.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
                 )

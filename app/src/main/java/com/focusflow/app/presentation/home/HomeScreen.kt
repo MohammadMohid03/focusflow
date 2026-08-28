@@ -1,13 +1,8 @@
 package com.focusflow.app.presentation.home
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,8 +18,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,7 +25,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.domain.model.Task
 import com.focusflow.app.domain.model.TaskCategory
+import com.focusflow.app.presentation.components.AIStudyTipCard
+import com.focusflow.app.presentation.components.QuickActionCard
 import com.focusflow.app.presentation.components.StatCard
+import com.focusflow.app.presentation.components.UpcomingSessionCard
 import com.focusflow.app.presentation.theme.*
 
 @Composable
@@ -53,7 +49,7 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
-        contentPadding = PaddingValues(bottom = 100.dp)
+        contentPadding = PaddingValues(bottom = 90.dp)
     ) {
         item {
             ProfileHeaderArea(
@@ -64,14 +60,14 @@ fun HomeScreen(
             )
         }
         item {
-            Hero3DFocusCard(
+            HeroFocusCard(
                 focusMinutes = uiState.focusMinutesToday,
                 completedTasks = uiState.completedCount,
                 onStartFocus = onNavigateToFocus
             )
         }
         item {
-            StatsRow3D(
+            StatsRow(
                 focusMinutes = uiState.focusMinutesToday,
                 completedTasks = uiState.completedCount,
                 currentStreak = uiState.currentStreak,
@@ -80,13 +76,14 @@ fun HomeScreen(
             )
         }
         item {
-            AiStudyTipCard3D(
-                recommendation = uiState.aiRecommendation,
+            AIStudyTipCard(
+                tipText = uiState.aiRecommendation.takeIf { it.isNotBlank() }
+                    ?: "You are most productive during morning hours. Plan your deep focus sessions before noon for maximum retention!",
                 onClick = onNavigateToAiChat
             )
         }
         item {
-            QuickActionsSection3D(
+            QuickActionsSection(
                 onNavigateToTasks = onNavigateToTasks,
                 onNavigateToCreateTask = onNavigateToCreateTask,
                 onNavigateToPlanner = onNavigateToPlanner,
@@ -95,7 +92,7 @@ fun HomeScreen(
             )
         }
         item {
-            UpcomingSessionsSection3D(
+            UpcomingSessionsSection(
                 tasks = uiState.todayTasks,
                 onViewAllClick = onNavigateToTasks,
                 onTaskClick = onNavigateToTaskDetail
@@ -126,172 +123,152 @@ fun ProfileHeaderArea(
         ) {
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .shadow(4.dp, CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                    .size(44.dp)
                     .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.primaryContainer,
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-                            )
-                        )
-                    ),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = userName.firstOrNull()?.uppercase() ?: "U",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.Bold
                 )
             }
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
                     text = greeting,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "Hi, $userName",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
 
-        Box(
+        Surface(
+            onClick = onSettingsClick,
             modifier = Modifier
-                .size(42.dp)
-                .pressSpring3D(pressScale = 0.92f, onClick = onSettingsClick)
-                .glass3D(shape = CircleShape, elevation = 2.dp),
-            contentAlignment = Alignment.Center
+                .size(38.dp)
+                .pressSpring3D(pressScale = 0.92f),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
         ) {
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = "Settings",
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(20.dp)
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
-fun Hero3DFocusCard(
+fun HeroFocusCard(
     focusMinutes: Int,
     completedTasks: Int,
     onStartFocus: () -> Unit
 ) {
-    val heroShape = FocusFlowCorners.Card
+    val cardShape = FocusFlowCorners.Card
 
-    Box(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
-            .ambientGlow(MaterialTheme.colorScheme.primary, radius = 140.dp, alpha = 0.2f)
-            .tilt3D(maxTiltDegrees = 7f, scaleOnTouch = 1.02f, shape = heroShape)
-            .glass3D(shape = heroShape, elevation = 8.dp)
-            .padding(20.dp)
+            .padding(horizontal = 20.dp, vertical = 6.dp)
+            .pressSpring3D(pressScale = 0.985f),
+        shape = cardShape,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+        shadowElevation = 1.dp
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
+                    shape = RoundedCornerShape(6.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
-                        text = "DAILY FOCUS FLOW",
+                        text = "TODAY'S TARGET",
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.ExtraBold,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        letterSpacing = 1.sp
+                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                        letterSpacing = 0.5.sp,
+                        fontSize = 10.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Ready to achieve your goals?",
+                    text = "Ready to Focus Today?",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = 26.sp
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "$focusMinutes mins focused • $completedTasks tasks completed",
+                    text = "$focusMinutes mins recorded • $completedTasks tasks done",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                // 3D Start Session Button
-                Box(
-                    modifier = Modifier
-                        .pressSpring3D(pressScale = 0.94f, onClick = onStartFocus)
-                        .shadow(6.dp, RoundedCornerShape(16.dp), spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            Brush.linearGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                                )
-                            )
-                        )
-                        .padding(horizontal = 18.dp, vertical = 10.dp)
+                Surface(
+                    onClick = onStartFocus,
+                    modifier = Modifier.pressSpring3D(pressScale = 0.95f),
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
                             contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "Start Focus",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
             }
 
-            // 3D Isometric Compass/Timer Orb Icon
             Box(
                 modifier = Modifier
-                    .size(76.dp)
-                    .shadow(8.dp, CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                    .size(54.dp)
                     .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.primaryContainer,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
-                                Color.Transparent
-                            )
-                        )
-                    ),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Timer,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(38.dp)
+                    modifier = Modifier.size(26.dp)
                 )
             }
         }
@@ -299,7 +276,7 @@ fun Hero3DFocusCard(
 }
 
 @Composable
-fun StatsRow3D(
+fun StatsRow(
     focusMinutes: Int,
     completedTasks: Int,
     currentStreak: Int,
@@ -317,7 +294,7 @@ fun StatsRow3D(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp),
+            .padding(horizontal = 20.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         StatCard(
@@ -325,8 +302,6 @@ fun StatsRow3D(
             label = "Focus Time",
             value = timeString,
             icon = Icons.Outlined.AccessTime,
-            iconColor = MaterialTheme.colorScheme.primary,
-            iconContainerColor = MaterialTheme.colorScheme.primaryContainer,
             onClick = onFocusClick
         )
         StatCard(
@@ -334,8 +309,6 @@ fun StatsRow3D(
             label = "Tasks Done",
             value = "$animatedTasks",
             icon = Icons.Outlined.CheckCircle,
-            iconColor = MaterialTheme.colorScheme.secondary,
-            iconContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             onClick = onTasksClick
         )
         StatCard(
@@ -343,68 +316,13 @@ fun StatsRow3D(
             label = "Streak",
             value = "$animatedStreak d",
             icon = Icons.Outlined.LocalFireDepartment,
-            iconColor = MaterialTheme.colorScheme.tertiary,
-            iconContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
             onClick = {}
         )
     }
 }
 
 @Composable
-fun AiStudyTipCard3D(
-    recommendation: String,
-    onClick: () -> Unit
-) {
-    val cardShape = FocusFlowCorners.Card
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
-            .tilt3D(maxTiltDegrees = 6f, scaleOnTouch = 1.02f, shape = cardShape)
-            .pressSpring3D(pressScale = 0.98f, onClick = onClick)
-            .glass3D(shape = cardShape, elevation = 4.dp)
-            .padding(18.dp)
-    ) {
-        Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .shadow(3.dp, CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.AutoAwesome,
-                        contentDescription = "AI Tip",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = "AI Flow Recommendation",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = recommendation.takeIf { it.isNotBlank() }
-                    ?: "You are most productive during morning hours. Plan your deep focus sessions before noon for maximum retention!",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = 21.sp
-            )
-        }
-    }
-}
-
-@Composable
-fun QuickActionsSection3D(
+fun QuickActionsSection(
     onNavigateToTasks: () -> Unit,
     onNavigateToCreateTask: () -> Unit,
     onNavigateToPlanner: () -> Unit,
@@ -414,129 +332,58 @@ fun QuickActionsSection3D(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .padding(horizontal = 20.dp, vertical = 10.dp)
     ) {
         Text(
             text = "Quick Actions",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 10.dp)
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            QuickAction3DCard(
-                modifier = Modifier.weight(1f),
-                title = "AI Mentor",
-                subtitle = "Ask & plan",
+            QuickActionCard(
                 icon = Icons.Outlined.ChatBubbleOutline,
-                accentColor = MaterialTheme.colorScheme.primary,
-                onClick = onNavigateToAiChat
+                label = "AI Mentor",
+                iconContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                iconColor = MaterialTheme.colorScheme.primary,
+                onClick = onNavigateToAiChat,
+                modifier = Modifier.weight(1f)
             )
-            QuickAction3DCard(
-                modifier = Modifier.weight(1f),
-                title = "Focus Room",
-                subtitle = "Timer & lock",
+            QuickActionCard(
                 icon = Icons.Outlined.Timer,
-                accentColor = MaterialTheme.colorScheme.tertiary,
-                onClick = onNavigateToFocus
+                label = "Focus Room",
+                iconContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                iconColor = MaterialTheme.colorScheme.secondary,
+                onClick = onNavigateToFocus,
+                modifier = Modifier.weight(1f)
             )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            QuickAction3DCard(
-                modifier = Modifier.weight(1f),
-                title = "Schedule",
-                subtitle = "Daily planner",
+            QuickActionCard(
                 icon = Icons.Outlined.DateRange,
-                accentColor = MaterialTheme.colorScheme.secondary,
-                onClick = onNavigateToPlanner
+                label = "Schedule",
+                iconContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                iconColor = MaterialTheme.colorScheme.primary,
+                onClick = onNavigateToPlanner,
+                modifier = Modifier.weight(1f)
             )
-            QuickAction3DCard(
-                modifier = Modifier.weight(1f),
-                title = "New Task",
-                subtitle = "Add & track",
+            QuickActionCard(
                 icon = Icons.Outlined.AddCircleOutline,
-                accentColor = MaterialTheme.colorScheme.primary,
-                onClick = onNavigateToCreateTask
+                label = "New Task",
+                iconContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                iconColor = MaterialTheme.colorScheme.secondary,
+                onClick = onNavigateToCreateTask,
+                modifier = Modifier.weight(1f)
             )
         }
     }
 }
 
 @Composable
-fun QuickAction3DCard(
-    modifier: Modifier = Modifier,
-    title: String,
-    subtitle: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    accentColor: Color,
-    onClick: () -> Unit
-) {
-    val cardShape = FocusFlowCorners.Card
-
-    Box(
-        modifier = modifier
-            .height(82.dp)
-            .tilt3D(maxTiltDegrees = 7f, scaleOnTouch = 1.03f, shape = cardShape)
-            .pressSpring3D(pressScale = 0.96f, onClick = onClick)
-            .glass3D(shape = cardShape, elevation = 3.dp)
-            .padding(12.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .shadow(3.dp, CircleShape, spotColor = accentColor.copy(alpha = 0.35f))
-                    .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                accentColor.copy(alpha = 0.2f),
-                                accentColor.copy(alpha = 0.08f)
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = accentColor,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(verticalArrangement = Arrangement.Center) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun UpcomingSessionsSection3D(
+fun UpcomingSessionsSection(
     tasks: List<Task>,
     onViewAllClick: () -> Unit = {},
     onTaskClick: (String) -> Unit = {}
@@ -544,7 +391,7 @@ fun UpcomingSessionsSection3D(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
+            .padding(vertical = 10.dp)
     ) {
         Row(
             modifier = Modifier
@@ -555,119 +402,65 @@ fun UpcomingSessionsSection3D(
         ) {
             Text(
                 text = "Upcoming Sessions",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.ExtraBold,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             TextButton(onClick = onViewAllClick) {
                 Text(
                     text = "View all",
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         if (tasks.isEmpty()) {
-            Box(
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .glass3D(shape = FocusFlowCorners.Card, elevation = 2.dp)
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
+                    .padding(horizontal = 20.dp),
+                shape = FocusFlowCorners.Card,
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f))
             ) {
-                Text(
-                    text = "No upcoming sessions. Relax or schedule a new one!",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        } else {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                items(tasks, key = { it.id }) { task ->
-                    SessionCard3D(
-                        task = task,
-                        onClick = { onTaskClick(task.id) }
+                Box(
+                    modifier = Modifier.padding(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No upcoming sessions. Relax or schedule a new one!",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun SessionCard3D(
-    task: Task,
-    onClick: () -> Unit = {}
-) {
-    val categoryColor = when (task.category) {
-        TaskCategory.WORK -> CategoryWork
-        TaskCategory.STUDY -> CategoryStudy
-        TaskCategory.PERSONAL -> CategoryPersonal
-        TaskCategory.HEALTH -> CategoryHealth
-        TaskCategory.CREATIVE -> CategoryCreative
-        else -> CategoryOther
-    }
-
-    val cardShape = FocusFlowCorners.Card
-
-    Box(
-        modifier = Modifier
-            .width(210.dp)
-            .tilt3D(maxTiltDegrees = 7f, scaleOnTouch = 1.03f, shape = cardShape)
-            .pressSpring3D(pressScale = 0.96f, onClick = onClick)
-            .glass3D(shape = cardShape, elevation = 4.dp)
-            .padding(16.dp)
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .shadow(3.dp, CircleShape, spotColor = categoryColor.copy(alpha = 0.6f))
-                        .clip(CircleShape)
-                        .background(categoryColor)
-                )
-                Icon(
-                    imageVector = Icons.Outlined.MoreVert,
-                    contentDescription = "Options",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = task.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Outlined.Schedule,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(14.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "${task.estimatedDurationMinutes ?: 30} mins",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                tasks.take(3).forEach { task ->
+                    val categoryColor = when (task.category) {
+                        TaskCategory.WORK -> CategoryWork
+                        TaskCategory.STUDY -> CategoryStudy
+                        TaskCategory.PERSONAL -> CategoryPersonal
+                        TaskCategory.HEALTH -> CategoryHealth
+                        TaskCategory.CREATIVE -> CategoryCreative
+                        else -> CategoryOther
+                    }
+                    UpcomingSessionCard(
+                        subject = task.title,
+                        time = "${task.estimatedDurationMinutes ?: 30} mins",
+                        categoryColor = categoryColor,
+                        onClick = { onTaskClick(task.id) }
+                    )
+                }
             }
         }
     }

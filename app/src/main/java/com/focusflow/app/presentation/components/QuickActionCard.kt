@@ -1,5 +1,6 @@
 package com.focusflow.app.presentation.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,16 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.focusflow.app.presentation.theme.FocusFlowCorners
-import com.focusflow.app.presentation.theme.glass3D
 import com.focusflow.app.presentation.theme.pressSpring3D
-import com.focusflow.app.presentation.theme.tilt3D
 
 @Composable
 fun QuickActionCard(
@@ -31,50 +28,45 @@ fun QuickActionCard(
 ) {
     val cardShape = FocusFlowCorners.Card
 
-    Box(
+    Surface(
+        onClick = onClick,
         modifier = modifier
-            .width(105.dp)
-            .height(115.dp)
-            .tilt3D(maxTiltDegrees = 8f, scaleOnTouch = 1.04f, shape = cardShape)
-            .pressSpring3D(pressScale = 0.94f, onClick = onClick)
-            .glass3D(shape = cardShape, elevation = 4.dp)
-            .padding(12.dp),
-        contentAlignment = Alignment.Center
+            .width(100.dp)
+            .height(105.dp)
+            .pressSpring3D(pressScale = 0.96f),
+        shape = cardShape,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+        shadowElevation = 1.dp
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Box(
                 modifier = Modifier
-                    .size(46.dp)
-                    .shadow(4.dp, CircleShape, spotColor = iconColor.copy(alpha = 0.35f))
+                    .size(40.dp)
                     .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                iconContainerColor,
-                                iconContainerColor.copy(alpha = 0.7f)
-                            )
-                        )
-                    ),
+                    .background(iconContainerColor),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = label,
                     tint = iconColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1
             )

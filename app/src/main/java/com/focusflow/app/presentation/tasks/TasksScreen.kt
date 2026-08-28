@@ -17,8 +17,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,7 +29,8 @@ import com.focusflow.app.presentation.components.EmptyStateView
 import com.focusflow.app.presentation.components.ErrorView
 import com.focusflow.app.presentation.components.LoadingView
 import com.focusflow.app.presentation.components.TaskCard
-import com.focusflow.app.presentation.theme.*
+import com.focusflow.app.presentation.theme.FocusFlowCorners
+import com.focusflow.app.presentation.theme.pressSpring3D
 
 @Composable
 fun TasksScreen(
@@ -50,19 +49,22 @@ fun TasksScreen(
                     title = "Tasks Studio",
                     actions = {
                         Box {
-                            Box(
+                            Surface(
+                                onClick = { sortMenuExpanded = true },
                                 modifier = Modifier
-                                    .size(38.dp)
-                                    .pressSpring3D(pressScale = 0.9f) { sortMenuExpanded = true }
-                                    .glass3D(shape = CircleShape, elevation = 2.dp),
-                                contentAlignment = Alignment.Center
+                                    .size(36.dp)
+                                    .pressSpring3D(pressScale = 0.92f),
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
                             ) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.List,
-                                    contentDescription = "Sort",
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(18.dp)
-                                )
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.List,
+                                        contentDescription = "Sort",
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
                             }
 
                             DropdownMenu(
@@ -83,22 +85,24 @@ fun TasksScreen(
                     }
                 )
 
-                // 3D Glass Search Bar
-                Box(
+                // Search Bar
+                Surface(
+                    shape = FocusFlowCorners.Input,
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+                    shadowElevation = 0.dp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .glass3D(shape = FocusFlowCorners.Input, elevation = 2.dp)
-                        .padding(horizontal = 12.dp, vertical = 2.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)
                     ) {
                         Icon(
                             Icons.Default.Search,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -124,50 +128,31 @@ fun TasksScreen(
                     }
                 }
 
-                // 3D Filter Pills
+                // Filter Chips
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(TaskFilter.entries.toTypedArray()) { filter ->
                         val isSelected = uiState.selectedFilter == filter
                         val chipShape = FocusFlowCorners.Chip
 
-                        Box(
-                            modifier = Modifier
-                                .pressSpring3D(pressScale = 0.94f) { viewModel.onFilterSelect(filter) }
-                                .shadow(
-                                    elevation = if (isSelected) 4.dp else 0.dp,
-                                    shape = chipShape,
-                                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
-                                )
-                                .clip(chipShape)
-                                .background(
-                                    if (isSelected) {
-                                        Brush.linearGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.primary,
-                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                                            )
-                                        )
-                                    } else {
-                                        Brush.linearGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.surface,
-                                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                            )
-                                        )
-                                    }
-                                )
-                                .padding(horizontal = 14.dp, vertical = 7.dp)
+                        Surface(
+                            onClick = { viewModel.onFilterSelect(filter) },
+                            modifier = Modifier.pressSpring3D(pressScale = 0.95f),
+                            shape = chipShape,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                            border = if (!isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)) else null,
+                            shadowElevation = if (isSelected) 1.dp else 0.dp
                         ) {
                             Text(
                                 text = filter.name.replace("_", " "),
                                 color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                                 style = MaterialTheme.typography.labelSmall,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
                         }
                     }
@@ -175,24 +160,15 @@ fun TasksScreen(
             }
         },
         floatingActionButton = {
-            Box(
-                modifier = Modifier
-                    .padding(bottom = 12.dp)
-                    .size(56.dp)
-                    .pressSpring3D(pressScale = 0.9f, onClick = onNavigateToCreateTask)
-                    .shadow(8.dp, CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                    .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.Center
+            FloatingActionButton(
+                onClick = onNavigateToCreateTask,
+                shape = FocusFlowCorners.FloatingActionButton,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.White,
+                modifier = Modifier.padding(bottom = 12.dp),
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Task", tint = Color.White)
+                Icon(Icons.Default.Add, contentDescription = "Add Task")
             }
         }
     ) { paddingValues ->
@@ -213,7 +189,7 @@ fun TasksScreen(
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 100.dp),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 100.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(uiState.tasks, key = { it.id }) { task ->

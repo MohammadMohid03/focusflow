@@ -1,9 +1,9 @@
 package com.focusflow.app.presentation.components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -20,14 +20,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.focusflow.app.presentation.theme.*
+import com.focusflow.app.presentation.theme.FocusFlowCorners
+import com.focusflow.app.presentation.theme.FramerSprings
+import com.focusflow.app.presentation.theme.pressSpring3D
 import kotlinx.coroutines.launch
 
 @Composable
@@ -44,41 +44,47 @@ fun PlannerCalendar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
+        Surface(
+            onClick = onPreviousMonth,
             modifier = Modifier
-                .size(38.dp)
-                .pressSpring3D(pressScale = 0.9f, onClick = onPreviousMonth)
-                .glass3D(shape = CircleShape, elevation = 2.dp),
-            contentAlignment = Alignment.Center
+                .size(36.dp)
+                .pressSpring3D(pressScale = 0.9f),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
         ) {
-            Icon(
-                imageVector = Icons.Default.ChevronLeft,
-                contentDescription = "Previous Month",
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(20.dp)
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.ChevronLeft,
+                    contentDescription = "Previous Month",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
 
         Text(
             text = monthYear,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
 
-        Box(
+        Surface(
+            onClick = onNextMonth,
             modifier = Modifier
-                .size(38.dp)
-                .pressSpring3D(pressScale = 0.9f, onClick = onNextMonth)
-                .glass3D(shape = CircleShape, elevation = 2.dp),
-            contentAlignment = Alignment.Center
+                .size(36.dp)
+                .pressSpring3D(pressScale = 0.9f),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
         ) {
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = "Next Month",
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(20.dp)
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = "Next Month",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }
@@ -93,43 +99,23 @@ fun DateSelector(
 ) {
     LazyRow(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         items(days) { day ->
             val isSelected = day.isSelected
-            val itemShape = RoundedCornerShape(18.dp)
+            val itemShape = RoundedCornerShape(12.dp)
 
-            Box(
+            Surface(
+                onClick = { onDaySelected(day) },
                 modifier = Modifier
-                    .width(54.dp)
-                    .height(72.dp)
-                    .tilt3D(maxTiltDegrees = 6f, scaleOnTouch = 1.05f, shape = itemShape)
-                    .pressSpring3D(pressScale = 0.94f) { onDaySelected(day) }
-                    .shadow(
-                        elevation = if (isSelected) 6.dp else 1.dp,
-                        shape = itemShape,
-                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isSelected) 0.45f else 0.1f)
-                    )
-                    .clip(itemShape)
-                    .background(
-                        if (isSelected) {
-                            Brush.verticalGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                                )
-                            )
-                        } else {
-                            Brush.linearGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.surface,
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                                )
-                            )
-                        }
-                    ),
-                contentAlignment = Alignment.Center
+                    .width(48.dp)
+                    .height(64.dp)
+                    .pressSpring3D(pressScale = 0.94f),
+                shape = itemShape,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                border = if (!isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)) else null,
+                shadowElevation = if (isSelected) 1.5.dp else 0.dp
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize().padding(4.dp),
@@ -140,13 +126,13 @@ fun DateSelector(
                         text = day.name,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium,
-                        color = if (isSelected) Color.White.copy(alpha = 0.85f) else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (isSelected) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = day.date,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold,
+                        fontWeight = FontWeight.Bold,
                         color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -164,30 +150,31 @@ fun PlannerSummaryCard(
 ) {
     val cardShape = FocusFlowCorners.Card
 
-    Box(
+    Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(100.dp)
-            .tilt3D(maxTiltDegrees = 6f, scaleOnTouch = 1.02f, shape = cardShape)
-            .glass3D(shape = cardShape, elevation = 4.dp)
-            .padding(18.dp)
+            .height(90.dp),
+        shape = cardShape,
+        color = backgroundColor,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+        shadowElevation = 1.dp
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(14.dp),
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = count,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.ExtraBold,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
-                letterSpacing = (-0.5).sp
+                letterSpacing = (-0.3).sp
             )
-            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -214,72 +201,60 @@ fun TimelineTaskItem(
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // 3D Timeline Glowing Node & Connector
+        // Timeline Connector
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(top = 22.dp, end = 14.dp)
+            modifier = Modifier.padding(top = 18.dp, end = 12.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(14.dp)
-                    .shadow(
-                        elevation = 4.dp,
-                        shape = CircleShape,
-                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                    )
+                    .size(10.dp)
                     .clip(CircleShape)
                     .background(
-                        if (isCompleted) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                        if (isCompleted) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
                         else MaterialTheme.colorScheme.primary
                     )
             )
             Box(
                 modifier = Modifier
-                    .width(2.dp)
-                    .height(76.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                            )
-                        )
-                    )
+                    .width(1.5.dp)
+                    .height(68.dp)
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
             )
         }
 
-        // 3D Glass Task Card
-        Box(
+        // Clean Surface Task Card
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 12.dp)
-                .tilt3D(maxTiltDegrees = 5f, scaleOnTouch = 1.015f, shape = cardShape)
-                .pressSpring3D(pressScale = 0.98f)
-                .glass3D(shape = cardShape, elevation = if (isCompleted) 1.dp else 4.dp)
-                .padding(14.dp)
+                .padding(bottom = 10.dp)
+                .pressSpring3D(pressScale = 0.985f),
+            shape = cardShape,
+            color = if (isCompleted) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+            shadowElevation = if (isCompleted) 0.dp else 1.dp
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 3D Bouncy Checkbox
+                // Tactile Checkbox
                 Box(
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(22.dp)
                         .scale(checkScale.value)
-                        .shadow(
-                            elevation = if (isCompleted) 0.dp else 2.dp,
-                            shape = CircleShape,
-                            spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        )
                         .clip(CircleShape)
-                        .background(
-                            if (isCompleted) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        .background(if (isCompleted) MaterialTheme.colorScheme.primary else Color.Transparent)
+                        .border(
+                            1.5.dp,
+                            if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                            CircleShape
                         )
                         .clickable {
                             scope.launch {
-                                checkScale.animateTo(1.35f, FramerSprings.Snappy)
+                                checkScale.animateTo(1.2f, FramerSprings.Snappy)
                                 checkScale.animateTo(1f, FramerSprings.Bouncy)
                             }
                             onToggleCompletion()
@@ -291,40 +266,39 @@ fun TimelineTaskItem(
                             imageVector = Icons.Default.Check,
                             contentDescription = "Completed",
                             tint = Color.White,
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(13.dp)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
                         textDecoration = if (isCompleted) TextDecoration.LineThrough else TextDecoration.None,
                         color = if (isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
+                            shape = RoundedCornerShape(4.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
                         ) {
                             Text(
                                 text = subject,
-                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                 style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "$time • $duration",
                             style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
