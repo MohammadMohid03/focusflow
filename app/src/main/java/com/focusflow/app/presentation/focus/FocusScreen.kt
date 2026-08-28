@@ -3,16 +3,24 @@ package com.focusflow.app.presentation.focus
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Psychology
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.domain.model.FocusSessionType
 import com.focusflow.app.presentation.components.CompactTopBar
-import com.focusflow.app.presentation.theme.FocusFlowCorners
+import com.focusflow.app.presentation.components.PrimaryButton
+import com.focusflow.app.presentation.theme.*
 
 @Composable
 fun FocusScreen(
@@ -25,7 +33,7 @@ fun FocusScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            CompactTopBar(title = "Focus Mode")
+            CompactTopBar(title = "Focus Studio")
         }
     ) { paddingValues ->
         Column(
@@ -33,43 +41,42 @@ fun FocusScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            // Stats Row in Surface
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = FocusFlowCorners.Card,
-                color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-                shadowElevation = 1.dp
+            // 3D Glassmorphic Stats Banner
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .tilt3D(maxTiltDegrees = 6f, scaleOnTouch = 1.02f, shape = FocusFlowCorners.Card)
+                    .glass3D(shape = FocusFlowCorners.Card, elevation = 6.dp)
+                    .padding(vertical = 18.dp)
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    StatItem("Today's Focus", "${uiState.totalFocusToday}m")
-                    StatItem("Sessions", "${uiState.recentSessions.size}")
-                    StatItem("Streak", "3 Days")
+                    StatItem3D("Daily Focus", "${uiState.totalFocusToday}m")
+                    StatItem3D("Sessions", "${uiState.recentSessions.size}")
+                    StatItem3D("Streak", "3 Days")
                 }
             }
 
             Text(
                 text = "Select Focus Mode",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            // Session Types
+            // 3D Session Type Cards
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                SessionTypeCard(
+                SessionTypeCard3D(
                     title = "Pomodoro",
                     subtitle = "25 / 5 min",
+                    icon = Icons.Outlined.Bolt,
                     isSelected = selectedType == FocusSessionType.POMODORO_25_5,
                     onClick = {
                         selectedType = FocusSessionType.POMODORO_25_5
@@ -77,9 +84,10 @@ fun FocusScreen(
                     },
                     modifier = Modifier.weight(1f)
                 )
-                SessionTypeCard(
+                SessionTypeCard3D(
                     title = "Deep Work",
                     subtitle = "50 / 10 min",
+                    icon = Icons.Outlined.Psychology,
                     isSelected = selectedType == FocusSessionType.POMODORO_50_10,
                     onClick = {
                         selectedType = FocusSessionType.POMODORO_50_10
@@ -87,9 +95,10 @@ fun FocusScreen(
                     },
                     modifier = Modifier.weight(1f)
                 )
-                SessionTypeCard(
+                SessionTypeCard3D(
                     title = "Custom",
                     subtitle = "Flexible",
+                    icon = Icons.Outlined.Tune,
                     isSelected = selectedType == FocusSessionType.CUSTOM,
                     onClick = {
                         selectedType = FocusSessionType.CUSTOM
@@ -101,85 +110,84 @@ fun FocusScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Button(
+            PrimaryButton(
+                text = "Enter Focus Room",
                 onClick = {
                     viewModel.startSession()
                     onNavigateToSession()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = FocusFlowCorners.Button,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
-            ) {
-                Text(
-                    text = "Start Focus Session",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+                }
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun StatItem(label: String, value: String) {
+fun StatItem3D(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            value,
+            text = value,
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            fontWeight = FontWeight.ExtraBold,
+            color = MaterialTheme.colorScheme.primary,
+            letterSpacing = (-0.5).sp
         )
         Text(
-            label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
         )
     }
 }
 
 @Composable
-fun SessionTypeCard(
+fun SessionTypeCard3D(
     title: String,
     subtitle: String,
+    icon: ImageVector,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier.aspectRatio(1f),
-        shape = FocusFlowCorners.CardSmall,
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-        ),
-        shadowElevation = if (isSelected) 2.dp else 0.dp,
-        onClick = onClick
+    val cardShape = FocusFlowCorners.CardSmall
+
+    Box(
+        modifier = modifier
+            .aspectRatio(0.92f)
+            .tilt3D(maxTiltDegrees = 8f, scaleOnTouch = 1.04f, shape = cardShape)
+            .pressSpring3D(pressScale = 0.94f, onClick = onClick)
+            .glass3D(
+                shape = cardShape,
+                backgroundColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else null,
+                elevation = if (isSelected) 6.dp else 2.dp
+            )
+            .padding(10.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp),
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }
     }

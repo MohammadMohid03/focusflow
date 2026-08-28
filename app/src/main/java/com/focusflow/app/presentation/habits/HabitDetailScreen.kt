@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.focusflow.app.presentation.theme.FocusFlowCorners
+import com.focusflow.app.presentation.theme.glass3D
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -17,34 +19,46 @@ fun HabitDetailScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Habit Details") })
+            TopAppBar(
+                title = { Text("Habit Details", fontWeight = FontWeight.Bold) }
+            )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Read Books", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Text("Read 10 pages daily.", style = MaterialTheme.typography.bodyLarge)
+            Text("Read Books", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+            Text("Read 10 pages daily.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-            Divider()
+            HorizontalDivider()
 
-            Text("Calendar", style = MaterialTheme.typography.titleMedium)
-            // Heatmap calendar placeholder
-            Card(
-                modifier = Modifier.fillMaxWidth().height(200.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            Text("Consistency Heatmap", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .glass3D(shape = FocusFlowCorners.Card, elevation = 2.dp)
+                    .padding(16.dp)
             ) {
-                // Heatmap drawing
+                Text("Daily completion active", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                HabitStatItem("Current Streak", "3")
-                HabitStatItem("Longest Streak", "12")
-                HabitStatItem("Completions", "45")
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .glass3D(shape = FocusFlowCorners.Card, elevation = 4.dp)
+                    .padding(vertical = 14.dp)
+            ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    HabitStatItem3D("Current Streak", "3 d")
+                    HabitStatItem3D("Longest Streak", "12 d")
+                    HabitStatItem3D("Completions", "45")
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -58,8 +72,8 @@ fun HabitDetailScreen(
                         viewModel.deleteHabit(habitId)
                         onNavigateBack()
                     }, 
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text("Delete")
                 }
