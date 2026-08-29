@@ -33,7 +33,8 @@ class HomeViewModel @Inject constructor(
     private val focusSessionRepository: FocusSessionRepository,
     private val commitmentRepository: CommitmentRepository,
     private val authRepository: AuthRepository,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val aiRepository: AiRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -41,6 +42,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadData()
+        fetchAiTip()
     }
 
     private fun loadData() {
@@ -70,6 +72,7 @@ class HomeViewModel @Inject constructor(
                         focusMinutesToday = focusMinutes,
                         currentStreak = 3,
                         activeCommitment = activeComm,
+                        aiRecommendation = _uiState.value.aiRecommendation,
                         isLoading = false
                     )
                 }
@@ -77,6 +80,15 @@ class HomeViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false, error = e.message ?: "Error loading data") }
             }.collect { newState ->
                 _uiState.value = newState
+            }
+        }
+    }
+
+    private fun fetchAiTip() {
+        viewModelScope.launch {
+            val tipResult = aiRepository.generateFocusTip()
+            tipResult.onSuccess { tip ->
+                _uiState.update { it.copy(aiRecommendation = tip) }
             }
         }
     }

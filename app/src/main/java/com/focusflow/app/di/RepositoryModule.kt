@@ -22,5 +22,5 @@ abstract class RepositoryModule {
     @Binds @Singleton abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
     @Binds @Singleton abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
     @Binds @Singleton abstract fun bindAppRestrictionManager(impl: AppRestrictionManagerImpl): AppRestrictionManager
+    @Binds @Singleton abstract fun bindAiRepository(impl: AiRepositoryImpl): AiRepository
 }
-

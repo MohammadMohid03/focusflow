@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,7 +37,8 @@ import com.focusflow.app.presentation.theme.pressSpring3D
 fun TasksScreen(
     viewModel: TasksViewModel = hiltViewModel(),
     onNavigateToCreateTask: () -> Unit,
-    onNavigateToTaskDetail: (String) -> Unit
+    onNavigateToTaskDetail: (String) -> Unit,
+    onNavigateToAiBreakdown: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var sortMenuExpanded by remember { mutableStateOf(false) }
@@ -48,37 +50,60 @@ fun TasksScreen(
                 CompactTopBar(
                     title = "Tasks Studio",
                     actions = {
-                        Box {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Surface(
-                                onClick = { sortMenuExpanded = true },
+                                onClick = onNavigateToAiBreakdown,
                                 modifier = Modifier
                                     .size(36.dp)
                                     .pressSpring3D(pressScale = 0.92f),
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+                                color = MaterialTheme.colorScheme.primaryContainer
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        Icons.AutoMirrored.Filled.List,
-                                        contentDescription = "Sort",
-                                        tint = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.size(18.dp)
+                                        Icons.Default.AutoAwesome,
+                                        contentDescription = "AI Breakdown",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(17.dp)
                                     )
                                 }
                             }
 
-                            DropdownMenu(
-                                expanded = sortMenuExpanded,
-                                onDismissRequest = { sortMenuExpanded = false }
-                            ) {
-                                TaskSortOrder.entries.forEach { order ->
-                                    DropdownMenuItem(
-                                        text = { Text(order.name.replace("_", " "), fontWeight = FontWeight.Medium) },
-                                        onClick = {
-                                            viewModel.onSortOrderSelect(order)
-                                            sortMenuExpanded = false
-                                        }
-                                    )
+                            Box {
+                                Surface(
+                                    onClick = { sortMenuExpanded = true },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .pressSpring3D(pressScale = 0.92f),
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            Icons.AutoMirrored.Filled.List,
+                                            contentDescription = "Sort",
+                                            tint = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+
+                                DropdownMenu(
+                                    expanded = sortMenuExpanded,
+                                    onDismissRequest = { sortMenuExpanded = false }
+                                ) {
+                                    TaskSortOrder.entries.forEach { order ->
+                                        DropdownMenuItem(
+                                            text = { Text(order.name.replace("_", " "), fontWeight = FontWeight.Medium) },
+                                            onClick = {
+                                                viewModel.onSortOrderSelect(order)
+                                                sortMenuExpanded = false
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }

@@ -1,15 +1,16 @@
 package com.focusflow.app.di
 
+import com.focusflow.app.data.remote.api.GroqApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import okhttp3.MediaType.Companion.toMediaType
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -31,7 +32,7 @@ object NetworkModule {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
-        
+
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -48,9 +49,15 @@ object NetworkModule {
     ): Retrofit {
         val contentType = "application/json".toMediaType()
         return Retrofit.Builder()
-            .baseUrl("https://api.focusflow.placeholder.com/") // Placeholder URL
+            .baseUrl("https://api.groq.com/openai/v1/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGroqApiService(retrofit: Retrofit): GroqApiService {
+        return retrofit.create(GroqApiService::class.java)
     }
 }

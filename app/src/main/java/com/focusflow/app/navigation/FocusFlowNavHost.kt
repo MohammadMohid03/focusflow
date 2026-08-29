@@ -205,7 +205,8 @@ fun FocusFlowNavHost() {
             composable(Screen.Tasks.route) {
                 TasksScreen(
                     onNavigateToCreateTask = { navController.navigate(Screen.CreateTask.route) },
-                    onNavigateToTaskDetail = { taskId -> navController.navigate("task_detail/$taskId") }
+                    onNavigateToTaskDetail = { taskId -> navController.navigate("task_detail/$taskId") },
+                    onNavigateToAiBreakdown = { navController.navigate(Screen.AiTaskBreakdown.route) }
                 )
             }
 
@@ -262,7 +263,8 @@ fun FocusFlowNavHost() {
             
             composable(Screen.AiPlanner.route) {
                 AiPlannerScreen(
-                    viewModel = hiltViewModel()
+                    viewModel = hiltViewModel(),
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             
@@ -275,7 +277,8 @@ fun FocusFlowNavHost() {
             
             composable(Screen.AiTaskBreakdown.route) {
                 AiTaskBreakdownScreen(
-                    viewModel = hiltViewModel()
+                    viewModel = hiltViewModel(),
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
