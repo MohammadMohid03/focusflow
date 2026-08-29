@@ -30,4 +30,5 @@ google-services.json
 prompt.txt
 spec.txt
 extract_docx.ps1
-
+*.py
+generate_files.py

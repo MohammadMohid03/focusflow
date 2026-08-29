@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,7 +12,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.focusflow.app.presentation.theme.FocusFlowCorners
 import com.focusflow.app.presentation.theme.pressSpring3D
 
@@ -31,8 +33,8 @@ fun QuickActionCard(
     Surface(
         onClick = onClick,
         modifier = modifier
-            .width(100.dp)
-            .height(105.dp)
+            .fillMaxWidth()
+            .height(96.dp)
             .pressSpring3D(pressScale = 0.96f),
         shape = cardShape,
         color = MaterialTheme.colorScheme.surface,
@@ -42,13 +44,13 @@ fun QuickActionCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(10.dp),
+                .padding(horizontal = 4.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(38.dp)
                     .clip(CircleShape)
                     .background(iconContainerColor),
                 contentAlignment = Alignment.Center
@@ -61,14 +63,18 @@ fun QuickActionCard(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(7.dp))
 
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 11.5.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

@@ -56,8 +56,11 @@ fun AiChatScreen(
         bottomBar = {
             Column(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(bottom = 8.dp)
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .padding(bottom = 6.dp)
             ) {
                 SuggestionChips(
                     onChipClick = { text -> viewModel.onInputTextChanged(text) }
@@ -187,15 +190,14 @@ fun ChatInputBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 4.dp)
-            .imePadding(),
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
-            shadowElevation = 2.dp,
+            shadowElevation = 1.dp,
             modifier = Modifier.weight(1f)
         ) {
             Row(
@@ -232,7 +234,7 @@ fun ChatInputBar(
             shape = CircleShape,
             color = if (text.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier.size(44.dp),
-            shadowElevation = if (text.isNotBlank()) 2.dp else 0.dp
+            shadowElevation = if (text.isNotBlank()) 1.dp else 0.dp
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(

@@ -135,8 +135,7 @@ fun ChatInput(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .imePadding()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),

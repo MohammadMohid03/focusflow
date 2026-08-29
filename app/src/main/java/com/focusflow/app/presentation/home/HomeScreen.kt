@@ -348,7 +348,7 @@ fun QuickActionsSection(
         ) {
             QuickActionCard(
                 icon = Icons.Outlined.ChatBubbleOutline,
-                label = "AI Mentor",
+                label = "AI Chat",
                 iconContainerColor = MaterialTheme.colorScheme.primaryContainer,
                 iconColor = MaterialTheme.colorScheme.primary,
                 onClick = onNavigateToAiChat,
@@ -356,7 +356,7 @@ fun QuickActionsSection(
             )
             QuickActionCard(
                 icon = Icons.Outlined.Timer,
-                label = "Focus Room",
+                label = "Focus",
                 iconContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                 iconColor = MaterialTheme.colorScheme.secondary,
                 onClick = onNavigateToFocus,
