@@ -9,7 +9,6 @@ import com.focusflow.app.di.IoDispatcher
 import com.focusflow.app.domain.model.CommitmentStatus
 import com.focusflow.app.domain.model.Task
 import com.focusflow.app.domain.model.TaskFilter
-import com.focusflow.app.domain.model.TaskPriority
 import com.focusflow.app.domain.repository.TaskRepository
 import com.focusflow.app.service.AppRestrictionManager
 import kotlinx.coroutines.CoroutineDispatcher
@@ -72,36 +71,27 @@ class TaskRepositoryImpl @Inject constructor(
         task.subtasks.forEach { subtask ->
             subtaskDao.insertSubtask(subtask.toEntity(task.id))
         }
+        if (task.isCompleted) {
+            completeTaskCommitments(task.id)
+        }
     }
 
     override suspend fun deleteTask(taskId: String) = withContext(ioDispatcher) {
         taskDao.deleteTask(taskId)
-        val now = System.currentTimeMillis()
-        val commitments = commitmentDao.getCommitmentsForTaskSync(taskId).map { it.toDomain() }
-        commitments.forEach { commitment ->
-            if (commitment.status == CommitmentStatus.ACTIVE || commitment.status == CommitmentStatus.WARNING) {
-                val updated = commitment.copy(
-                    status = CommitmentStatus.CANCELLED,
-                    cancelledAt = now
-                )
-                commitmentDao.update(updated.toEntity())
-            }
-        }
-
-        val remainingActive = commitmentDao.getAllActiveCommitmentsSync().map { it.toDomain() }
-        val remainingActiveApps = remainingActive.flatMap { it.selectedAppPackages }.toSet()
-        val allUnlocked = commitments.flatMap { it.selectedAppPackages }.filter { !remainingActiveApps.contains(it) }
-        appRestrictionManager.disableRestriction(allUnlocked)
-        Unit
+        cancelTaskCommitments(taskId)
     }
 
     override suspend fun completeTask(taskId: String) = withContext(ioDispatcher) {
         val now = System.currentTimeMillis()
         taskDao.completeTask(taskId, now, now)
+        completeTaskCommitments(taskId)
+    }
 
+    private suspend fun completeTaskCommitments(taskId: String) {
+        val now = System.currentTimeMillis()
         val commitments = commitmentDao.getCommitmentsForTaskSync(taskId).map { it.toDomain() }
         commitments.forEach { commitment ->
-            if (commitment.status == CommitmentStatus.ACTIVE || commitment.status == CommitmentStatus.WARNING) {
+            if (commitment.status != CommitmentStatus.COMPLETED && commitment.status != CommitmentStatus.CANCELLED) {
                 val updated = commitment.copy(
                     status = CommitmentStatus.COMPLETED,
                     completedAt = now
@@ -114,7 +104,25 @@ class TaskRepositoryImpl @Inject constructor(
         val remainingActiveApps = remainingActive.flatMap { it.selectedAppPackages }.toSet()
         val allUnlocked = commitments.flatMap { it.selectedAppPackages }.filter { !remainingActiveApps.contains(it) }
         appRestrictionManager.disableRestriction(allUnlocked)
-        Unit
+    }
+
+    private suspend fun cancelTaskCommitments(taskId: String) {
+        val now = System.currentTimeMillis()
+        val commitments = commitmentDao.getCommitmentsForTaskSync(taskId).map { it.toDomain() }
+        commitments.forEach { commitment ->
+            if (commitment.status != CommitmentStatus.COMPLETED && commitment.status != CommitmentStatus.CANCELLED) {
+                val updated = commitment.copy(
+                    status = CommitmentStatus.CANCELLED,
+                    cancelledAt = now
+                )
+                commitmentDao.update(updated.toEntity())
+            }
+        }
+
+        val remainingActive = commitmentDao.getAllActiveCommitmentsSync().map { it.toDomain() }
+        val remainingActiveApps = remainingActive.flatMap { it.selectedAppPackages }.toSet()
+        val allUnlocked = commitments.flatMap { it.selectedAppPackages }.filter { !remainingActiveApps.contains(it) }
+        appRestrictionManager.disableRestriction(allUnlocked)
     }
 
     override suspend fun restoreTask(taskId: String) = withContext(ioDispatcher) {

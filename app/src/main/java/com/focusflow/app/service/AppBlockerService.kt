@@ -185,6 +185,11 @@ class AppBlockerService : Service() {
 
     private fun stopMonitoring() {
         isMonitoring = false
+        try {
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+            notificationManager?.cancel(NOTIFICATION_ALERT_ID)
+            notificationManager?.cancel(NOTIFICATION_ID)
+        } catch (e: Exception) {}
     }
 
     private fun createNotificationChannels() {
