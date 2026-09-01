@@ -1,5 +1,6 @@
 package com.focusflow.app.data.repository
 
+import android.util.Log
 import com.focusflow.app.BuildConfig
 import com.focusflow.app.data.remote.api.GroqApiService
 import com.focusflow.app.data.remote.dto.groq.*
@@ -19,6 +20,10 @@ class AiRepositoryImpl @Inject constructor(
     private val json: Json
 ) : AiRepository {
 
+    private val tag = "AiRepository"
+    private val defaultModel = "openai/gpt-oss-20b"
+    private val fallbackModel = "groq/compound-mini"
+
     private val apiKey: String
         get() = BuildConfig.GROQ_API_KEY.trim()
 
@@ -27,13 +32,14 @@ class AiRepositoryImpl @Inject constructor(
         prompt: String
     ): Result<String> = withContext(Dispatchers.IO) {
         if (apiKey.isBlank()) {
+            Log.w(tag, "Groq API Key is blank in BuildConfig")
             return@withContext Result.success(getFallbackChatResponse(prompt))
         }
 
         try {
             val systemMessage = GroqMessageDto(
                 role = "system",
-                content = "You are FocusFlow AI, an elite study partner, productivity coach, and academic assistant. You provide concise, actionable, clear, and motivational advice. Use bullet points, short paragraphs, and practical steps."
+                content = "You are FocusFlow AI, an elite study partner, productivity coach, and academic assistant. You provide concise, clear, accurate, and structured explanations. Use markdown formatting, bullet points, and practical examples where appropriate."
             )
 
             val messages = mutableListOf(systemMessage)
@@ -48,29 +54,42 @@ class AiRepositoryImpl @Inject constructor(
             }
             messages.add(GroqMessageDto(role = "user", content = prompt))
 
-            val request = GroqChatRequest(
-                model = "llama-3.3-70b-versatile",
+            var request = GroqChatRequest(
+                model = defaultModel,
                 messages = messages,
                 temperature = 0.7,
                 maxTokens = 1024
             )
 
-            val response = groqApiService.getChatCompletion(
+            var response = groqApiService.getChatCompletion(
                 authorization = "Bearer $apiKey",
                 request = request
             )
 
+            // If default model failed, try fallback model
+            if (!response.isSuccessful) {
+                Log.w(tag, "Groq primary model failed: ${response.code()} ${response.errorBody()?.string()}. Trying fallback model: $fallbackModel")
+                request = request.copy(model = fallbackModel)
+                response = groqApiService.getChatCompletion(
+                    authorization = "Bearer $apiKey",
+                    request = request
+                )
+            }
+
             if (response.isSuccessful) {
                 val content = response.body()?.choices?.firstOrNull()?.message?.content
                 if (!content.isNullOrBlank()) {
-                    Result.success(content)
-                } else {
-                    Result.success(getFallbackChatResponse(prompt))
+                    Log.d(tag, "Groq AI chat response received successfully")
+                    return@withContext Result.success(content)
                 }
             } else {
-                Result.success(getFallbackChatResponse(prompt))
+                val errBody = response.errorBody()?.string()
+                Log.e(tag, "Groq AI API error: ${response.code()} $errBody")
             }
+
+            Result.success(getFallbackChatResponse(prompt))
         } catch (e: Exception) {
+            Log.e(tag, "Groq AI Exception: ${e.message}", e)
             Result.success(getFallbackChatResponse(prompt))
         }
     }
@@ -100,7 +119,7 @@ class AiRepositoryImpl @Inject constructor(
             """.trimIndent()
 
             val request = GroqChatRequest(
-                model = "llama-3.3-70b-versatile",
+                model = defaultModel,
                 messages = listOf(
                     GroqMessageDto(role = "system", content = systemPrompt),
                     GroqMessageDto(role = "user", content = "Goal: $goalOrTask")
@@ -110,10 +129,18 @@ class AiRepositoryImpl @Inject constructor(
                 responseFormat = GroqResponseFormat("json_object")
             )
 
-            val response = groqApiService.getChatCompletion(
+            var response = groqApiService.getChatCompletion(
                 authorization = "Bearer $apiKey",
                 request = request
             )
+
+            if (!response.isSuccessful) {
+                val fallbackRequest = request.copy(model = fallbackModel)
+                response = groqApiService.getChatCompletion(
+                    authorization = "Bearer $apiKey",
+                    request = fallbackRequest
+                )
+            }
 
             if (response.isSuccessful) {
                 val rawJson = response.body()?.choices?.firstOrNull()?.message?.content
@@ -138,6 +165,7 @@ class AiRepositoryImpl @Inject constructor(
             }
             Result.success(getFallbackBreakdown(goalOrTask))
         } catch (e: Exception) {
+            Log.e(tag, "Breakdown exception: ${e.message}", e)
             Result.success(getFallbackBreakdown(goalOrTask))
         }
     }
@@ -169,7 +197,7 @@ class AiRepositoryImpl @Inject constructor(
             """.trimIndent()
 
             val request = GroqChatRequest(
-                model = "llama-3.3-70b-versatile",
+                model = defaultModel,
                 messages = listOf(
                     GroqMessageDto(role = "system", content = systemPrompt),
                     GroqMessageDto(role = "user", content = "Tasks to schedule: $taskListStr. Total hours available: $availableHours")
@@ -179,10 +207,18 @@ class AiRepositoryImpl @Inject constructor(
                 responseFormat = GroqResponseFormat("json_object")
             )
 
-            val response = groqApiService.getChatCompletion(
+            var response = groqApiService.getChatCompletion(
                 authorization = "Bearer $apiKey",
                 request = request
             )
+
+            if (!response.isSuccessful) {
+                val fallbackRequest = request.copy(model = fallbackModel)
+                response = groqApiService.getChatCompletion(
+                    authorization = "Bearer $apiKey",
+                    request = fallbackRequest
+                )
+            }
 
             if (response.isSuccessful) {
                 val rawJson = response.body()?.choices?.firstOrNull()?.message?.content
@@ -203,6 +239,7 @@ class AiRepositoryImpl @Inject constructor(
             }
             Result.success(getFallbackSchedule(tasks, availableHours))
         } catch (e: Exception) {
+            Log.e(tag, "Schedule exception: ${e.message}", e)
             Result.success(getFallbackSchedule(tasks, availableHours))
         }
     }
@@ -215,7 +252,7 @@ class AiRepositoryImpl @Inject constructor(
         try {
             val systemPrompt = "You are a cognitive science & focus coach. Provide a single, powerful 1-2 sentence evidence-based study or focus tip. Be concise, direct, and practical."
             val request = GroqChatRequest(
-                model = "llama-3.3-70b-versatile",
+                model = defaultModel,
                 messages = listOf(
                     GroqMessageDto(role = "system", content = systemPrompt),
                     GroqMessageDto(role = "user", content = "Give me today's actionable focus tip.")
@@ -242,17 +279,7 @@ class AiRepositoryImpl @Inject constructor(
     }
 
     private fun getFallbackChatResponse(text: String): String {
-        val lower = text.lowercase()
-        return when {
-            lower.contains("calculus") || lower.contains("derivative") || lower.contains("math") ->
-                "For Calculus: 1. Identify the core rule (Power, Product, Chain). 2. Differentiate step-by-step. 3. Check critical points where f'(x)=0."
-            lower.contains("tip") || lower.contains("exam") || lower.contains("memoriz") ->
-                "Top Active Recall Tip: Teach the concept out loud in plain terms (Feynman Technique), then do a 25-minute closed-book practice session."
-            lower.contains("plan") || lower.contains("schedule") ->
-                "Recommended 2-Hour Plan: Block 1 (45m hardest topic) -> 10m walk/water -> Block 2 (40m active problems) -> 25m review & recap."
-            else ->
-                "Let's tackle this systematically! Break this into 2-3 focused milestones. What specific outcome would you like to achieve in this study session?"
-        }
+        return "I'm currently operating in offline mode. Please ensure your device has an active internet connection to receive real-time answers from FocusFlow AI."
     }
 
     private fun getFallbackBreakdown(goal: String): List<SuggestedSubtask> {

@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GroqChatRequest(
-    val model: String = "llama-3.3-70b-versatile",
+    val model: String = "openai/gpt-oss-20b",
     val messages: List<GroqMessageDto>,
-    val temperature: Double = 0.6,
+    val temperature: Double = 0.7,
     @SerialName("max_tokens") val maxTokens: Int = 1024,
     @SerialName("response_format") val responseFormat: GroqResponseFormat? = null
 )
