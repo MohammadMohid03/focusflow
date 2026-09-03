@@ -87,6 +87,7 @@ class GoalsViewModel @Inject constructor(
                     id = UUID.randomUUID().toString(),
                     title = title,
                     description = description,
+                    targetDate = targetDate.toLongOrNull(),
                     createdAt = System.currentTimeMillis(),
                     updatedAt = System.currentTimeMillis(),
                     userId = userId,

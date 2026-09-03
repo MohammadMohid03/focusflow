@@ -29,8 +29,8 @@ fun TaskDetailScreen(
     onNavigateBack: () -> Unit,
     viewModel: TasksViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val task = uiState.tasks.firstOrNull { it.id == taskId }
+    val taskState by remember(taskId) { viewModel.getTaskById(taskId) }.collectAsState(initial = null)
+    val task = taskState
 
     var isEditing by remember { mutableStateOf(false) }
     var editTitle by remember(task) { mutableStateOf(task?.title ?: "") }

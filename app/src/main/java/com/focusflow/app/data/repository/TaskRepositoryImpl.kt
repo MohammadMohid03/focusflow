@@ -134,9 +134,10 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override fun getTasksDueToday(userId: String): Flow<List<Task>> {
-        val now = System.currentTimeMillis()
-        val startOfDay = now - (now % 86400000)
-        val endOfDay = startOfDay + 86400000
+        val zoneId = java.time.ZoneId.systemDefault()
+        val today = java.time.LocalDate.now(zoneId)
+        val startOfDay = today.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val endOfDay = today.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli() - 1
         return taskDao.getTasksDueToday(userId, startOfDay, endOfDay).map { list -> list.map { it.toDomain(emptyList()) } }
     }
 

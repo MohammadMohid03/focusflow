@@ -59,6 +59,8 @@ class TasksViewModel @Inject constructor(
         initialValue = TasksUiState(isLoading = false)
     )
 
+    fun getTaskById(taskId: String): Flow<com.focusflow.app.domain.model.Task?> = taskRepository.getTaskById(taskId)
+
     fun onSearchQueryChange(query: String) {
         _query.value = query
     }

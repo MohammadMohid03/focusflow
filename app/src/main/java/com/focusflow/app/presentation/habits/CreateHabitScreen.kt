@@ -57,14 +57,22 @@ fun CreateHabitScreen(
             Text("Goal Target", style = MaterialTheme.typography.titleMedium)
             // Target selector placeholder
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = { 
-                    // Save
-                    onNavigateBack()
+                    if (name.isNotBlank()) {
+                        viewModel.createHabit(
+                            com.focusflow.app.domain.model.Habit(
+                                name = name.trim(),
+                                description = description.trim()
+                            )
+                        )
+                        onNavigateBack()
+                    }
                 },
-                modifier = Modifier.fillMaxWidth().height(56.dp)
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                enabled = name.isNotBlank()
             ) {
                 Text("Save Habit")
             }

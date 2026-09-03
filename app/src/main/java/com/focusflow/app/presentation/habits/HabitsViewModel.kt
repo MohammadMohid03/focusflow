@@ -57,10 +57,22 @@ class HabitsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 habitRepository.completeHabit(habitId, System.currentTimeMillis())
+                // Add to local completions so UI reflects immediately
+                _uiState.update { state ->
+                    state.copy(completions = state.completions + com.focusflow.app.domain.model.HabitCompletion(
+                        habitId = habitId,
+                        completedAt = System.currentTimeMillis(),
+                        date = System.currentTimeMillis()
+                    ))
+                }
             } catch (e: Exception) {
                 // Handle error
             }
         }
+    }
+
+    fun getHabitById(habitId: String): kotlinx.coroutines.flow.Flow<com.focusflow.app.domain.model.Habit?> {
+        return habitRepository.getHabitById(habitId)
     }
     
     fun createHabit(habit: Habit) {

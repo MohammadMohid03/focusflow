@@ -111,7 +111,7 @@ class AuthViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             val result = authRepository.resetPassword(email.trim())
             result.onSuccess {
-                _uiState.value = _uiState.value.copy(isLoading = false, error = "Password reset link sent to $email")
+                _uiState.value = _uiState.value.copy(isLoading = false, successMessage = "Password reset link sent to $email")
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(isLoading = false, error = error.localizedMessage ?: "Failed to send reset email")
             }
@@ -126,6 +126,7 @@ class AuthViewModel @Inject constructor(
 data class AuthUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
+    val successMessage: String? = null,
     val isAuthenticated: Boolean = false,
     val user: Any? = null
 )

@@ -45,7 +45,11 @@ fun FocusSessionScreen(
     }
 
     val progress by animateFloatAsState(
-        targetValue = uiState.timeRemaining.toFloat() / (25 * 60).toFloat(),
+        targetValue = if (uiState.totalDuration > 0) {
+            uiState.timeRemaining.toFloat() / uiState.totalDuration.toFloat()
+        } else {
+            0f
+        },
         animationSpec = tween(400),
         label = "Progress"
     )

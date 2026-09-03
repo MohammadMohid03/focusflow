@@ -285,7 +285,7 @@ fun FocusFlowNavHost() {
             // Focus Mode
             composable(Screen.Focus.route) {
                 FocusScreen(
-                    onNavigateToSession = { navController.navigate(Screen.FocusSession.route) }
+                    onNavigateToSession = { navController.navigate("focus_session") }
                 )
             }
 
@@ -354,11 +354,12 @@ fun FocusFlowNavHost() {
                 arguments = listOf(navArgument("taskId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId") ?: ""
+                val viewModel: com.focusflow.app.presentation.commitment.CommitmentViewModel = hiltViewModel(backStackEntry)
                 CommitmentConfigScreen(
                     taskId = taskId,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateNext = { navController.navigate("app_selection/$taskId") },
-                    viewModel = hiltViewModel()
+                    viewModel = viewModel
                 )
             }
 
@@ -367,17 +368,25 @@ fun FocusFlowNavHost() {
                 arguments = listOf(navArgument("commitmentId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val commitmentId = backStackEntry.arguments?.getString("commitmentId") ?: ""
+                val parentEntry = remember(backStackEntry) {
+                    runCatching { navController.getBackStackEntry(Screen.CommitmentConfig.route) }.getOrNull()
+                }
+                val viewModel: com.focusflow.app.presentation.commitment.CommitmentViewModel = if (parentEntry != null) hiltViewModel(parentEntry) else hiltViewModel()
                 AppSelectionScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateNext = { navController.navigate("commitment_review/$commitmentId") },
-                    viewModel = hiltViewModel()
+                    viewModel = viewModel
                 )
             }
 
             composable(
                 route = Screen.CommitmentReview.route,
                 arguments = listOf(navArgument("commitmentId") { type = NavType.StringType })
-            ) {
+            ) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    runCatching { navController.getBackStackEntry(Screen.CommitmentConfig.route) }.getOrNull()
+                }
+                val viewModel: com.focusflow.app.presentation.commitment.CommitmentViewModel = if (parentEntry != null) hiltViewModel(parentEntry) else hiltViewModel()
                 CommitmentReviewScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onActivate = {
@@ -385,7 +394,7 @@ fun FocusFlowNavHost() {
                             popUpTo(Screen.Home.route) { inclusive = true }
                         }
                     },
-                    viewModel = hiltViewModel()
+                    viewModel = viewModel
                 )
             }
 

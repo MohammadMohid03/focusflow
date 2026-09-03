@@ -152,10 +152,11 @@ fun HabitsScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(habitsToShow) { habit ->
+                        val isCompletedToday = uiState.completions.any { it.habitId == habit.id }
                         HabitCard(
                             habit = habit,
-                            isCompleted = false,
-                            onComplete = { viewModel.completeHabit(habit.id) },
+                            isCompleted = isCompletedToday,
+                            onComplete = { if (!isCompletedToday) viewModel.completeHabit(habit.id) },
                             onClick = { onHabitClick(habit.id) }
                         )
                     }

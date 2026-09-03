@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,7 +27,8 @@ fun GoalDetailScreen(
     onNavigateBack: () -> Unit,
     viewModel: GoalsViewModel = hiltViewModel()
 ) {
-    val goal by viewModel.getGoal(goalId).collectAsState(initial = null)
+    val goalFlow = remember(goalId) { viewModel.getGoal(goalId) }
+    val goal by goalFlow.collectAsState(initial = null)
 
     Scaffold(
         topBar = {

@@ -25,6 +25,7 @@ data class FocusUiState(
     val isRunning: Boolean = false,
     val isPaused: Boolean = false,
     val timeRemaining: Int = 25 * 60,
+    val totalDuration: Int = 25 * 60,
     val isBreak: Boolean = false,
     val currentRound: Int = 1,
     val totalFocusToday: Int = 0,
@@ -67,8 +68,20 @@ class FocusViewModel @Inject constructor(
         }
     }
 
+    private fun getDurationMinutes(type: FocusSessionType?): Int {
+        return when (type) {
+            FocusSessionType.POMODORO_50_10 -> 50
+            FocusSessionType.CUSTOM -> 25
+            FocusSessionType.POMODORO_25_5 -> 25
+            null -> 25
+            else -> 25
+        }
+    }
+
     fun selectSessionType(type: FocusSessionType) {
-        _uiState.update { it.copy(sessionType = type) }
+        val durationMinutes = getDurationMinutes(type)
+        val durationSeconds = durationMinutes * 60
+        _uiState.update { it.copy(sessionType = type, timeRemaining = durationSeconds, totalDuration = durationSeconds) }
     }
 
     fun selectTask(task: Task?) {
@@ -76,8 +89,10 @@ class FocusViewModel @Inject constructor(
     }
 
     fun startSession() {
+        val durationMinutes = getDurationMinutes(_uiState.value.sessionType)
+        val durationSeconds = durationMinutes * 60
         sessionStartTime = System.currentTimeMillis()
-        _uiState.update { it.copy(isRunning = true, isPaused = false, timeRemaining = 25 * 60) }
+        _uiState.update { it.copy(isRunning = true, isPaused = false, timeRemaining = durationSeconds, totalDuration = durationSeconds) }
         startTimer()
     }
 
@@ -93,7 +108,9 @@ class FocusViewModel @Inject constructor(
 
     fun endSession() {
         timerJob?.cancel()
-        val durationMinutes = ((25 * 60 - _uiState.value.timeRemaining) / 60).coerceAtLeast(1)
+        val plannedMinutes = getDurationMinutes(_uiState.value.sessionType)
+        val plannedSeconds = plannedMinutes * 60
+        val durationMinutes = ((plannedSeconds - _uiState.value.timeRemaining) / 60).coerceAtLeast(1)
         _uiState.update { it.copy(isRunning = false, isPaused = false, timeRemaining = 0) }
         
         viewModelScope.launch {
@@ -104,7 +121,7 @@ class FocusViewModel @Inject constructor(
                     taskId = _uiState.value.currentTask?.id,
                     startTime = sessionStartTime,
                     endTime = System.currentTimeMillis(),
-                    plannedDurationMinutes = 25,
+                    plannedDurationMinutes = plannedMinutes,
                     actualDurationMinutes = durationMinutes,
                     sessionType = _uiState.value.sessionType ?: FocusSessionType.POMODORO_25_5,
                     isCompleted = true

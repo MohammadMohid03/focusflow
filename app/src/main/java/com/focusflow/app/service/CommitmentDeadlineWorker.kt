@@ -1,6 +1,7 @@
 package com.focusflow.app.service
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -22,6 +23,7 @@ class CommitmentDeadlineWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, params) {
 
     companion object {
+        private const val TAG = "CommitmentWorker"
         const val KEY_COMMITMENT_ID = "commitment_id"
         const val KEY_NOTIFICATION_TYPE = "notification_type"
         const val KEY_MINUTES_REMAINING = "minutes_remaining"
@@ -78,6 +80,8 @@ class CommitmentDeadlineWorker @AssistedInject constructor(
                             commitmentId = commitmentId,
                             taskName = task.title
                         )
+                        // Unlock apps since commitment is completed
+                        unlockAppsIfNoActiveCommitments(commitment.selectedAppPackages)
                     } else {
                         // Task not completed - MISSED
                         val updatedCommitment = commitment.copy(
@@ -86,21 +90,10 @@ class CommitmentDeadlineWorker @AssistedInject constructor(
                         )
                         commitmentRepository.updateCommitment(updatedCommitment)
 
-                        // Activate consequence if applicable
-                        if (commitment.selectedAppPackages.isNotEmpty()) {
-                            val result = appRestrictionManager.enableRestriction(
-                                apps = commitment.selectedAppPackages,
-                                reason = "Commitment missed: ${task?.title ?: "task"}"
-                            )
-                            if (result.success) {
-                                commitmentRepository.updateCommitment(
-                                    updatedCommitment.copy(
-                                        status = CommitmentStatus.RESTRICTED,
-                                        recoveryMinutesRequired = calculateRecoveryMinutes(commitment.estimatedDurationMinutes)
-                                    )
-                                )
-                            }
-                        }
+                        // On missed deadline, keep restrictions active but update status.
+                        // Don't try to start a new foreground service from background
+                        // (would throw ForegroundServiceStartNotAllowedException on Android 12+).
+                        // The existing AppBlockerService remains running if it was already started.
 
                         notificationHelper.showCommitmentMissed(
                             commitmentId = commitmentId,
@@ -113,7 +106,20 @@ class CommitmentDeadlineWorker @AssistedInject constructor(
                 else -> Result.failure()
             }
         } catch (e: Exception) {
-            Result.retry()
+            Log.e(TAG, "CommitmentDeadlineWorker failed", e)
+            if (runAttemptCount < 3) Result.retry() else Result.failure()
+        }
+    }
+
+    /**
+     * After completing a commitment, check if there are any remaining active commitments.
+     * If not, stop the blocker service and unlock all apps.
+     */
+    private suspend fun unlockAppsIfNoActiveCommitments(appsToCheck: List<String>) {
+        try {
+            appRestrictionManager.disableRestriction(appsToCheck)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to unlock apps after commitment completion", e)
         }
     }
 

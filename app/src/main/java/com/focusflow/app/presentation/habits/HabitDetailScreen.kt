@@ -17,6 +17,9 @@ fun HabitDetailScreen(
     viewModel: HabitsViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
+    val habitFlow = remember(habitId) { viewModel.getHabitById(habitId) }
+    val habit by habitFlow.collectAsState(initial = null)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -31,51 +34,61 @@ fun HabitDetailScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Read Books", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
-            Text("Read 10 pages daily.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            habit?.let { h ->
+                Text(h.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+                Text(
+                    h.description.ifBlank { "No description" },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
-            HorizontalDivider()
+                HorizontalDivider()
 
-            Text("Consistency Heatmap", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .glass3D(shape = FocusFlowCorners.Card, elevation = 2.dp)
-                    .padding(16.dp)
-            ) {
-                Text("Daily completion active", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .glass3D(shape = FocusFlowCorners.Card, elevation = 4.dp)
-                    .padding(vertical = 14.dp)
-            ) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    HabitStatItem3D("Current Streak", "3 d")
-                    HabitStatItem3D("Longest Streak", "12 d")
-                    HabitStatItem3D("Completions", "45")
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-            
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                OutlinedButton(onClick = { /* Edit */ }, modifier = Modifier.weight(1f)) {
-                    Text("Edit")
-                }
-                Button(
-                    onClick = { 
-                        viewModel.deleteHabit(habitId)
-                        onNavigateBack()
-                    }, 
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                    modifier = Modifier.weight(1f)
+                Text("Consistency Heatmap", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .glass3D(shape = FocusFlowCorners.Card, elevation = 2.dp)
+                        .padding(16.dp)
                 ) {
-                    Text("Delete")
+                    Text("${h.frequency.name} completion active", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .glass3D(shape = FocusFlowCorners.Card, elevation = 4.dp)
+                        .padding(vertical = 14.dp)
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        HabitStatItem3D("Current Streak", "${h.currentStreak} d")
+                        HabitStatItem3D("Longest Streak", "${h.longestStreak} d")
+                        HabitStatItem3D("Completions", "${h.totalCompletions}")
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+                
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    OutlinedButton(onClick = { /* Edit */ }, modifier = Modifier.weight(1f)) {
+                        Text("Edit")
+                    }
+                    Button(
+                        onClick = { 
+                            viewModel.deleteHabit(habitId)
+                            onNavigateBack()
+                        }, 
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Delete")
+                    }
+                }
+            } ?: run {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                    CircularProgressIndicator()
                 }
             }
         }

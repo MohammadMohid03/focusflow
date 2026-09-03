@@ -5,6 +5,10 @@ import com.focusflow.app.domain.model.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+inline fun <reified T : Enum<T>> safeValueOf(name: String, default: T): T {
+    return try { enumValueOf<T>(name) } catch (e: Exception) { default }
+}
+
 // Assuming standard domain models exist in com.focusflow.app.domain.model
 
 fun Task.toEntity(): TaskEntity = TaskEntity(
@@ -29,8 +33,8 @@ fun TaskEntity.toDomain(subtasks: List<SubtaskEntity>): Task = Task(
     id = id,
     title = title,
     description = description,
-    category = TaskCategory.valueOf(category),
-    priority = TaskPriority.valueOf(priority),
+    category = safeValueOf(category, TaskCategory.STUDY),
+    priority = safeValueOf(priority, TaskPriority.MEDIUM),
     dueDate = dueDate,
     estimatedDurationMinutes = estimatedDurationMinutes,
     isCompleted = isCompleted,
@@ -110,8 +114,8 @@ fun HabitEntity.toDomain(): Habit = Habit(
     id = id,
     name = name,
     description = description,
-    frequency = HabitFrequency.valueOf(frequency),
-    customDays = Json.decodeFromString(customDays),
+    frequency = safeValueOf(frequency, HabitFrequency.DAILY),
+    customDays = try { Json.decodeFromString<List<Int>>(customDays) } catch (e: Exception) { emptyList() },
     reminderTime = reminderTime,
     goalTarget = goalTarget,
     icon = icon,
@@ -164,7 +168,7 @@ fun FocusSessionEntity.toDomain(): FocusSession = FocusSession(
     plannedDurationMinutes = plannedDurationMinutes,
     actualDurationMinutes = actualDurationMinutes,
     breakDurationMinutes = breakDurationMinutes,
-    sessionType = FocusSessionType.valueOf(sessionType),
+    sessionType = safeValueOf(sessionType, FocusSessionType.POMODORO_25_5),
     isCompleted = isCompleted,
     createdAt = createdAt,
     userId = userId,
@@ -200,11 +204,11 @@ fun CommitmentEntity.toDomain(): Commitment = Commitment(
     taskId = taskId,
     deadline = deadline,
     estimatedDurationMinutes = estimatedDurationMinutes,
-    status = CommitmentStatus.valueOf(status),
-    commitmentType = CommitmentType.valueOf(commitmentType),
-    consequenceType = ConsequenceType.valueOf(consequenceType),
-    selectedAppPackages = Json.decodeFromString(selectedAppPackages),
-    unlockCondition = UnlockCondition.valueOf(unlockCondition),
+    status = safeValueOf(status, CommitmentStatus.ACTIVE),
+    commitmentType = safeValueOf(commitmentType, CommitmentType.COMPLETE_BEFORE_DEADLINE),
+    consequenceType = safeValueOf(consequenceType, ConsequenceType.COMMITMENT_LOCK),
+    selectedAppPackages = try { Json.decodeFromString<List<String>>(selectedAppPackages) } catch (e: Exception) { emptyList() },
+    unlockCondition = safeValueOf(unlockCondition, UnlockCondition.TASK_COMPLETED),
     createdAt = createdAt,
     activatedAt = activatedAt,
     warningAt = warningAt,
@@ -238,12 +242,11 @@ fun PlannerSessionEntity.toDomain(): PlannerSession = PlannerSession(
     goal = goal,
     deadline = deadline,
     availableHoursPerDay = availableHoursPerDay,
-    skillLevel = try { com.focusflow.app.domain.model.SkillLevel.valueOf(skillLevel) } catch (e: Exception) { com.focusflow.app.domain.model.SkillLevel.INTERMEDIATE },
-    preferredStudyTime = try { com.focusflow.app.domain.model.PreferredTime.valueOf(preferredStudyTime) } catch (e: Exception) { com.focusflow.app.domain.model.PreferredTime.MORNING },
+    skillLevel = safeValueOf(skillLevel, SkillLevel.INTERMEDIATE),
+    preferredStudyTime = safeValueOf(preferredStudyTime, PreferredTime.MORNING),
     existingCommitments = existingCommitments,
-    generatedPlan = Json.decodeFromString(generatedPlan),
+    generatedPlan = try { Json.decodeFromString<List<PlannerDay>>(generatedPlan) } catch (e: Exception) { emptyList() },
     createdAt = createdAt,
     userId = userId,
     isSynced = isSynced
 )
-

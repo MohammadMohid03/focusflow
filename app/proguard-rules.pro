@@ -14,8 +14,19 @@
 # Kotlin Serialization
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.AnnotationsKt
--keep,allowobfuscation,allowshrinking class kotlinx.serialization.internal.**
--keep,allowobfuscation class * @kotlinx.serialization.Serializable {
+-keepclassmembers class * {
+    *** Companion;
+}
+-keepclasseswithmembers class * {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keepclassmembers class * extends kotlinx.serialization.internal.GeneratedSerializer {
+    *;
+}
+-keepclassmembers @kotlinx.serialization.Serializable class * {
+    *;
+}
+-keepclassmembers class * implements kotlinx.serialization.KSerializer {
     *;
 }
 

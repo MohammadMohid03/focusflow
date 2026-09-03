@@ -2,10 +2,12 @@ package com.focusflow.app.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "habit_completions",
+    indices = [Index(value = ["habitId"])],
     foreignKeys = [
         ForeignKey(
             entity = HabitEntity::class,

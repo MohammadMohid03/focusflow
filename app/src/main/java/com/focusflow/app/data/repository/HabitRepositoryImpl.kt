@@ -11,6 +11,7 @@ import com.focusflow.app.domain.model.HabitCompletion
 import com.focusflow.app.domain.repository.HabitRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.UUID
@@ -50,6 +51,19 @@ class HabitRepositoryImpl @Inject constructor(
             date = date
         )
         habitCompletionDao.insertCompletion(completion)
+
+        val habitEntity = habitDao.getById(habitId).first()
+        if (habitEntity != null) {
+            val habit = habitEntity.toDomain()
+            val newStreak = habit.currentStreak + 1
+            val updatedHabit = habit.copy(
+                totalCompletions = habit.totalCompletions + 1,
+                currentStreak = newStreak,
+                longestStreak = if (newStreak > habit.longestStreak) newStreak else habit.longestStreak,
+                updatedAt = System.currentTimeMillis()
+            )
+            habitDao.update(updatedHabit.toEntity())
+        }
     }
 
     override fun getHabitCompletions(habitId: String): Flow<List<HabitCompletion>> {

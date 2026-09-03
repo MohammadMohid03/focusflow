@@ -28,10 +28,10 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND dueDate >= :startOfDay AND dueDate <= :endOfDay ORDER BY dueDate ASC")
     fun getTasksDueToday(userId: String, startOfDay: Long, endOfDay: Long): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND dueDate > :now ORDER BY dueDate ASC")
+    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND isCompleted = 0 AND dueDate > :now ORDER BY dueDate ASC")
     fun getUpcomingTasks(userId: String, now: Long): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND isCompleted = 0 AND (priority = 'URGENT' OR priority = 'HIGH') ORDER BY priority ASC, dueDate ASC")
+    @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND isCompleted = 0 AND (priority = 'URGENT' OR priority = 'HIGH') ORDER BY CASE priority WHEN 'URGENT' THEN 1 WHEN 'HIGH' THEN 2 ELSE 3 END ASC, dueDate ASC")
     fun getHighPriorityTasks(userId: String): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE (userId = :userId OR :userId = '' OR userId = '') AND (title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%')")

@@ -1,6 +1,7 @@
 package com.focusflow.app.domain.model
 
 import java.util.UUID
+import kotlinx.serialization.Serializable
 
 data class PlannerSession(
     val id: String = UUID.randomUUID().toString(),
@@ -16,11 +17,13 @@ data class PlannerSession(
     val isSynced: Boolean = false
 )
 
+@Serializable
 data class PlannerDay(
     val date: Long,
     val sessions: List<PlannerTask>
 )
 
+@Serializable
 data class PlannerTask(
     val title: String,
     val description: String = "",
@@ -32,4 +35,6 @@ data class PlannerTask(
 
 enum class SkillLevel { BEGINNER, INTERMEDIATE, ADVANCED }
 enum class PreferredTime { MORNING, AFTERNOON, EVENING, NIGHT }
+
+@Serializable
 enum class PlannerTaskType { STUDY, BREAK, REVISION, PROJECT, EXERCISE }
