@@ -50,10 +50,18 @@ class AppBlockerService : Service() {
         }
 
         fun stop(context: Context) {
-            val intent = Intent(context, AppBlockerService::class.java).apply {
-                action = ACTION_STOP
+            try {
+                val intent = Intent(context, AppBlockerService::class.java).apply {
+                    action = ACTION_STOP
+                }
+                context.startService(intent)
+            } catch (e: Exception) {
+                // If startService fails (e.g. app is in background on Android 12+),
+                // try stopService directly
+                try {
+                    context.stopService(Intent(context, AppBlockerService::class.java))
+                } catch (_: Exception) {}
             }
-            context.startService(intent)
         }
     }
 

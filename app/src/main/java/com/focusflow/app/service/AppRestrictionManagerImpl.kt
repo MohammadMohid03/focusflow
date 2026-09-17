@@ -90,10 +90,16 @@ class AppRestrictionManagerImpl @Inject constructor(
         apps: List<String>
     ): RestrictionResult = withContext(Dispatchers.IO) {
         return@withContext try {
+            // Always stop the service first to clear the current state
+            AppBlockerService.stop(context)
+            
+            // Small delay to let the service process the stop command
+            kotlinx.coroutines.delay(100)
+            
+            // Check if any commitments are still active
             val remainingActive = getActiveRestrictedApps()
-            if (remainingActive.isEmpty()) {
-                AppBlockerService.stop(context)
-            } else {
+            if (remainingActive.isNotEmpty()) {
+                // Restart with only the remaining restricted apps
                 AppBlockerService.start(context, ArrayList(remainingActive))
             }
 
@@ -102,6 +108,8 @@ class AppRestrictionManagerImpl @Inject constructor(
                 message = "Restrictions updated"
             )
         } catch (e: Exception) {
+            // Even if we get an error, try to force-stop the service
+            try { AppBlockerService.stop(context) } catch (_: Exception) {}
             RestrictionResult(
                 success = false,
                 message = e.message ?: "Failed to disable restrictions",
