@@ -17,7 +17,7 @@ import com.focusflow.app.data.local.entity.*
         CommitmentEntity::class,
         PlannerSessionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
