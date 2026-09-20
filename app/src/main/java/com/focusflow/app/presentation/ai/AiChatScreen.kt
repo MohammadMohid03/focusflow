@@ -21,6 +21,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -103,6 +106,14 @@ fun AiChatScreen(
 
 @Composable
 fun ChatMessageItem(message: ChatMessage) {
+    val renderedText = remember(message.content) {
+        if (message.isUser) {
+            AnnotatedString(message.content)
+        } else {
+            formatCleanMarkdown(message.content)
+        }
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (message.isUser) Arrangement.End else Arrangement.Start,
@@ -143,12 +154,38 @@ fun ChatMessageItem(message: ChatMessage) {
             shadowElevation = 1.dp
         ) {
             Text(
-                text = message.content,
+                text = renderedText,
                 color = textColor,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
+        }
+    }
+}
+
+fun formatCleanMarkdown(content: String): AnnotatedString {
+    val preprocessed = content
+        .replace(Regex("""^#{1,6}\s*""", RegexOption.MULTILINE), "")
+        .replace(Regex("""^[\*\-]\s+""", RegexOption.MULTILINE), "• ")
+
+    return buildAnnotatedString {
+        val boldRegex = Regex("""\*\*(.*?)\*\*|__(.*?)__""")
+        var lastIndex = 0
+        val matches = boldRegex.findAll(preprocessed)
+
+        for (match in matches) {
+            if (match.range.first > lastIndex) {
+                append(preprocessed.substring(lastIndex, match.range.first))
+            }
+            val boldContent = match.groupValues[1].ifEmpty { match.groupValues[2] }
+            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+            append(boldContent)
+            pop()
+            lastIndex = match.range.last + 1
+        }
+        if (lastIndex < preprocessed.length) {
+            append(preprocessed.substring(lastIndex))
         }
     }
 }

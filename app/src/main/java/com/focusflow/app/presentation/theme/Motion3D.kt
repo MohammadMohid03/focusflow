@@ -4,6 +4,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -44,29 +45,28 @@ fun Modifier.pressSpring3D(
     pressScale: Float = 0.98f,
     onClick: (() -> Unit)? = null
 ): Modifier = composed {
+    val scope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
 
-    this
-        .graphicsLayer {
-            scaleX = scale.value
-            scaleY = scale.value
+    val base = this.graphicsLayer {
+        scaleX = scale.value
+        scaleY = scale.value
+    }
+
+    if (onClick != null) {
+        base.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+        ) {
+            scope.launch {
+                scale.animateTo(pressScale, tween(60))
+                scale.animateTo(1f, tween(100))
+            }
+            onClick()
         }
-        .pointerInput(onClick) {
-            detectTapGestures(
-                onPress = {
-                    coroutineScope {
-                        launch { scale.animateTo(pressScale, FramerSprings.Snappy) }
-                    }
-                    val released = tryAwaitRelease()
-                    coroutineScope {
-                        launch { scale.animateTo(1f, FramerSprings.Bouncy) }
-                    }
-                    if (released && onClick != null) {
-                        onClick()
-                    }
-                }
-            )
-        }
+    } else {
+        base
+    }
 }
 
 /**

@@ -26,6 +26,7 @@ data class FocusUiState(
     val isPaused: Boolean = false,
     val timeRemaining: Int = 25 * 60,
     val totalDuration: Int = 25 * 60,
+    val customDurationMinutes: Int = 25,
     val isBreak: Boolean = false,
     val currentRound: Int = 1,
     val totalFocusToday: Int = 0,
@@ -71,15 +72,32 @@ class FocusViewModel @Inject constructor(
     private fun getDurationMinutes(type: FocusSessionType?): Int {
         return when (type) {
             FocusSessionType.POMODORO_50_10 -> 50
-            FocusSessionType.CUSTOM -> 25
+            FocusSessionType.CUSTOM -> _uiState.value.customDurationMinutes
             FocusSessionType.POMODORO_25_5 -> 25
             null -> 25
             else -> 25
         }
     }
 
+    fun setCustomDuration(minutes: Int) {
+        val clamped = minutes.coerceIn(1, 240)
+        val durationSeconds = clamped * 60
+        _uiState.update {
+            it.copy(
+                customDurationMinutes = clamped,
+                sessionType = FocusSessionType.CUSTOM,
+                timeRemaining = if (!it.isRunning) durationSeconds else it.timeRemaining,
+                totalDuration = if (!it.isRunning) durationSeconds else it.totalDuration
+            )
+        }
+    }
+
     fun selectSessionType(type: FocusSessionType) {
-        val durationMinutes = getDurationMinutes(type)
+        val durationMinutes = if (type == FocusSessionType.CUSTOM) {
+            _uiState.value.customDurationMinutes
+        } else {
+            getDurationMinutes(type)
+        }
         val durationSeconds = durationMinutes * 60
         _uiState.update { it.copy(sessionType = type, timeRemaining = durationSeconds, totalDuration = durationSeconds) }
     }

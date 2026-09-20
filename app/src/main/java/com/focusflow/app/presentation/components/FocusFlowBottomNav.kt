@@ -83,7 +83,12 @@ fun FocusFlowBottomNav(
                             .fillMaxHeight()
                             .clip(RoundedCornerShape(12.dp))
                             .background(pillBgColor)
-                            .pressSpring3D(pressScale = 0.94f) { onNavigate(item.route) },
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                onNavigate(item.route)
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Column(

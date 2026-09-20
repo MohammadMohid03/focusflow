@@ -11,20 +11,20 @@
         <!-- Focus ring outer -->
         <path
             android:pathData="M54,14A40,40 0,1 1,14,54A40,40 0,0 1,54,14z"
-            android:strokeWidth="3"
-            android:strokeColor="#FFFFFF"
+            android:strokeWidth="3.5"
+            android:strokeColor="#3E7B62"
             android:fillColor="#00000000"/>
         <!-- Focus ring progress arc -->
         <path
             android:pathData="M54,14A40,40 0,0 1,94,54"
-            android:strokeWidth="4"
-            android:strokeColor="#B99AEA"
+            android:strokeWidth="4.5"
+            android:strokeColor="#74C69D"
             android:fillColor="#00000000"
             android:strokeLineCap="round"/>
         <!-- Inner circle -->
         <path
             android:pathData="M54,30A24,24 0,1 1,30,54A24,24 0,0 1,54,30z"
-            android:fillColor="#7B52C9"/>
+            android:fillColor="#2D6A4F"/>
         <!-- Play/Flow arrow -->
         <path
             android:pathData="M46,40L46,68L68,54z"

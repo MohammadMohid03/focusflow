@@ -26,12 +26,18 @@ class AppRestrictionManagerImpl @Inject constructor(
     private val commitmentDao: CommitmentDao
 ) : AppRestrictionManager {
 
+    private var cachedApps: List<RestrictableApp>? = null
+
     override suspend fun getAvailableApps(): List<RestrictableApp> = withContext(Dispatchers.IO) {
+        val activeApps = getActiveRestrictedApps()
+        cachedApps?.let { cached ->
+            return@withContext cached.map { it.copy(isSelected = activeApps.contains(it.packageName)) }
+        }
+
         val pm = context.packageManager
         val installedApps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-        val activeApps = getActiveRestrictedApps()
 
-        installedApps
+        val apps = installedApps
             .filter { app ->
                 val isSystemApp = (app.flags and ApplicationInfo.FLAG_SYSTEM) != 0
                 val isOurApp = app.packageName == context.packageName
@@ -48,6 +54,9 @@ class AppRestrictionManagerImpl @Inject constructor(
                 )
             }
             .sortedBy { it.appName.lowercase() }
+
+        cachedApps = apps
+        apps
     }
 
     override suspend fun getActiveRestrictedApps(): Set<String> = withContext(Dispatchers.IO) {

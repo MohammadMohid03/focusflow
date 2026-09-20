@@ -39,7 +39,7 @@ class AiRepositoryImpl @Inject constructor(
         try {
             val systemMessage = GroqMessageDto(
                 role = "system",
-                content = "You are FocusFlow AI, an elite study partner, productivity coach, and academic assistant. You provide concise, clear, accurate, and structured explanations. Use markdown formatting, bullet points, and practical examples where appropriate."
+                content = "You are FocusFlow AI, an elite study partner, productivity coach, and academic assistant. You provide concise, clear, accurate, and structured explanations. Write clean, natural sentences. Do not use raw markdown asterisks (like '**') or hashtags (like '###'). Use clean bullet points and practical examples."
             )
 
             val messages = mutableListOf(systemMessage)
@@ -250,7 +250,7 @@ class AiRepositoryImpl @Inject constructor(
         }
 
         try {
-            val systemPrompt = "You are a cognitive science & focus coach. Provide a single, powerful 1-2 sentence evidence-based study or focus tip. Be concise, direct, and practical."
+            val systemPrompt = "You are a cognitive science and focus coach. Provide a single, powerful 1-2 sentence evidence-based study or focus tip. Be concise, direct, and practical. Output only plain natural language without any asterisks, quotes, bold markers, or labels like 'Tip:'."
             val request = GroqChatRequest(
                 model = defaultModel,
                 messages = listOf(
@@ -269,7 +269,13 @@ class AiRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 val tip = response.body()?.choices?.firstOrNull()?.message?.content?.trim()
                 if (!tip.isNullOrBlank()) {
-                    return@withContext Result.success(tip.removePrefix("\"").removeSuffix("\""))
+                    val cleanTip = tip
+                        .replace(Regex("""^\*?\*?Tip:?\*?\*?:?\s*""", RegexOption.IGNORE_CASE), "")
+                        .replace("**", "")
+                        .replace("__", "")
+                        .replace(Regex("""^["']|["']$"""), "")
+                        .trim()
+                    return@withContext Result.success(cleanTip)
                 }
             }
             Result.success(getRandomFallbackTip())

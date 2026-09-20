@@ -22,6 +22,16 @@ import com.focusflow.app.presentation.components.PrimaryButton
 import com.focusflow.app.presentation.theme.FocusFlowCorners
 import com.focusflow.app.presentation.theme.pressSpring3D
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+
 @Composable
 fun FocusScreen(
     viewModel: FocusViewModel = hiltViewModel(),
@@ -40,6 +50,7 @@ fun FocusScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -99,7 +110,7 @@ fun FocusScreen(
                 )
                 SessionTypeCard(
                     title = "Custom",
-                    subtitle = "Flexible",
+                    subtitle = "${uiState.customDurationMinutes} min",
                     icon = Icons.Outlined.Tune,
                     isSelected = selectedType == FocusSessionType.CUSTOM,
                     onClick = {
@@ -110,10 +121,155 @@ fun FocusScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            // Custom Duration Interactive Panel (visible when Custom is selected)
+            AnimatedVisibility(
+                visible = selectedType == FocusSessionType.CUSTOM,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = FocusFlowCorners.Card,
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
+                    shadowElevation = 1.dp
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Tune,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = "Customize Focus Time",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = MaterialTheme.colorScheme.primaryContainer
+                            ) {
+                                Text(
+                                    text = "${uiState.customDurationMinutes} min",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+
+                        // Stepper + Slider Control
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            FilledTonalIconButton(
+                                onClick = {
+                                    viewModel.setCustomDuration((uiState.customDurationMinutes - 5).coerceAtLeast(5))
+                                },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(Icons.Default.Remove, contentDescription = "Decrease 5m")
+                            }
+
+                            Slider(
+                                value = uiState.customDurationMinutes.toFloat(),
+                                onValueChange = { viewModel.setCustomDuration(it.toInt()) },
+                                valueRange = 5f..180f,
+                                steps = 34,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            FilledTonalIconButton(
+                                onClick = {
+                                    viewModel.setCustomDuration((uiState.customDurationMinutes + 5).coerceAtMost(180))
+                                },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(Icons.Default.Add, contentDescription = "Increase 5m")
+                            }
+                        }
+
+                        // Quick Preset Chips
+                        Text(
+                            text = "Quick Presets",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp)
+                        ) {
+                            items(listOf(10, 15, 20, 25, 30, 45, 50, 60, 90, 120)) { mins ->
+                                val isPresetSelected = uiState.customDurationMinutes == mins
+                                Surface(
+                                    onClick = { viewModel.setCustomDuration(mins) },
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = if (isPresetSelected) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                    },
+                                    border = BorderStroke(
+                                        1.dp,
+                                        if (isPresetSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                    )
+                                ) {
+                                    Box(
+                                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "${mins} min",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = if (isPresetSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isPresetSelected) {
+                                                MaterialTheme.colorScheme.onPrimary
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurface
+                                            },
+                                            maxLines = 1,
+                                            softWrap = false
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             PrimaryButton(
-                text = "Enter Focus Room",
+                text = if (selectedType == FocusSessionType.CUSTOM) {
+                    "Enter Focus Room (${uiState.customDurationMinutes}m)"
+                } else {
+                    "Enter Focus Room"
+                },
                 onClick = {
                     viewModel.startSession()
                     onNavigateToSession()

@@ -104,7 +104,16 @@ fun FocusFlowNavHost() {
                     items = navItems,
                     currentRoute = currentDestination?.route,
                     onNavigate = { route ->
-                        if (route != currentDestination?.route) {
+                        if (route == Screen.Home.route) {
+                            if (currentDestination?.route != Screen.Home.route) {
+                                if (!navController.popBackStack(Screen.Home.route, inclusive = false)) {
+                                    navController.navigate(Screen.Home.route) {
+                                        popUpTo(Screen.Home.route) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                }
+                            }
+                        } else if (route != currentDestination?.route) {
                             navController.navigate(route) {
                                 popUpTo(Screen.Home.route) {
                                     saveState = true
