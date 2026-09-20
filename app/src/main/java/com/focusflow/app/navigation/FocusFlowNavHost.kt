@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
@@ -107,7 +106,7 @@ fun FocusFlowNavHost() {
                     onNavigate = { route ->
                         if (route != currentDestination?.route) {
                             navController.navigate(route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
+                                popUpTo(Screen.Home.route) {
                                     saveState = true
                                 }
                                 launchSingleTop = true
@@ -256,7 +255,13 @@ fun FocusFlowNavHost() {
             // Planner
             composable(Screen.Planner.route) {
                 PlannerScreen(
-                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateBack = {
+                        if (!navController.popBackStack()) {
+                            navController.navigate(Screen.Home.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    },
                     onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
                 )
             }
@@ -271,7 +276,13 @@ fun FocusFlowNavHost() {
             // AI Chat
             composable(Screen.AiChat.route) {
                 AiChatScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = {
+                        if (!navController.popBackStack()) {
+                            navController.navigate(Screen.Home.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
                 )
             }
             
@@ -441,7 +452,13 @@ fun FocusFlowNavHost() {
 
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateBack = {
+                        if (!navController.popBackStack()) {
+                            navController.navigate(Screen.Home.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    },
                     onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
                 )
             }

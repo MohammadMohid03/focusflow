@@ -27,7 +27,7 @@
     <color name="on_surface">#FF1B1B1F</color>
 
     <!-- Splash screen -->
-    <color name="splash_background">#FF1B0A3C</color>
+    <color name="splash_background">#FFF8F9FA</color>
 
     <color name="seed">#FF5B34A5</color>
 </resources>

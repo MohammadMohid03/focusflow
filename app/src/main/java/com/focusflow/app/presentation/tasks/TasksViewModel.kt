@@ -53,6 +53,8 @@ class TasksViewModel @Inject constructor(
                 isLoading = false
             )
         }
+    }.catch { e ->
+        emit(TasksUiState(isLoading = false, error = e.message ?: "Error loading tasks"))
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -75,23 +77,29 @@ class TasksViewModel @Inject constructor(
 
     fun toggleTaskCompletion(task: Task, isCompleted: Boolean) {
         viewModelScope.launch {
-            if (isCompleted) {
-                taskRepository.completeTask(task.id)
-            } else {
-                taskRepository.restoreTask(task.id)
-            }
+            try {
+                if (isCompleted) {
+                    taskRepository.completeTask(task.id)
+                } else {
+                    taskRepository.restoreTask(task.id)
+                }
+            } catch (_: Exception) {}
         }
     }
 
     fun deleteTask(task: Task) {
         viewModelScope.launch {
-            taskRepository.deleteTask(task.id)
+            try {
+                taskRepository.deleteTask(task.id)
+            } catch (_: Exception) {}
         }
     }
 
     fun updateTask(task: Task) {
         viewModelScope.launch {
-            taskRepository.updateTask(task)
+            try {
+                taskRepository.updateTask(task)
+            } catch (_: Exception) {}
         }
     }
 

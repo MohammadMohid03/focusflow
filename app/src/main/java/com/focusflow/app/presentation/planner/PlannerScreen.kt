@@ -88,25 +88,29 @@ fun PlannerScreen(
             }
         }
 
-        AlertDialog(
-            onDismissRequest = { showAppPickerDialog = false },
-            title = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Select Apps to Lock", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    IconButton(onClick = { showAppPickerDialog = false }, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
-                    }
-                }
-            },
-            text = {
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { showAppPickerDialog = false }
+        ) {
+            Surface(
+                shape = FocusFlowCorners.Dialog,
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.fillMaxWidth().heightIn(max = 520.dp)
+            ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp),
+                    modifier = Modifier.fillMaxWidth().padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Select Apps to Lock", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        IconButton(onClick = { showAppPickerDialog = false }, modifier = Modifier.size(24.dp)) {
+                            Icon(Icons.Default.Close, contentDescription = "Close")
+                        }
+                    }
+
                     if (!uiState.hasUsagePermission) {
                         Surface(
                             shape = FocusFlowCorners.CardSmall,
@@ -218,19 +222,17 @@ fun PlannerScreen(
                             }
                         }
                     }
+
+                    Button(
+                        onClick = { showAppPickerDialog = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = FocusFlowCorners.Button
+                    ) {
+                        Text("Done (${uiState.selectedAppPackages.size} selected)")
+                    }
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { showAppPickerDialog = false },
-                    shape = FocusFlowCorners.Button
-                ) {
-                    Text("Done (${uiState.selectedAppPackages.size} selected)")
-                }
-            },
-            shape = FocusFlowCorners.Dialog,
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+            }
+        }
     }
 
     if (showAddTaskDialog) {
