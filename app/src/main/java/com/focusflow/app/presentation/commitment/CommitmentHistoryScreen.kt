@@ -77,7 +77,7 @@ fun CommitmentHistoryScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(uiState.allCommitments, key = { it.id }) { item ->
-                        val isActive = item.status == CommitmentStatus.ACTIVE || item.status == CommitmentStatus.WARNING
+                        val isActive = item.status in setOf(CommitmentStatus.ACTIVE, CommitmentStatus.WARNING, CommitmentStatus.MISSED, CommitmentStatus.RESTRICTED, CommitmentStatus.RECOVERY)
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             shape = FocusFlowCorners.Card,

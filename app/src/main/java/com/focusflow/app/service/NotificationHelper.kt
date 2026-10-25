@@ -9,17 +9,20 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.focusflow.app.MainActivity
 import com.focusflow.app.R
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.focusflow.app.domain.repository.UserPreferencesRepository
+import kotlinx.coroutines.flow.first
+import androidx.core.app.NotificationManagerCompat
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class NotificationHelper @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val preferencesRepository: UserPreferencesRepository
 ) {
     companion object {
         const val CHANNEL_TASKS = "tasks_channel"
@@ -82,14 +85,25 @@ class NotificationHelper @Inject constructor(
         channels.forEach { notificationManager.createNotificationChannel(it) }
     }
 
-    private fun hasNotificationPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true
+    private suspend fun isEnabled(channel: String): Boolean {
+        val preferences = preferencesRepository.getUserPreferences().first()
+        return preferences.notificationsEnabled && when (channel) {
+            CHANNEL_TASKS -> preferences.taskReminders
+            CHANNEL_HABITS -> preferences.habitReminders
+            CHANNEL_COMMITMENTS -> preferences.commitmentReminders
+            CHANNEL_FOCUS -> preferences.focusReminders
+            CHANNEL_DAILY -> preferences.dailyPlanReminder
+            else -> false
+        }
+    }
+
+    private fun postNotification(id: Int, notification: android.app.Notification) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
+        try {
+            NotificationManagerCompat.from(context).notify(id, notification)
+        } catch (_: SecurityException) {
+            // Permission may be revoked between checking and posting.
         }
     }
 
@@ -103,8 +117,8 @@ class NotificationHelper @Inject constructor(
         )
     }
 
-    fun showTaskReminder(taskId: String, taskTitle: String, dueTime: String) {
-        if (!hasNotificationPermission()) return
+    suspend fun showTaskReminder(taskId: String, taskTitle: String, dueTime: String) {
+        if (!isEnabled(CHANNEL_TASKS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_TASKS)
             .setSmallIcon(R.drawable.ic_splash_logo)
@@ -115,14 +129,14 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(
+        postNotification(
             NOTIFICATION_ID_BASE_TASK + taskId.hashCode() % 1000,
             notification
         )
     }
 
-    fun showHabitReminder(habitId: String, habitName: String) {
-        if (!hasNotificationPermission()) return
+    suspend fun showHabitReminder(habitId: String, habitName: String) {
+        if (!isEnabled(CHANNEL_HABITS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_HABITS)
             .setSmallIcon(R.drawable.ic_splash_logo)
@@ -133,14 +147,14 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(
+        postNotification(
             NOTIFICATION_ID_BASE_HABIT + habitId.hashCode() % 1000,
             notification
         )
     }
 
-    fun showFocusSessionComplete(sessionDuration: Int) {
-        if (!hasNotificationPermission()) return
+    suspend fun showFocusSessionComplete(sessionDuration: Int) {
+        if (!isEnabled(CHANNEL_FOCUS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_FOCUS)
             .setSmallIcon(R.drawable.ic_splash_logo)
@@ -151,14 +165,14 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(
+        postNotification(
             NOTIFICATION_ID_BASE_FOCUS,
             notification
         )
     }
 
-    fun showCommitmentWarning(commitmentId: String, taskName: String, minutesRemaining: Int) {
-        if (!hasNotificationPermission()) return
+    suspend fun showCommitmentWarning(commitmentId: String, taskName: String, minutesRemaining: Int) {
+        if (!isEnabled(CHANNEL_COMMITMENTS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_COMMITMENTS)
             .setSmallIcon(R.drawable.ic_splash_logo)
@@ -169,14 +183,14 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(
+        postNotification(
             NOTIFICATION_ID_BASE_COMMITMENT + commitmentId.hashCode() % 1000,
             notification
         )
     }
 
-    fun showCommitmentMissed(commitmentId: String, taskName: String) {
-        if (!hasNotificationPermission()) return
+    suspend fun showCommitmentMissed(commitmentId: String, taskName: String) {
+        if (!isEnabled(CHANNEL_COMMITMENTS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_COMMITMENTS)
             .setSmallIcon(R.drawable.ic_splash_logo)
@@ -187,14 +201,14 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(
+        postNotification(
             NOTIFICATION_ID_BASE_COMMITMENT + commitmentId.hashCode() % 1000 + 500,
             notification
         )
     }
 
-    fun showCommitmentCompleted(commitmentId: String, taskName: String) {
-        if (!hasNotificationPermission()) return
+    suspend fun showCommitmentCompleted(commitmentId: String, taskName: String) {
+        if (!isEnabled(CHANNEL_COMMITMENTS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_COMMITMENTS)
             .setSmallIcon(R.drawable.ic_splash_logo)
@@ -205,14 +219,14 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(
+        postNotification(
             NOTIFICATION_ID_BASE_COMMITMENT + commitmentId.hashCode() % 1000 + 999,
             notification
         )
     }
 
-    fun showCommitmentActivated(taskName: String, deadline: String) {
-        if (!hasNotificationPermission()) return
+    suspend fun showCommitmentActivated(taskName: String, deadline: String) {
+        if (!isEnabled(CHANNEL_COMMITMENTS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_COMMITMENTS)
             .setSmallIcon(R.drawable.ic_splash_logo)
@@ -223,14 +237,14 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(
+        postNotification(
             NOTIFICATION_ID_BASE_COMMITMENT + taskName.hashCode() % 1000 + 100,
             notification
         )
     }
 
-    fun showRecoveryAvailable(commitmentId: String, taskName: String, recoveryMinutes: Int) {
-        if (!hasNotificationPermission()) return
+    suspend fun showRecoveryAvailable(commitmentId: String, taskName: String, recoveryMinutes: Int) {
+        if (!isEnabled(CHANNEL_COMMITMENTS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_COMMITMENTS)
             .setSmallIcon(R.drawable.ic_splash_logo)
@@ -241,14 +255,14 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(
+        postNotification(
             NOTIFICATION_ID_BASE_COMMITMENT + commitmentId.hashCode() % 1000 + 200,
             notification
         )
     }
 
-    fun showDailyPlan(taskCount: Int, focusMinutes: Int) {
-        if (!hasNotificationPermission()) return
+    suspend fun showDailyPlan(taskCount: Int, focusMinutes: Int) {
+        if (!isEnabled(CHANNEL_DAILY)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_DAILY)
             .setSmallIcon(R.drawable.ic_splash_logo)
@@ -259,6 +273,6 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_DAILY, notification)
+        postNotification(NOTIFICATION_ID_DAILY, notification)
     }
 }

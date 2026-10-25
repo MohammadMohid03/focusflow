@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface HabitDao {
+    @Query("SELECT * FROM habits WHERE id = :id")
+    suspend fun getByIdSync(id: String): HabitEntity?
     @Query("SELECT * FROM habits WHERE userId = :userId ORDER BY createdAt DESC")
     fun getAllHabits(userId: String): Flow<List<HabitEntity>>
 

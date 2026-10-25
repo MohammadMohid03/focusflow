@@ -45,19 +45,19 @@ class AiChatViewModel @Inject constructor(
 
     fun sendMessage() {
         val text = _inputText.value.trim()
-        if (text.isEmpty()) return
+        if (text.isEmpty() || _isLoading.value) return
 
+        val history = _messages.value.drop(1).map { it.content to it.isUser }
         val userMessage = ChatMessage(content = text, isUser = true)
         _messages.update { it + userMessage }
         _inputText.value = ""
         _isLoading.value = true
 
         viewModelScope.launch {
-            val history = _messages.value.map { it.content to it.isUser }
             val result = aiRepository.sendMessage(history, text)
             
             _isLoading.value = false
-            val aiContent = result.getOrDefault("I'm here to help! Could you provide a bit more detail on what you'd like to work through?")
+            val aiContent = result.getOrElse { "AI request failed. Please try again. ${it.message.orEmpty()}" }
             _messages.update { it + ChatMessage(content = aiContent, isUser = false) }
         }
     }

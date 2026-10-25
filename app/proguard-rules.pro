@@ -1,16 +1,3 @@
-# Retrofit
--dontwarn retrofit2.**
--keep,allowobfuscation,allowshrinking interface retrofit2.Call
--keep,allowobfuscation,allowshrinking class retrofit2.Response
--keep class kotlin.coroutines.Continuation
-
-# OkHttp
--dontwarn okhttp3.**
--dontwarn okio.**
--dontwarn javax.annotation.**
--dontwarn org.conscrypt.**
--keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
-
 # Kotlin Serialization
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.AnnotationsKt

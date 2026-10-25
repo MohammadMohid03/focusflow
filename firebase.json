@@ -1,0 +1,9 @@
+{
+  "functions": {
+    "source": "backend",
+    "runtime": "nodejs22"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

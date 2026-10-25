@@ -22,7 +22,7 @@ interface FocusSessionDao {
     @Query("SELECT * FROM focus_sessions WHERE userId = :userId AND startTime >= :start AND startTime <= :end ORDER BY startTime ASC")
     fun getSessionsInRange(userId: String, start: Long, end: Long): Flow<List<FocusSessionEntity>>
 
-    @Query("SELECT SUM(actualDurationMinutes) FROM focus_sessions WHERE userId = :userId AND isCompleted = 1")
+    @Query("SELECT SUM(actualDurationMinutes) FROM focus_sessions WHERE userId = :userId")
     fun getTotalFocusMinutes(userId: String): Flow<Int?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

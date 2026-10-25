@@ -209,4 +209,20 @@
     <string name="cd_settings">Settings</string>
     <string name="cd_profile">Profile</string>
     <string name="cd_notification">Notification</string>
+    <string name="ui_settings">Settings</string>
+    <string name="ui_planner">Planner</string>
+    <string name="home_greeting">Hi, %1$s</string>
+    <string name="home_focus_time">Focus time today</string>
+    <string name="home_start_focus">Start focus</string>
+    <string name="home_minutes">%1$dm</string>
+    <string name="home_hours_minutes">%1$dh %2$dm</string>
+    <string name="home_tasks_done">Tasks completed</string>
+    <string name="home_streak">Day streak</string>
+    <string name="home_create_task">New task</string>
+    <string name="home_ask_ai">Ask AI</string>
+    <string name="home_your_plan">Your plan</string>
+    <string name="home_view_all">All tasks</string>
+    <string name="home_empty_title">Your next step starts here</string>
+    <string name="home_empty_description">Add a task, then give it your full attention.</string>
+    <string name="home_focus_tip">Focus tip</string>
 </resources>

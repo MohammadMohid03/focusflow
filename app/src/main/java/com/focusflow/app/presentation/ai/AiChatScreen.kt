@@ -27,6 +27,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.focusflow.app.presentation.components.LocalFloatingNavigationPadding
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.presentation.components.CompactTopBar
 import com.focusflow.app.presentation.theme.FocusFlowCorners
@@ -36,9 +38,9 @@ fun AiChatScreen(
     viewModel: AiChatViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {}
 ) {
-    val messages by viewModel.messages.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val inputText by viewModel.inputText.collectAsState()
+    val messages by viewModel.messages.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val inputText by viewModel.inputText.collectAsStateWithLifecycle()
     
     val listState = rememberLazyListState()
     
@@ -51,7 +53,7 @@ fun AiChatScreen(
     Scaffold(
         topBar = {
             CompactTopBar(
-                title = "AI Study Assistant",
+                title = "Study assistant",
                 onBackClick = onNavigateBack
             )
         },
@@ -63,7 +65,7 @@ fun AiChatScreen(
                     .background(MaterialTheme.colorScheme.background)
                     .navigationBarsPadding()
                     .imePadding()
-                    .padding(bottom = 6.dp)
+                    .padding(bottom = LocalFloatingNavigationPadding.current + 6.dp)
             ) {
                 SuggestionChips(
                     onChipClick = { text -> viewModel.onInputTextChanged(text) }
@@ -83,7 +85,8 @@ fun AiChatScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
+                .consumeWindowInsets(paddingValues)
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(vertical = 12.dp)
         ) {
@@ -270,7 +273,7 @@ fun ChatInputBar(
             enabled = text.isNotBlank(),
             shape = CircleShape,
             color = if (text.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.size(44.dp),
+            modifier = Modifier.size(48.dp),
             shadowElevation = if (text.isNotBlank()) 1.dp else 0.dp
         ) {
             Box(contentAlignment = Alignment.Center) {

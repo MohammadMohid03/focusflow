@@ -1,118 +1,97 @@
 package com.focusflow.app.presentation.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import android.content.res.Configuration
+import androidx.compose.animation.*
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.focusflow.app.presentation.theme.FocusFlowCorners
-import com.focusflow.app.presentation.theme.pressSpring3D
+import com.focusflow.app.navigation.BottomNavItem
+import com.focusflow.app.presentation.theme.FocusFlowTheme
 
-data class BottomNavItemData(
-    val route: String,
-    val icon: ImageVector,
-    val selectedIcon: ImageVector,
-    val label: String
-)
+@Immutable
+data class BottomNavItemData(val route: String, val icon: ImageVector, val selectedIcon: ImageVector, val label: String)
 
 @Composable
 fun FocusFlowBottomNav(
-    items: List<BottomNavItemData>,
-    currentRoute: String?,
-    onNavigate: (String) -> Unit,
-    modifier: Modifier = Modifier
+    items: List<BottomNavItemData>, currentRoute: String?, onNavigate: (String) -> Unit,
+    modifier: Modifier = Modifier, compact: Boolean = false
 ) {
-    val navShape = FocusFlowCorners.FloatingBottomNav
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .navigationBarsPadding(),
-        contentAlignment = Alignment.Center
+    val width by animateDpAsState(if (compact) 216.dp else 288.dp, tween(220), label = "dockWidth")
+    val height by animateDpAsState(if (compact) 52.dp else 60.dp, tween(220), label = "dockHeight")
+    Surface(
+        modifier = modifier.widthIn(max = width).width(width).height(height).testTag("floating_navigation")
+            .semantics { stateDescription = if (compact) "Compact navigation" else "Expanded navigation" },
+        shape = CircleShape, color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
+        shadowElevation = 6.dp, tonalElevation = 0.dp
     ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = navShape,
-            color = MaterialTheme.colorScheme.surface,
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
-            shadowElevation = 3.dp
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(58.dp)
-                    .padding(horizontal = 6.dp, vertical = 5.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                items.forEach { item ->
-                    val isSelected = currentRoute == item.route
-
-                    val pillBgColor by animateColorAsState(
-                        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
-                        label = "pillBgColor"
-                    )
-                    val contentColor by animateColorAsState(
-                        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
-                        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
-                        label = "contentColor"
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(pillBgColor)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                onNavigate(item.route)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = if (isSelected) item.selectedIcon else item.icon,
-                                contentDescription = item.label,
-                                tint = contentColor,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = item.label,
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = contentColor,
-                                maxLines = 1
-                            )
-                        }
+        Row(Modifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 2.dp).selectableGroup(),
+            verticalAlignment = Alignment.CenterVertically) {
+            items.forEach { item ->
+                val selected = currentRoute == item.route
+                val tint by animateColorAsState(
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tween(160), label = "dockTint")
+                val background by animateColorAsState(
+                    if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                    tween(160), label = "dockSelection")
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxHeight().clip(CircleShape).background(background)
+                        .selectable(selected = selected, role = Role.Tab, onClick = { onNavigate(item.route) })
+                        .semantics(mergeDescendants = true) { contentDescription = item.label }
+                        .testTag("nav_${item.route}"),
+                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(if (selected) item.selectedIcon else item.icon, null, Modifier.size(20.dp), tint)
+                    AnimatedVisibility(visible = !compact,
+                        enter = fadeIn(tween(120)) + expandVertically(tween(180)),
+                        exit = fadeOut(tween(90)) + shrinkVertically(tween(180))) {
+                        Text(item.label, Modifier.padding(top = 1.dp).clearAndSetSemantics { },
+                            color = tint, fontSize = 10.sp, lineHeight = 14.sp,
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium, maxLines = 1)
                     }
                 }
             }
+        }
+    }
+}
+
+@Preview(name = "Expanded dock", showBackground = true)
+@Preview(name = "Dark dock", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun NavigationPreview() {
+    FocusFlowTheme {
+        Box(Modifier.padding(24.dp)) {
+            FocusFlowBottomNav(BottomNavItem.entries.map { BottomNavItemData(it.route, it.icon, it.selectedIcon, it.label) }, "home", {})
+        }
+    }
+}
+
+@Preview(name = "Compact dock", showBackground = true)
+@Composable
+private fun CompactNavigationPreview() {
+    FocusFlowTheme {
+        Box(Modifier.padding(24.dp)) {
+            FocusFlowBottomNav(BottomNavItem.entries.map { BottomNavItemData(it.route, it.icon, it.selectedIcon, it.label) }, "planner", {}, compact = true)
         }
     }
 }

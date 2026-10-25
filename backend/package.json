@@ -1,0 +1,16 @@
+{
+  "name": "focusflow-functions",
+  "private": true,
+  "engines": {
+    "node": "22"
+  },
+  "main": "index.js",
+  "scripts": {
+    "lint": "node --check index.js",
+    "test": "node --test index.test.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.0",
+    "firebase-functions": "^7.4.0"
+  }
+}

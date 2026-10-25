@@ -14,4 +14,5 @@ interface UserPreferencesRepository {
     fun getUserEmail(): Flow<String>
     suspend fun setUserEmail(email: String)
     fun getUserPreferences(): Flow<UserPreferences>
+    suspend fun updateUserPreferences(update: (UserPreferences) -> UserPreferences)
 }

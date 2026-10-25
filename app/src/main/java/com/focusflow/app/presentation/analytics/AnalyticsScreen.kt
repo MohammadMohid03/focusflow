@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.focusflow.app.presentation.components.LocalFloatingNavigationPadding
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.presentation.components.CompactTopBar
 import com.focusflow.app.presentation.theme.FocusFlowCorners
@@ -25,8 +27,7 @@ import com.focusflow.app.presentation.theme.FocusFlowCorners
 fun AnalyticsScreen(
     viewModel: AnalyticsViewModel = hiltViewModel()
 ) {
-    var selectedTab by remember { mutableStateOf(0) }
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -40,9 +41,9 @@ fun AnalyticsScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     listOf("Week", "Month", "Year").forEachIndexed { index, title ->
-                        val isSelected = selectedTab == index
+                        val isSelected = uiState.period.ordinal == index
                         Surface(
-                            onClick = { selectedTab = index },
+                            onClick = { viewModel.selectPeriod(AnalyticsPeriod.entries[index]) },
                             shape = FocusFlowCorners.Chip,
                             color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
                             border = if (!isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)) else null,
@@ -71,7 +72,7 @@ fun AnalyticsScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 12.dp)
-                .padding(bottom = 90.dp),
+                .padding(bottom = LocalFloatingNavigationPadding.current + 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Overview Cards
@@ -81,7 +82,7 @@ fun AnalyticsScreen(
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 OverviewCard(title = "Completion", value = "${(uiState.completionRate * 100).toInt()}%", modifier = Modifier.weight(1f))
-                OverviewCard(title = "Best Streak", value = "${uiState.currentStreak} Days", modifier = Modifier.weight(1f))
+                OverviewCard(title = "Current Habit Streak", value = "${uiState.currentStreak} Days", modifier = Modifier.weight(1f))
             }
 
             // Charts Section
@@ -91,11 +92,11 @@ fun AnalyticsScreen(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            ProductivityChart()
+            ProductivityChart(uiState.chartLabels, uiState.chartMinutes)
 
             // AI Insights
             Text(
-                text = "AI Insights",
+                text = "Focus Insight",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -127,7 +128,7 @@ fun AnalyticsScreen(
                     }
                     Spacer(modifier = Modifier.width(14.dp))
                     Text(
-                        text = "You maintain highest focus on mornings between 9:00 AM and 11:30 AM.",
+                        text = uiState.insight,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -168,11 +169,9 @@ fun OverviewCard(title: String, value: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ProductivityChart() {
+fun ProductivityChart(days: List<String>, minutes: List<Int>) {
     val primaryColor = MaterialTheme.colorScheme.primary
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
-    val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    val heights = listOf(0.6f, 0.85f, 0.45f, 0.9f, 0.7f, 0.3f, 0.5f)
+    val maxMinutes = (minutes.maxOrNull() ?: 0).coerceAtLeast(1)
 
     Surface(
         modifier = Modifier.fillMaxWidth().height(180.dp),
@@ -190,23 +189,24 @@ fun ProductivityChart() {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Bottom,
-                    modifier = Modifier.fillMaxHeight()
+                    modifier = Modifier.fillMaxHeight().weight(1f)
                 ) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .width(24.dp),
+                            .fillMaxWidth(),
                         contentAlignment = Alignment.BottomCenter
                     ) {
                         Surface(
                             modifier = Modifier
-                                .fillMaxHeight(heights[index])
+                                .fillMaxHeight((minutes.getOrElse(index) { 0 }.toFloat() / maxMinutes).coerceIn(0f, 1f))
                                 .width(18.dp),
                             shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
                             color = primaryColor
                         ) {}
                     }
                     Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = "${minutes.getOrElse(index) { 0 }}m", style = MaterialTheme.typography.labelSmall)
                     Text(
                         text = day,
                         style = MaterialTheme.typography.labelSmall,

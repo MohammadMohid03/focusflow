@@ -6,15 +6,14 @@
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20%2F%20MVVM-orange.svg)](https://developer.android.com/topic/architecture)
 [![License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
 
-**FocusFlow** is a publishable, production-grade Android application engineered for students and professionals. It combines smart goal breakdown, AI-assisted study planning, deep Pomodoro focus sessions, habit streak tracking, real-time analytics, an interactive **AI Study Assistant**, and a unique **Commitment Lock** accountability engine.
+**FocusFlow** is an Android application in active development for students and professionals. It combines smart goal breakdown, AI-assisted study planning, deep Pomodoro focus sessions, habit streak tracking, real-time analytics, an interactive **AI Study Assistant**, and a unique **Commitment Lock** accountability engine.
 
-### 🎨 Premium UI Redesign (Pastel Aesthetic)
-FocusFlow features an iOS-inspired study app UI:
-- **Pastel Color Palette**: Soft lavender background (`#F8F5FF`), warm lilac container accents (`#D4A5CC`), soft purple primary tokens (`#8B6CC1`), and clear visual hierarchy.
-- **Component Library**: 16 custom Material 3 components including pastel `StatCard`s, gradient `AIStudyTipCard`s, timeline items, and smooth animated cards.
-- **AI Assistant Chat**: Dedicated AI chat view with suggestion chips, bouncing dot typing indicators, and intuitive prompt input.
-- **Study Planner**: Modern timeline schedule view with date selectors, task status toggles, and time allocation stat cards.
-- **Bottom Navigation**: Floating top-rounded 4-tab bar (Home, Planner, AI Chat, Profile) with pill-shaped selection indicators.
+### Interface
+- **Floating navigation**: A true overlay with no full-width backing strip. The dock contracts from 288 x 60 dp to 216 x 52 dp after scrolling down and expands when scrolling up or switching tabs.
+- **Keyboard behavior**: Navigation hides while the keyboard is open, keeping chat and form inputs accessible.
+- **Compact dashboard**: Focus time, task progress, quick actions, and today's plan use real app state with a consistent spacing scale.
+- **Themes**: Neutral Material 3 surface roles keep the light and dark palettes consistent without default cream-colored containers.
+- **Accessibility**: Navigation keeps 48 dp touch targets and selected-tab semantics in both sizes.
 
 ---
 
@@ -22,10 +21,10 @@ FocusFlow features an iOS-inspired study app UI:
 
 ### 🔐 Commitment Lock & Focus Contract
 - **Voluntary Accountability**: Attach a commitment to critical tasks with a strict deadline and user-selected consequences (such as policy-compliant app restriction reminders).
-- **Commitment Engine**: Centralized 10-state machine (`DRAFT → ACTIVE → WARNING → COMPLETED/MISSED → RESTRICTED → RECOVERY → RESTORED`).
+- **Commitment States**: Active commitments warn before the deadline and become completed or missed. Missed commitments retain restrictions until task completion or cancellation.
 - **Emergency Cancellation**: Transparent, non-punitive options with score impact warning.
-- **AI Recovery Plans**: Automatically generates realistic step-by-step recovery schedules for missed commitments.
-- **Earn-Back System**: Restores full status through focused, timed productivity sessions.
+- **Recovery UI (in progress)**: Recovery screens are scaffolding; generated recovery plans are not implemented.
+- **Unlocking**: Complete the linked task or cancel the commitment to remove its restrictions. Timed earn-back is not implemented.
 - **Commitment Score**: Transparent accountability metric based on completion, recovery, and consistency trends.
 
 ### 🤖 AI-Powered Productivity
@@ -52,10 +51,9 @@ FocusFlow features an iOS-inspired study app UI:
 - **Real-Data Charts**: Visualizes focus minutes, task completion rates, habit consistency, and commitment scores over Week, Month, or Year.
 - **Offline-First Storage**: Local database acts as single source of truth—no empty states or fake statistics once data exists.
 
-### 🌐 Synchronization & Offline Capability
+### 🌐 Offline Capability
 - **Offline-First Architecture**: Powered by Room DB and DataStore for full offline access.
-- **Cloud Sync**: Synchronizes seamlessly with Firebase Cloud Firestore when internet connection is restored.
-- **Security Rules**: User data isolated via strict Firestore security rules.
+- **Firestore Rules**: Owner-scoped rules are included for a future cloud-sync implementation. Cloud sync is not currently implemented in the Android repositories.
 
 ---
 
@@ -79,7 +77,7 @@ graph TD
         Repos --> ReposImpl[Repository Implementations]
         ReposImpl --> Room[Room Local Database]
         ReposImpl --> DS[DataStore Preferences]
-        ReposImpl --> Remote[Firebase Firestore / Retrofit AI API]
+        ReposImpl --> Remote[Firebase Callable AI Function]
     end
 ```
 
@@ -88,9 +86,9 @@ graph TD
 - **UI Framework**: Jetpack Compose, Material 3, Navigation Compose
 - **Dependency Injection**: Dagger Hilt
 - **Local Persistence**: Room Database (Offline-First), Preferences DataStore
-- **Remote Services**: Firebase Authentication, Cloud Firestore, Firebase Cloud Messaging
+- **Remote Services**: Firebase Authentication, Firebase Callable Functions, Firebase Cloud Messaging
 - **Background Processing**: WorkManager
-- **Networking**: Retrofit 2, OkHttp 4, Kotlinx Serialization
+- **Networking**: Firebase callable functions, Kotlinx Serialization
 - **Testing**: JUnit 4, Mockk, Google Truth, Turbine
 
 ---
@@ -147,22 +145,38 @@ sdk.dir=C:/Users/moham/AppData/Local/Android/Sdk
 ```
 
 ### Step 3: Firebase Configuration
-Place your `google-services.json` inside `app/` directory and uncomment the plugin in `app/build.gradle.kts`:
-```kotlin
-alias(libs.plugins.google.services)
+Place your `google-services.json` inside `app/`, then select the Firebase project for the CLI:
+```bash
+firebase use --add
 ```
 
-### Step 4: Build Debug APK
+### Step 4: Configure and deploy the AI proxy
+The Android client calls the authenticated `generateAi` Firebase callable function. Store the Groq key in Firebase Secret Manager; do not add it to `local.properties`, Gradle, or the Android app:
+```bash
+npm --prefix backend install
+firebase functions:secrets:set GROQ_API_KEY
+firebase deploy --only functions,firestore:rules
+```
+The function requires a signed-in Firebase user and enforces per-user request limits. Deploying it also requires a Firebase project with Cloud Functions enabled.
+
+### Step 5: Build Debug APK
 ```bash
 ./gradlew assembleDebug
 ```
 
-### Step 5: Run Unit Tests
-```bash
-./gradlew test
+### Step 6: Run checks
+On Windows:
+```powershell
+.\gradlew.bat testDebugUnitTest assembleDebug lintDebug compileDebugAndroidTestKotlin
+npm --prefix backend test
+```
+Room migration, owner isolation, export, and deletion instrumentation tests require an Android device or emulator:
+```powershell
+.\gradlew.bat connectedDebugAndroidTest
 ```
 
-### Step 6: Generate Production Release Bundle (AAB)
+
+### Step 7: Generate Production Release Bundle (AAB)
 ```bash
 ./gradlew bundleRelease
 ```
@@ -171,7 +185,11 @@ alias(libs.plugins.google.services)
 
 ## 🔒 Security & Privacy
 
-- **No Hardcoded Secrets**: All AI interactions communicate through a secure server proxy.
+- **No Client Provider Key**: AI requests go through an authenticated Firebase callable function; the Groq key is stored as a server-side secret.
+- **Account Deletion**: Deletes the signed-in Firebase Authentication account and that account's local records. Firebase may require a fresh sign-in before deletion. Guest deletion clears only guest records.
+- **Export**: Saves an owner-scoped JSON export through Android's file picker.
+- **Settings**: Notification switches and default focus/break durations persist locally. Cloud sync is unavailable and is labeled accordingly.
+- **Database Upgrades**: The v1-to-v2 migration preserves data; missing future migrations fail instead of deleting records.
 - **Data Minimization**: App restriction preferences remain local to the device and are never uploaded to analytics or AI backends.
 - **Firestore Isolation**: Security rules restrict all reads/writes strictly to authenticated owner user IDs.
 

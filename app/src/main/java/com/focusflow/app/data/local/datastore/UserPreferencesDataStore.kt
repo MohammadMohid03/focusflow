@@ -84,23 +84,33 @@ class UserPreferencesDataStore @Inject constructor(
         }
     }
 
-    fun getUserPreferences(): Flow<UserPreferences> {
-        return dataStore.data.map { preferences ->
-            val modeString = preferences[THEME_MODE] ?: ThemeMode.SYSTEM.name
-            val themeMode = try { ThemeMode.valueOf(modeString) } catch (e: Exception) { ThemeMode.SYSTEM }
-            UserPreferences(
-                themeMode = themeMode,
-                defaultFocusDuration = preferences[DEFAULT_FOCUS_DURATION] ?: 25,
-                defaultBreakDuration = preferences[DEFAULT_BREAK_DURATION] ?: 5,
-                notificationsEnabled = preferences[NOTIFICATIONS_ENABLED] ?: true,
-                taskReminders = preferences[TASK_REMINDERS] ?: true,
-                habitReminders = preferences[HABIT_REMINDERS] ?: true,
-                commitmentReminders = preferences[COMMITMENT_REMINDERS] ?: true,
-                focusReminders = preferences[FOCUS_REMINDERS] ?: true,
-                dailyPlanReminder = preferences[DAILY_PLAN_REMINDER] ?: true,
-                workingHoursStart = preferences[WORKING_HOURS_START] ?: 9,
-                workingHoursEnd = preferences[WORKING_HOURS_END] ?: 17
-            )
+    fun getUserPreferences(): Flow<UserPreferences> = dataStore.data.map { it.toUserPreferences() }
+
+    private fun Preferences.toUserPreferences(): UserPreferences = UserPreferences(
+        themeMode = runCatching { ThemeMode.valueOf(this[THEME_MODE] ?: ThemeMode.SYSTEM.name) }.getOrDefault(ThemeMode.SYSTEM),
+        defaultFocusDuration = (this[DEFAULT_FOCUS_DURATION] ?: 25).coerceIn(1, 240),
+        defaultBreakDuration = (this[DEFAULT_BREAK_DURATION] ?: 5).coerceIn(1, 60),
+        notificationsEnabled = this[NOTIFICATIONS_ENABLED] ?: true,
+        taskReminders = this[TASK_REMINDERS] ?: true,
+        habitReminders = this[HABIT_REMINDERS] ?: true,
+        commitmentReminders = this[COMMITMENT_REMINDERS] ?: true,
+        focusReminders = this[FOCUS_REMINDERS] ?: true,
+        dailyPlanReminder = this[DAILY_PLAN_REMINDER] ?: true,
+        workingHoursStart = this[WORKING_HOURS_START] ?: 9,
+        workingHoursEnd = this[WORKING_HOURS_END] ?: 17
+    )
+
+    suspend fun updateUserPreferences(update: (UserPreferences) -> UserPreferences) {
+        dataStore.edit { stored ->
+            val value = update(stored.toUserPreferences())
+            stored[DEFAULT_FOCUS_DURATION] = value.defaultFocusDuration.coerceIn(1, 240)
+            stored[DEFAULT_BREAK_DURATION] = value.defaultBreakDuration.coerceIn(1, 60)
+            stored[NOTIFICATIONS_ENABLED] = value.notificationsEnabled
+            stored[TASK_REMINDERS] = value.taskReminders
+            stored[HABIT_REMINDERS] = value.habitReminders
+            stored[COMMITMENT_REMINDERS] = value.commitmentReminders
+            stored[FOCUS_REMINDERS] = value.focusReminders
+            stored[DAILY_PLAN_REMINDER] = value.dailyPlanReminder
         }
     }
 

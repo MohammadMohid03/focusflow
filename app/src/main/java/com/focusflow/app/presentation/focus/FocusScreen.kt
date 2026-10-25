@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.focusflow.app.presentation.components.LocalFloatingNavigationPadding
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.domain.model.FocusSessionType
 import com.focusflow.app.presentation.components.CompactTopBar
@@ -37,8 +39,8 @@ fun FocusScreen(
     viewModel: FocusViewModel = hiltViewModel(),
     onNavigateToSession: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    var selectedType by remember { mutableStateOf(FocusSessionType.POMODORO_25_5) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val selectedType = uiState.sessionType
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -51,7 +53,8 @@ fun FocusScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 8.dp),
+                .padding(horizontal = 20.dp, vertical = 8.dp)
+                .padding(bottom = LocalFloatingNavigationPadding.current + 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Stats Banner
@@ -70,7 +73,7 @@ fun FocusScreen(
                 ) {
                     StatItem("Daily Focus", "${uiState.totalFocusToday}m")
                     StatItem("Sessions", "${uiState.recentSessions.size}")
-                    StatItem("Streak", "3 Days")
+                    StatItem("Streak", "${uiState.focusStreak} Days")
                 }
             }
 
@@ -92,7 +95,6 @@ fun FocusScreen(
                     icon = Icons.Outlined.Bolt,
                     isSelected = selectedType == FocusSessionType.POMODORO_25_5,
                     onClick = {
-                        selectedType = FocusSessionType.POMODORO_25_5
                         viewModel.selectSessionType(FocusSessionType.POMODORO_25_5)
                     },
                     modifier = Modifier.weight(1f)
@@ -103,7 +105,6 @@ fun FocusScreen(
                     icon = Icons.Outlined.Psychology,
                     isSelected = selectedType == FocusSessionType.POMODORO_50_10,
                     onClick = {
-                        selectedType = FocusSessionType.POMODORO_50_10
                         viewModel.selectSessionType(FocusSessionType.POMODORO_50_10)
                     },
                     modifier = Modifier.weight(1f)
@@ -114,7 +115,6 @@ fun FocusScreen(
                     icon = Icons.Outlined.Tune,
                     isSelected = selectedType == FocusSessionType.CUSTOM,
                     onClick = {
-                        selectedType = FocusSessionType.CUSTOM
                         viewModel.selectSessionType(FocusSessionType.CUSTOM)
                     },
                     modifier = Modifier.weight(1f)
@@ -271,7 +271,6 @@ fun FocusScreen(
                     "Enter Focus Room"
                 },
                 onClick = {
-                    viewModel.startSession()
                     onNavigateToSession()
                 }
             )

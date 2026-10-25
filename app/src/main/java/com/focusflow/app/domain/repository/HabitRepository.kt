@@ -12,5 +12,6 @@ interface HabitRepository {
     suspend fun deleteHabit(habitId: String)
     suspend fun completeHabit(habitId: String, date: Long)
     fun getHabitCompletions(habitId: String): Flow<List<HabitCompletion>>
+    fun getCompletionsForUser(userId: String): Flow<List<HabitCompletion>>
     fun getHabitsForToday(userId: String): Flow<List<Habit>>
 }

@@ -117,8 +117,8 @@ fun HabitsScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     HabitStatItem("Active Habits", uiState.allHabits.size.toString())
-                    HabitStatItem("Streak", "3 Days")
-                    HabitStatItem("Completion", "85%")
+                    HabitStatItem("Streak", "${uiState.allHabits.maxOfOrNull { it.currentStreak } ?: 0}")
+                    HabitStatItem("Done Today", "${uiState.todayHabits.count { habit -> isHabitCompleted(habit, uiState.completions, uiState.today) }}/${uiState.todayHabits.size}")
                 }
             }
 
@@ -152,7 +152,7 @@ fun HabitsScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(habitsToShow) { habit ->
-                        val isCompletedToday = uiState.completions.any { it.habitId == habit.id }
+                        val isCompletedToday = isHabitCompleted(habit, uiState.completions, uiState.today)
                         HabitCard(
                             habit = habit,
                             isCompleted = isCompletedToday,
@@ -291,5 +291,19 @@ fun HabitCard(
                 }
             }
         }
+    }
+}
+
+internal fun isHabitCompleted(
+    habit: Habit,
+    completions: List<com.focusflow.app.domain.model.HabitCompletion>,
+    today: java.time.LocalDate
+): Boolean {
+    val start = if (habit.frequency == com.focusflow.app.domain.model.HabitFrequency.WEEKLY)
+        today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)) else today
+    val end = if (habit.frequency == com.focusflow.app.domain.model.HabitFrequency.WEEKLY) start.plusWeeks(1) else start.plusDays(1)
+    return completions.any {
+        val date = java.time.Instant.ofEpochMilli(it.completedAt).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+        it.habitId == habit.id && date >= start && date < end
     }
 }

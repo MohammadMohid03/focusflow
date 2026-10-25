@@ -3,6 +3,7 @@ package com.focusflow.app.presentation.habits
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.focusflow.app.domain.model.Habit
+import com.focusflow.app.domain.model.isScheduledOn
 import com.focusflow.app.domain.model.HabitCompletion
 import com.focusflow.app.domain.repository.AuthRepository
 import com.focusflow.app.domain.repository.HabitRepository
@@ -18,7 +19,9 @@ import javax.inject.Inject
 data class HabitsUiState(
     val todayHabits: List<Habit> = emptyList(),
     val allHabits: List<Habit> = emptyList(),
-    val completions: List<HabitCompletion> = emptyList()
+    val completions: List<HabitCompletion> = emptyList(),
+    val today: java.time.LocalDate = java.time.LocalDate.now(),
+    val error: String? = null
 )
 
 @HiltViewModel
@@ -38,36 +41,26 @@ class HabitsViewModel @Inject constructor(
 
     private fun loadHabits() {
         viewModelScope.launch {
-            habitRepository.getAllHabits(userId)
-                .catch { /* Handle error */ }
-                .collect { habits ->
-                    _uiState.update { it.copy(allHabits = habits) }
-                }
-        }
-        viewModelScope.launch {
-            habitRepository.getHabitsForToday(userId)
-                .catch { /* Handle error */ }
-                .collect { todayHabits ->
-                    _uiState.update { it.copy(todayHabits = todayHabits) }
-                }
+            kotlinx.coroutines.flow.combine(
+                habitRepository.getAllHabits(userId),
+                habitRepository.getCompletionsForUser(userId),
+                com.focusflow.app.domain.model.observeToday()
+            ) { habits, completions, today ->
+                HabitsUiState(
+                    allHabits = habits,
+                    todayHabits = habits.filter { it.isScheduledOn(today) },
+                    completions = completions, today = today
+                )
+            }.catch { error -> _uiState.update { it.copy(error = error.message) } }
+                .collect { _uiState.value = it }
         }
     }
 
     fun completeHabit(habitId: String) {
         viewModelScope.launch {
-            try {
-                habitRepository.completeHabit(habitId, System.currentTimeMillis())
-                // Add to local completions so UI reflects immediately
-                _uiState.update { state ->
-                    state.copy(completions = state.completions + com.focusflow.app.domain.model.HabitCompletion(
-                        habitId = habitId,
-                        completedAt = System.currentTimeMillis(),
-                        date = System.currentTimeMillis()
-                    ))
-                }
-            } catch (e: Exception) {
-                // Handle error
-            }
+            try { habitRepository.completeHabit(habitId, System.currentTimeMillis())
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e
+            } catch (e: Exception) { _uiState.update { it.copy(error = e.message) } }
         }
     }
 

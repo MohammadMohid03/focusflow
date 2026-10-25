@@ -77,7 +77,7 @@ fun ProfileHeader(
             onClick = onThemeToggle,
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.size(36.dp)
+            modifier = Modifier.size(48.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -101,7 +101,7 @@ fun CompactTopBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .height(56.dp)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -115,7 +115,7 @@ fun CompactTopBar(
                     onClick = onBackClick,
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(48.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -130,7 +130,7 @@ fun CompactTopBar(
             }
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,

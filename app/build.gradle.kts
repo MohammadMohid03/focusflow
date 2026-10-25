@@ -1,6 +1,3 @@
-import java.util.Properties
-import java.io.FileInputStream
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -10,14 +7,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
 }
-
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        FileInputStream(localPropertiesFile).use { load(it) }
-    }
-}
-val groqApiKey: String = localProperties.getProperty("GROQ_API_KEY") ?: System.getenv("GROQ_API_KEY") ?: ""
 
 android {
     namespace = "com.focusflow.app"
@@ -31,8 +20,6 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "GROQ_API_KEY", "\"$groqApiKey\"")
-        
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
@@ -59,6 +46,7 @@ android {
         compose = true
         buildConfig = true
     }
+    sourceSets.getByName("androidTest").assets.srcDir("$projectDir/schemas")
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -96,15 +84,9 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.analytics)
-    
-    implementation(libs.retrofit)
-    implementation(platform(libs.okhttp.bom))
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.firebase.functions)
     
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.retrofit2.kotlinx.serialization.converter)
-    
     implementation(libs.androidx.datastore.preferences)
     
     implementation(libs.androidx.work.runtime.ktx)

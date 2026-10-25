@@ -1,5 +1,7 @@
 package com.focusflow.app.service
 
+import android.Manifest
+import androidx.core.content.ContextCompat
 import android.app.*
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
@@ -171,7 +173,10 @@ class AppBlockerService : Service() {
             .build()
 
         try {
-            NotificationManagerCompat.from(this).notify(NOTIFICATION_ALERT_ID, alertNotification)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                NotificationManagerCompat.from(this).notify(NOTIFICATION_ALERT_ID, alertNotification)
+            }
         } catch (e: Exception) {}
 
         // 2. Launch Activity directly with Background Activity Launch permission options

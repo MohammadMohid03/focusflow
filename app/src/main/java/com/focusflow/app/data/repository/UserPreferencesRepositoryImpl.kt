@@ -11,6 +11,10 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     private val dataStore: UserPreferencesDataStore
 ) : UserPreferencesRepository {
 
+    override suspend fun updateUserPreferences(update: (UserPreferences) -> UserPreferences) {
+        dataStore.updateUserPreferences(update)
+    }
+
     override fun getUserPreferences(): Flow<UserPreferences> {
         return dataStore.getUserPreferences()
     }

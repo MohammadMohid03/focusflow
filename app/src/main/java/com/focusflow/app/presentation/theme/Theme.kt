@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -164,12 +165,23 @@ fun FocusFlowTheme(
         else -> PrimaryLightColorScheme
     }
 
+    val resolvedColorScheme = colorScheme.copy(
+        surfaceTint = Color.Transparent,
+        surfaceDim = colorScheme.background,
+        surfaceBright = colorScheme.surface,
+        surfaceContainerLowest = colorScheme.surface,
+        surfaceContainerLow = lerp(colorScheme.surface, colorScheme.surfaceVariant, 0.25f),
+        surfaceContainer = lerp(colorScheme.surface, colorScheme.surfaceVariant, 0.5f),
+        surfaceContainerHigh = lerp(colorScheme.surface, colorScheme.surfaceVariant, 0.75f),
+        surfaceContainerHighest = colorScheme.surfaceVariant
+    )
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = view.context.findActivity()?.window ?: return@SideEffect
             window.statusBarColor = Color.Transparent.toArgb()
             window.navigationBarColor = Color.Transparent.toArgb()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) window.isNavigationBarContrastEnforced = false
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDark
             WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !isDark
         }
@@ -177,7 +189,7 @@ fun FocusFlowTheme(
 
     CompositionLocalProvider(LocalSpacing provides Spacing) {
         MaterialTheme(
-            colorScheme = colorScheme,
+            colorScheme = resolvedColorScheme,
             typography = FocusFlowTypography,
             shapes = FocusFlowShapes,
             content = content

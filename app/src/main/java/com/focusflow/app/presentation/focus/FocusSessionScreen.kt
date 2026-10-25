@@ -1,5 +1,6 @@
 package com.focusflow.app.presentation.focus
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -31,6 +32,8 @@ fun FocusSessionScreen(
     onSessionEnd: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    BackHandler { viewModel.endSession() }
 
     LaunchedEffect(Unit) {
         if (!uiState.isRunning) {
@@ -130,7 +133,7 @@ fun FocusSessionScreen(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = if (uiState.isPaused) "PAUSED" else "IN FOCUS",
+                        text = if (uiState.isPaused) "PAUSED" else if (uiState.isBreak) "BREAK" else "IN FOCUS",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = primaryColor,
@@ -171,7 +174,6 @@ fun FocusSessionScreen(
                 Surface(
                     onClick = {
                         viewModel.endSession()
-                        onSessionEnd()
                     },
                     modifier = Modifier
                         .size(60.dp)

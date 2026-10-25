@@ -14,11 +14,11 @@ val FocusFlowShapes = Shapes(
 
 // Intentional, architectural shape tokens
 object FocusFlowCorners {
-    val Card = RoundedCornerShape(14.dp)
+    val Card = RoundedCornerShape(12.dp)
     val CardSmall = RoundedCornerShape(10.dp)
-    val CardLarge = RoundedCornerShape(18.dp)
+    val CardLarge = RoundedCornerShape(16.dp)
 
-    val Button = RoundedCornerShape(12.dp)
+    val Button = RoundedCornerShape(10.dp)
     val ButtonSmall = RoundedCornerShape(8.dp)
     val ButtonLarge = RoundedCornerShape(14.dp)
 

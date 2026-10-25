@@ -16,6 +16,7 @@ import com.focusflow.app.domain.model.RestrictionCapability
 import com.focusflow.app.domain.model.RestrictionResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,7 +24,8 @@ import javax.inject.Singleton
 @Singleton
 class AppRestrictionManagerImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val commitmentDao: CommitmentDao
+    private val commitmentDao: CommitmentDao,
+    private val authRepository: com.focusflow.app.domain.repository.AuthRepository
 ) : AppRestrictionManager {
 
     private var cachedApps: List<RestrictableApp>? = null
@@ -61,7 +63,7 @@ class AppRestrictionManagerImpl @Inject constructor(
 
     override suspend fun getActiveRestrictedApps(): Set<String> = withContext(Dispatchers.IO) {
         return@withContext try {
-            commitmentDao.getAllActiveCommitmentsSync()
+            commitmentDao.getActiveCommitments(authRepository.getCurrentUser()?.id ?: "").first()
                 .map { it.toDomain() }
                 .flatMap { it.selectedAppPackages }
                 .toSet()

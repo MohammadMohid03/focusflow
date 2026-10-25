@@ -1,5 +1,9 @@
 package com.focusflow.app.presentation.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.Lifecycle
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,8 +46,40 @@ fun SettingsScreen(
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        viewModel.checkPermissions()
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.checkPermissions() }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri != null) viewModel.exportData(uri)
+    }
+    LaunchedEffect(uiState.message) {
+        uiState.message?.let { snackbarHostState.showSnackbar(it); viewModel.clearMessage() }
+    }
+    var editingFocusDuration by remember { mutableStateOf<Boolean?>(null) }
+    var durationInput by remember { mutableStateOf("") }
+    editingFocusDuration?.let { isFocus ->
+        val duration = durationInput.toIntOrNull()
+        val maxDuration = if (isFocus) 240 else 60
+        AlertDialog(
+            onDismissRequest = { editingFocusDuration = null },
+            title = { Text(if (isFocus) "Focus duration" else "Break duration") },
+            text = {
+                OutlinedTextField(
+                    value = durationInput,
+                    onValueChange = { durationInput = it.filter(Char::isDigit).take(3) },
+                    label = { Text("Minutes (1–$maxDuration)") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    singleLine = true,
+                    isError = duration == null || duration !in 1..maxDuration
+                )
+            },
+            confirmButton = {
+                TextButton(enabled = duration != null && duration in 1..maxDuration, onClick = {
+                    if (isFocus) viewModel.updateFocusDuration(duration!!) else viewModel.updateBreakDuration(duration!!)
+                    editingFocusDuration = null
+                }) { Text("Save") }
+            },
+            dismissButton = { TextButton(onClick = { editingFocusDuration = null }) { Text("Cancel") } }
+        )
     }
 
     // Theme Selection Dialog
@@ -153,7 +189,7 @@ fun SettingsScreen(
                     ),
                     shape = FocusFlowCorners.Button
                 ) {
-                    Text("Delete Forever")
+                    Text(if (uiState.isBusy) "Deleting…" else "Delete Forever")
                 }
             },
             dismissButton = {
@@ -167,6 +203,7 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CompactTopBar(
@@ -281,13 +318,19 @@ fun SettingsScreen(
                         icon = Icons.Default.Timer,
                         title = "Default Focus Duration",
                         subtitle = "${uiState.focusDuration} min",
-                        onClick = { }
+                        onClick = {
+                            durationInput = uiState.focusDuration.toString()
+                            editingFocusDuration = true
+                        }
                     )
                     SettingsRow(
                         icon = Icons.Default.FreeBreakfast,
                         title = "Default Break Duration",
                         subtitle = "${uiState.breakDuration} min",
-                        onClick = { }
+                        onClick = {
+                            durationInput = uiState.breakDuration.toString()
+                            editingFocusDuration = false
+                        }
                     )
                 }
             }
@@ -301,16 +344,16 @@ fun SettingsScreen(
                         subtitle = uiState.userProfile,
                         onClick = onNavigateToProfile
                     )
-                    SettingsToggleRow(
-                        icon = Icons.Default.CloudSync,
-                        title = "Sync Data",
-                        checked = uiState.syncEnabled,
-                        onCheckedChange = { viewModel.toggleSync(it) }
+                    SettingsRow(
+                        icon = Icons.Default.Storage,
+                        title = "Data Storage",
+                        subtitle = "Stored on this device. Cloud sync is not available.",
+                        onClick = {}
                     )
                     SettingsRow(
                         icon = Icons.Default.Share,
                         title = "Export Data",
-                        onClick = { viewModel.exportData() }
+                        onClick = { if (!uiState.isBusy) exportLauncher.launch("focusflow-export.json") }
                     )
                     SettingsRow(
                         icon = Icons.AutoMirrored.Filled.ExitToApp,

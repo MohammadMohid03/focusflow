@@ -40,6 +40,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import com.focusflow.app.presentation.components.LocalFloatingNavigationPadding
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.domain.model.TaskCategory
 import com.focusflow.app.domain.model.TaskPriority
@@ -55,7 +57,7 @@ fun PlannerScreen(
     onNavigateToSettings: () -> Unit = {},
     viewModel: PlannerViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val selectedDate = uiState.selectedDate
     val today = remember { LocalDate.now() }
 
@@ -450,7 +452,7 @@ fun PlannerScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 100.dp)
+                .padding(bottom = LocalFloatingNavigationPadding.current + 20.dp)
         ) {
             // Month Navigation (Disallow past navigation)
             Row(

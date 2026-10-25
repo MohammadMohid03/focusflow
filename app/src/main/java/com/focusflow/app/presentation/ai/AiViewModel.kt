@@ -42,7 +42,8 @@ data class AiUiState(
 class AiViewModel @Inject constructor(
     private val aiRepository: AiRepository,
     private val taskRepository: TaskRepository,
-    private val plannerRepository: PlannerRepository
+    private val plannerRepository: PlannerRepository,
+    private val authRepository: com.focusflow.app.domain.repository.AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AiUiState())
@@ -85,7 +86,7 @@ class AiViewModel @Inject constructor(
                 )
             }
             val totalMinutes = subtasks.sumOf { it.estimatedMinutes }
-            val highestPriority = subtasks.maxByOrNull { it.priority.ordinal }?.priority ?: TaskPriority.MEDIUM
+            val highestPriority = subtasks.minByOrNull { it.priority.ordinal }?.priority ?: TaskPriority.MEDIUM
 
             val task = Task(
                 id = taskId,
@@ -94,6 +95,7 @@ class AiViewModel @Inject constructor(
                 category = TaskCategory.STUDY,
                 priority = highestPriority,
                 estimatedDurationMinutes = totalMinutes,
+                userId = authRepository.getCurrentUser()?.id ?: "",
                 subtasks = domainSubtasks
             )
 
@@ -106,7 +108,7 @@ class AiViewModel @Inject constructor(
         _uiState.update { it.copy(isGenerating = true, error = null, isScheduleSaved = false) }
         viewModelScope.launch {
             val existingTasks = try {
-                taskRepository.getAllTasks("").first().filter { !it.isCompleted }.map { it.title }
+                taskRepository.getAllTasks(authRepository.getCurrentUser()?.id ?: "").first().filter { !it.isCompleted }.map { it.title }
             } catch (e: Exception) {
                 emptyList()
             }
@@ -148,6 +150,7 @@ class AiViewModel @Inject constructor(
                 goal = "AI Daily Schedule (${_uiState.value.plannerHours} hours)",
                 deadline = System.currentTimeMillis() + (24 * 60 * 60 * 1000L),
                 availableHoursPerDay = _uiState.value.plannerHours.toFloat(),
+                userId = authRepository.getCurrentUser()?.id ?: "",
                 generatedPlan = listOf(plannerDay)
             )
             plannerRepository.insertSession(plannerSession)

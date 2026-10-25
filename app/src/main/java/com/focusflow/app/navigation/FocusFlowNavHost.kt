@@ -5,7 +5,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
+import com.focusflow.app.presentation.components.FloatingNavigationLayout
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -96,14 +97,11 @@ fun FocusFlowNavHost() {
         }
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            if (showBottomBar) {
-                FocusFlowBottomNav(
-                    items = navItems,
-                    currentRoute = currentDestination?.route,
-                    onNavigate = { route ->
+    FloatingNavigationLayout(
+        items = navItems,
+        currentRoute = currentDestination?.route,
+        showNavigation = showBottomBar,
+        onNavigate = { route ->
                         if (route == Screen.Home.route) {
                             if (currentDestination?.route != Screen.Home.route) {
                                 if (!navController.popBackStack(Screen.Home.route, inclusive = false)) {
@@ -123,14 +121,11 @@ fun FocusFlowNavHost() {
                             }
                         }
                     }
-                )
-            }
-        }
-    ) { paddingValues ->
+    ) {
         NavHost(
             navController = navController,
             startDestination = Screen.Splash.route,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.fillMaxSize(),
             enterTransition = { fadeIn(animationSpec = tween(150)) },
             exitTransition = { fadeOut(animationSpec = tween(150)) },
             popEnterTransition = { fadeIn(animationSpec = tween(150)) },
@@ -316,8 +311,14 @@ fun FocusFlowNavHost() {
                     nullable = true
                     defaultValue = null
                 })
-            ) {
+            ) { backStackEntry ->
+                val focusEntry = remember(backStackEntry) {
+                    runCatching { navController.getBackStackEntry(Screen.Focus.route) }.getOrNull()
+                }
+                val focusViewModel: com.focusflow.app.presentation.focus.FocusViewModel =
+                    if (focusEntry != null) hiltViewModel(focusEntry) else hiltViewModel(backStackEntry)
                 FocusSessionScreen(
+                    viewModel = focusViewModel,
                     onSessionEnd = { navController.popBackStack() }
                 )
             }

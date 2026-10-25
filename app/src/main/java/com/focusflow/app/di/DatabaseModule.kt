@@ -2,6 +2,8 @@ package com.focusflow.app.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.focusflow.app.data.local.FocusFlowDatabase
 import com.focusflow.app.data.local.dao.*
 import dagger.Module
@@ -15,6 +17,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
+    // The exported v1 and v2 schemas are identical. Preserve all existing rows.
+    val MIGRATION_1_2 = object : Migration(1, 2) {
+        override fun migrate(db: SupportSQLiteDatabase) = Unit
+    }
+
     @Provides
     @Singleton
     fun provideFocusFlowDatabase(@ApplicationContext context: Context): FocusFlowDatabase {
@@ -22,7 +29,7 @@ object DatabaseModule {
             context,
             FocusFlowDatabase::class.java,
             "focus_flow_database"
-        ).fallbackToDestructiveMigration().build()
+        ).addMigrations(MIGRATION_1_2).build()
     }
 
     @Provides
@@ -49,7 +56,3 @@ object DatabaseModule {
     @Provides
     fun providePlannerSessionDao(database: FocusFlowDatabase): PlannerSessionDao = database.plannerSessionDao()
 }
-
-// Assuming Database definition is defined here or elsewhere
-// @Database(entities = [...], version = 1)
-// abstract class FocusFlowDatabase : RoomDatabase() { ... }

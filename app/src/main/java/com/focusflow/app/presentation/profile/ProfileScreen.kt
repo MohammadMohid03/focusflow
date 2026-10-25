@@ -27,6 +27,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.focusflow.app.presentation.components.LocalFloatingNavigationPadding
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.presentation.components.CompactTopBar
 import com.focusflow.app.presentation.settings.SettingsViewModel
@@ -38,7 +40,7 @@ fun ProfileScreen(
     onNavigateBack: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val userName = uiState.userProfile.ifEmpty { "User" }
     val initial = userName.firstOrNull()?.uppercase() ?: "U"
 
@@ -53,7 +55,7 @@ fun ProfileScreen(
                         onClick = onNavigateToSettings,
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(48.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
@@ -74,7 +76,7 @@ fun ProfileScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 8.dp)
-                .padding(bottom = 90.dp),
+                .padding(bottom = LocalFloatingNavigationPadding.current + 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(12.dp))
@@ -83,14 +85,14 @@ fun ProfileScreen(
             Surface(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer,
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
-                modifier = Modifier.size(96.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                modifier = Modifier.size(72.dp),
                 shadowElevation = 2.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
                         text = initial,
-                        fontSize = 36.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -115,14 +117,6 @@ fun ProfileScreen(
                 )
             }
             
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Productivity Level: Focus Champion",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium
-            )
-            
             Spacer(modifier = Modifier.height(20.dp))
             
             // Stats Grid
@@ -130,8 +124,8 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                ProfileStatCard(title = "Focus Time", value = "${uiState.focusDuration}m", modifier = Modifier.weight(1f))
-                ProfileStatCard(title = "Break Time", value = "${uiState.breakDuration}m", modifier = Modifier.weight(1f))
+                ProfileStatCard(title = "Focus preset", value = "${uiState.focusDuration}m", modifier = Modifier.weight(1f))
+                ProfileStatCard(title = "Break preset", value = "${uiState.breakDuration}m", modifier = Modifier.weight(1f))
             }
             Spacer(modifier = Modifier.height(12.dp))
             Row(
@@ -139,7 +133,7 @@ fun ProfileScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 ProfileStatCard(title = "Theme", value = uiState.themeMode, modifier = Modifier.weight(1f))
-                ProfileStatCard(title = "Sync", value = if (uiState.syncEnabled) "Active" else "Off", modifier = Modifier.weight(1f))
+                ProfileStatCard(title = "Storage", value = "On device", modifier = Modifier.weight(1f))
             }
             
             Spacer(modifier = Modifier.height(24.dp))

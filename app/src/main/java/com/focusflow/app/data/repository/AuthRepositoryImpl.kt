@@ -54,6 +54,16 @@ class AuthRepositoryImpl @Inject constructor(
         firebaseAuth.signOut()
     }
 
+    override suspend fun deleteAccount(): Result<Unit> = try {
+        // Firebase rejects stale sessions; never report success or clear local data then.
+        firebaseAuth.currentUser?.delete()?.await()
+        Result.success(Unit)
+    } catch (e: kotlinx.coroutines.CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     override suspend fun resetPassword(email: String): Result<Unit> {
         return try {
             firebaseAuth.sendPasswordResetEmail(email).await()

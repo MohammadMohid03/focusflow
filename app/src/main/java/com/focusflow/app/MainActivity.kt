@@ -6,9 +6,10 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -35,11 +36,11 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         
-        enableEdgeToEdge()
+        enableEdgeToEdge(navigationBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT))
         checkAndRequestNotificationPermission()
         
         setContent {
-            val themeMode by userPreferencesRepository.getThemeMode().collectAsState(initial = ThemeMode.SYSTEM)
+            val themeMode by userPreferencesRepository.getThemeMode().collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM)
             FocusFlowTheme(themeMode = themeMode) {
                 FocusFlowNavHost()
             }

@@ -18,9 +18,9 @@ data class HomeUiState(
     val completedCount: Int = 0,
     val totalCount: Int = 0,
     val focusMinutesToday: Int = 0,
-    val currentStreak: Int = 3,
+    val currentStreak: Int = 0,
     val activeCommitment: Commitment? = null,
-    val aiRecommendation: String = "You tend to be most productive in the morning. Schedule your hardest task then.",
+    val aiRecommendation: String = "Choose one task and give it your full attention for your next focus session.",
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -50,11 +50,18 @@ class HomeViewModel @Inject constructor(
             authRepository.observeAuthState().flatMapLatest { user ->
                 val userId = user?.id ?: ""
                 combine(
-                    taskRepository.getAllTasks(userId),
-                    focusSessionRepository.getAllSessions(userId),
+                    combine(taskRepository.getAllTasks(userId), com.focusflow.app.domain.model.observeToday()) { tasks, today ->
+                        val zone = java.time.ZoneId.systemDefault()
+                        fun onToday(timestamp: Long?) = timestamp != null && java.time.Instant.ofEpochMilli(timestamp).atZone(zone).toLocalDate() == today
+                        tasks.filter { onToday(it.dueDate) || onToday(it.completedAt) || (it.dueDate == null && !it.isCompleted) }
+                    },
+                    combine(focusSessionRepository.getAllSessions(userId), com.focusflow.app.domain.model.observeToday()) { sessions, today ->
+                        sessions.filter { java.time.Instant.ofEpochMilli(it.startTime).atZone(java.time.ZoneId.systemDefault()).toLocalDate() == today }
+                    },
                     commitmentRepository.getActiveCommitments(userId),
-                    userPreferencesRepository.getUserName()
-                ) { tasks, sessions, commitments, savedName ->
+                    userPreferencesRepository.getUserName(),
+                    habitRepository.getAllHabits(userId)
+                ) { tasks, sessions, commitments, savedName, habits ->
                     val authName = user?.displayName?.takeIf { it.isNotBlank() }
                     val finalName = savedName.takeIf { it.isNotBlank() } ?: authName ?: "User"
 
@@ -70,7 +77,7 @@ class HomeViewModel @Inject constructor(
                         completedCount = completed,
                         totalCount = tasks.size,
                         focusMinutesToday = focusMinutes,
-                        currentStreak = 3,
+                        currentStreak = habits.maxOfOrNull { it.currentStreak } ?: 0,
                         activeCommitment = activeComm,
                         aiRecommendation = _uiState.value.aiRecommendation,
                         isLoading = false

@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.focusflow.app.presentation.components.LocalFloatingNavigationPadding
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusflow.app.domain.model.TaskFilter
 import com.focusflow.app.domain.model.TaskSortOrder
@@ -40,7 +42,7 @@ fun TasksScreen(
     onNavigateToTaskDetail: (String) -> Unit,
     onNavigateToAiBreakdown: () -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var sortMenuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -190,7 +192,7 @@ fun TasksScreen(
                 shape = FocusFlowCorners.FloatingActionButton,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White,
-                modifier = Modifier.padding(bottom = 12.dp),
+                modifier = Modifier.padding(bottom = LocalFloatingNavigationPadding.current + 12.dp),
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Task")
@@ -214,7 +216,7 @@ fun TasksScreen(
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 100.dp),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = LocalFloatingNavigationPadding.current + 20.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(uiState.tasks, key = { it.id }) { task ->

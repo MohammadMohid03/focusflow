@@ -1,5 +1,6 @@
 *.iml
 .gradle
+/.kotlin/
 /local.properties
 /.idea/caches
 /.idea/libraries
@@ -9,6 +10,10 @@
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
+node_modules/
+backend/node_modules/
+backend/.env*
+backend/.runtimeconfig.json
 /captures
 .externalNativeBuild
 .cxx
