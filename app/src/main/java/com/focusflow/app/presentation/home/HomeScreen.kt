@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.focusflow.app.R
 import com.focusflow.app.domain.model.Task
@@ -43,16 +43,17 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit = {}, onNavigateToTaskDetail: (String) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HomeContent(state, onNavigateToTasks, onNavigateToCreateTask, onNavigateToPlanner,
+    HomeContent(state, Modifier, onNavigateToTasks, onNavigateToCreateTask, onNavigateToPlanner,
         onNavigateToAiChat, onNavigateToFocus, onNavigateToProfile, onNavigateToSettings, onNavigateToTaskDetail)
 }
 
 @Composable
 fun HomeContent(
     state: HomeUiState,
+    modifier: Modifier = Modifier,
     onTasks: () -> Unit = {}, onCreateTask: () -> Unit = {}, onPlanner: () -> Unit = {},
     onAiChat: () -> Unit = {}, onFocus: () -> Unit = {}, onProfile: () -> Unit = {},
-    onSettings: () -> Unit = {}, onTask: (String) -> Unit = {}, modifier: Modifier = Modifier
+    onSettings: () -> Unit = {}, onTask: (String) -> Unit = {}
 ) {
     val navigationPadding = LocalFloatingNavigationPadding.current
     Scaffold(
@@ -78,7 +79,7 @@ fun HomeContent(
             item(key = "greeting", contentType = "greeting") {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(stringResource(R.string.home_greeting, state.userName), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-                    Text(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.getDefault())),
+                    Text(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])),
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }

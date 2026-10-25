@@ -31,8 +31,8 @@ import com.focusflow.app.presentation.theme.pressSpring3D
 @Composable
 fun AIStudyTipCard(
     tipText: String,
-    onClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     val cardShape = RoundedCornerShape(20.dp)
     val primaryColor = MaterialTheme.colorScheme.primary

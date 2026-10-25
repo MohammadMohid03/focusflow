@@ -40,8 +40,8 @@ fun TaskCard(
     task: Task,
     onClick: () -> Unit,
     onComplete: (Boolean) -> Unit,
-    onLongClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLongClick: () -> Unit = {}
 ) {
     val isCompleted = task.isCompleted
     val scope = rememberCoroutineScope()
@@ -127,13 +127,13 @@ fun TaskCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        task.category?.let { CategoryChip(category = it) }
+                        CategoryChip(category = task.category)
                         PriorityIndicator(priority = task.priority)
 
                         Spacer(modifier = Modifier.weight(1f))
 
                         task.dueDate?.let { dueDateMillis ->
-                            val formatter = SimpleDateFormat("MMM d, hh:mm a", Locale.getDefault())
+                            val formatter = SimpleDateFormat("MMM d, hh:mm a", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])
                             val dateStr = formatter.format(Date(dueDateMillis))
                             Surface(
                                 shape = RoundedCornerShape(6.dp),

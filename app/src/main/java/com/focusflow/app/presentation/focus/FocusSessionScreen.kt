@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.focusflow.app.presentation.theme.pressSpring3D
 
 @Composable
@@ -125,7 +125,7 @@ fun FocusSessionScreen(
                 val seconds = uiState.timeRemaining % 60
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = String.format("%02d:%02d", minutes, seconds),
+                        text = String.format(androidx.compose.ui.platform.LocalConfiguration.current.locales[0], "%02d:%02d", minutes, seconds),
                         style = MaterialTheme.typography.displayMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,

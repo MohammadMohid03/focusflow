@@ -6,20 +6,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
     viewModel: CalendarViewModel = hiltViewModel()
 ) {
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(0) }
     
     Scaffold(
         topBar = {
             Column {
                 TopAppBar(title = { Text("Calendar", fontWeight = FontWeight.Bold) })
-                TabRow(selectedTabIndex = selectedTab) {
+                PrimaryTabRow(selectedTabIndex = selectedTab) {
                     Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("Day") })
                     Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text("Week") })
                     Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }, text = { Text("Month") })

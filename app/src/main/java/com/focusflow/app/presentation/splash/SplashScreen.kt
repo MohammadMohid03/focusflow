@@ -25,7 +25,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.res.stringResource
+import com.focusflow.app.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -36,7 +39,7 @@ fun SplashScreen(
     onNavigateToHome: () -> Unit,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
-    val navigationTarget by viewModel.navigationTarget.collectAsState()
+    val navigationTarget by viewModel.navigationTarget.collectAsStateWithLifecycle()
     val density = LocalDensity.current
 
     // 3D Spatial Animatable Values
@@ -193,7 +196,7 @@ fun SplashScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Focus Flow",
+                        contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(38.dp)
                     )
@@ -211,7 +214,7 @@ fun SplashScreen(
                 }
             ) {
                 Text(
-                    text = "FocusFlow",
+                    text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.onBackground,
@@ -221,7 +224,7 @@ fun SplashScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "Plan • Focus • Progress",
+                    text = stringResource(R.string.splash_tagline),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = taglineAlpha.value),

@@ -44,11 +44,7 @@ class AppBlockerService : Service() {
                 action = ACTION_START
                 putStringArrayListExtra(EXTRA_RESTRICTED_APPS, apps)
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
+            context.startForegroundService(intent)
         }
 
         fun stop(context: Context) {
@@ -163,7 +159,7 @@ class AppBlockerService : Service() {
 
         // 1. Send High-Priority FullScreen Alert Notification (Supported on all Android versions)
         val alertNotification = NotificationCompat.Builder(this, CHANNEL_ALERT_ID)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("🔒 App Locked by FocusFlow")
             .setContentText("$appName is restricted during your focus commitment.")
             .setPriority(NotificationCompat.PRIORITY_MAX)
@@ -183,7 +179,13 @@ class AppBlockerService : Service() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 val options = ActivityOptions.makeBasic().apply {
-                    pendingIntentBackgroundActivityStartMode = ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                    pendingIntentBackgroundActivityStartMode = if (Build.VERSION.SDK_INT >= 36) {
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                    } else {
+                        // API 34–35 only expose the legacy opt-in constant.
+                        @Suppress("DEPRECATION")
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                    }
                 }.toBundle()
                 pendingIntent.send(this, 0, null, null, null, null, options)
             } else {
@@ -206,30 +208,28 @@ class AppBlockerService : Service() {
     }
 
     private fun createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val monitorChannel = NotificationChannel(
-                CHANNEL_ID,
-                "Focus Lock Monitoring",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Monitors app restrictions during focus commitments"
-                setShowBadge(false)
-            }
-
-            val alertChannel = NotificationChannel(
-                CHANNEL_ALERT_ID,
-                "Focus Lock Alerts",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Immediate alerts and lock screen when restricted apps are opened"
-                setBypassDnd(true)
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            }
-
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(monitorChannel)
-            manager.createNotificationChannel(alertChannel)
+        val monitorChannel = NotificationChannel(
+            CHANNEL_ID,
+            "Focus Lock Monitoring",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = "Monitors app restrictions during focus commitments"
+            setShowBadge(false)
         }
+
+        val alertChannel = NotificationChannel(
+            CHANNEL_ALERT_ID,
+            "Focus Lock Alerts",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Immediate alerts and lock screen when restricted apps are opened"
+            setBypassDnd(true)
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+        }
+
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(monitorChannel)
+        manager.createNotificationChannel(alertChannel)
     }
 
     private fun buildForegroundNotification(appCount: Int): Notification {
@@ -242,7 +242,7 @@ class AppBlockerService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("Commitment Lock Active 🔒")
             .setContentText("FocusFlow is monitoring distractions ($appCount apps restricted)")
             .setContentIntent(pendingIntent)

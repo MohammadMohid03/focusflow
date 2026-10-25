@@ -6,13 +6,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.*
@@ -46,7 +48,7 @@ class FocusBlockActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(navigationBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT))
 
         val appName = intent.getStringExtra(EXTRA_BLOCKED_APP_NAME) ?: "This application"
 
@@ -58,7 +60,7 @@ class FocusBlockActivity : ComponentActivity() {
         })
 
         setContent {
-            val themeMode by userPreferencesRepository.getThemeMode().collectAsState(initial = ThemeMode.SYSTEM)
+            val themeMode by userPreferencesRepository.getThemeMode().collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM)
             FocusFlowTheme(themeMode = themeMode) {
                 FocusBlockScreen(
                     blockedAppName = appName,
@@ -164,7 +166,7 @@ fun FocusBlockScreen(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Return to FocusFlow Task", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }

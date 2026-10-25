@@ -4,9 +4,7 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
+import androidx.core.net.toUri
 import android.os.Process
 import android.provider.Settings
 import com.focusflow.app.data.local.dao.CommitmentDao
@@ -37,7 +35,10 @@ class AppRestrictionManagerImpl @Inject constructor(
         }
 
         val pm = context.packageManager
-        val installedApps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        val launcherIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        val installedApps = pm.queryIntentActivities(launcherIntent, 0)
+            .map { it.activityInfo.applicationInfo }
+            .distinctBy { it.packageName }
 
         val apps = installedApps
             .filter { app ->
@@ -152,20 +153,11 @@ class AppRestrictionManagerImpl @Inject constructor(
     override suspend fun hasUsagePermission(): Boolean {
         return try {
             val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-            val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                appOps.unsafeCheckOpNoThrow(
-                    AppOpsManager.OPSTR_GET_USAGE_STATS,
-                    Process.myUid(),
-                    context.packageName
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                appOps.checkOpNoThrow(
-                    AppOpsManager.OPSTR_GET_USAGE_STATS,
-                    Process.myUid(),
-                    context.packageName
-                )
-            }
+            val mode = appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(),
+                context.packageName
+            )
             mode == AppOpsManager.MODE_ALLOWED
         } catch (e: Exception) {
             false
@@ -173,11 +165,7 @@ class AppRestrictionManagerImpl @Inject constructor(
     }
 
     override suspend fun hasOverlayPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Settings.canDrawOverlays(context)
-        } else {
-            true
-        }
+        return Settings.canDrawOverlays(context)
     }
 
     override suspend fun requestPermissionSetup() {
@@ -188,14 +176,12 @@ class AppRestrictionManagerImpl @Inject constructor(
     }
 
     override suspend fun requestOverlayPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:${context.packageName}")
-            ).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-            context.startActivity(intent)
+        val intent = Intent(
+            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+            "package:${context.packageName}".toUri()
+        ).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
+        context.startActivity(intent)
     }
 }

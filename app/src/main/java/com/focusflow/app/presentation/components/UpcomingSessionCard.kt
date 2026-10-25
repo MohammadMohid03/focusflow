@@ -24,8 +24,8 @@ fun UpcomingSessionCard(
     subject: String,
     time: String,
     categoryColor: Color,
-    onClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     val cardShape = FocusFlowCorners.Card
 

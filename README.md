@@ -1,7 +1,7 @@
 # FocusFlow — AI-Powered Productivity & Study Assistant
 
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
-[![Kotlin](https://img.shields.io/badge/Language-Kotlin%202.1.0-purple.svg)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Language-Kotlin%202.4.21-purple.svg)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-blue.svg)](https://developer.android.com/jetpack/compose)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20%2F%20MVVM-orange.svg)](https://developer.android.com/topic/architecture)
 [![License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
@@ -82,7 +82,7 @@ graph TD
 ```
 
 ### Technology Stack
-- **Language**: Kotlin 2.1.0 (Coroutines & Flow)
+- **Language**: Kotlin 2.4.21 (Coroutines & Flow)
 - **UI Framework**: Jetpack Compose, Material 3, Navigation Compose
 - **Dependency Injection**: Dagger Hilt
 - **Local Persistence**: Room Database (Offline-First), Preferences DataStore
@@ -128,8 +128,8 @@ com.focusflow.app/
 ## 🚀 Building & Setup
 
 ### Prerequisites
-- JDK 17 or higher (Java 26 supported)
-- Android SDK (API 35, Min SDK 26)
+- JDK 21 (Android Studio bundled JBR is suitable)
+- Android SDK (API 37, Min SDK 26)
 - Android Studio Ladybug / Koala or CLI
 
 ### Step 1: Clone Repository
@@ -198,3 +198,21 @@ Room migration, owner isolation, export, and deletion instrumentation tests requ
 ## 📄 License
 
 FocusFlow is released under the [MIT License](LICENSE).
+
+## Build and validation
+
+Use JDK 21 (for example Android Studio's bundled JBR), Android SDK Platform 37,
+and SDK Build Tools 36.0.0 or newer. The Gradle wrapper supplies Gradle 9.8.2.
+Configure `JAVA_HOME` for your local JDK and `sdk.dir` in the ignored
+`local.properties`; no machine-specific JDK path is committed.
+
+```shell
+./gradlew assembleDebug testDebugUnitTest lintDebug
+./gradlew connectedDebugAndroidTest
+```
+
+Lint warnings fail the build. Keep the resource set and dependency catalog clean;
+do not add a lint baseline or disable checks to make validation pass.
+
+The launcher logo source and generation prompt are in [branding/LOGO.md](branding/LOGO.md).
+The splash screen retains the original rotating emblem, loading arc, and text animation.

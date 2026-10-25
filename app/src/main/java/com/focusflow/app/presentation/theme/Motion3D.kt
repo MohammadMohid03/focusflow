@@ -142,6 +142,4 @@ fun Modifier.ambientGlow(
     color: Color,
     radius: Dp = 100.dp,
     alpha: Float = 0.08f
-): Modifier = composed {
-    this
-}
+): Modifier = this

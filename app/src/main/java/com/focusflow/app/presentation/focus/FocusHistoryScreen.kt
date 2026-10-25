@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.focusflow.app.domain.model.FocusSession
 import com.focusflow.app.presentation.theme.FocusFlowCorners
 import com.focusflow.app.presentation.theme.glass3D
@@ -79,7 +79,7 @@ fun FocusHistoryScreen(
 
 @Composable
 fun SessionHistoryItem(session: FocusSession) {
-    val dateFormat = SimpleDateFormat("MMM d, yyyy - hh:mm a", Locale.getDefault())
+    val dateFormat = SimpleDateFormat("MMM d, yyyy - hh:mm a", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])
     val formattedDate = dateFormat.format(Date(session.startTime))
 
     Box(

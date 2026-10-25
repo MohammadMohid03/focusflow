@@ -145,8 +145,8 @@ fun DateSelector(
 fun PlannerSummaryCard(
     count: String,
     label: String,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface
 ) {
     val cardShape = FocusFlowCorners.Card
 

@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.focusflow.app.presentation.components.LocalFloatingNavigationPadding
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.focusflow.app.domain.model.TaskFilter
 import com.focusflow.app.domain.model.TaskSortOrder
 import com.focusflow.app.presentation.components.CompactTopBar

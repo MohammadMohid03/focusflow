@@ -1,31 +1,28 @@
 [versions]
-agp = "8.7.3"
-kotlin = "2.1.0"
-ksp = "2.1.0-1.0.29"
-coreKtx = "1.15.0"
+agp = "9.4.1"
+kotlin = "2.4.21"
+ksp = "2.3.12"
+coreKtx = "1.19.1"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-lifecycle = "2.8.7"
-activityCompose = "1.9.3"
-composeBom = "2024.12.01"
-navigationCompose = "2.8.5"
-hilt = "2.53.1"
-hiltNavigationCompose = "1.2.0"
-room = "2.6.1"
-firebaseBom = "33.7.0"
-kotlinxSerialization = "1.7.3"
-datastorePreferences = "1.1.1"
-work = "2.10.0"
-coroutines = "1.9.0"
-vico = "2.0.0-beta.3"
-coil = "2.7.0"
-playServicesAuth = "21.3.0"
-accompanist = "0.36.0"
-splashScreen = "1.0.1"
-mockk = "1.13.13"
-turbine = "1.2.0"
-truth = "1.4.4"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+lifecycle = "2.11.0"
+activityCompose = "1.13.0"
+composeBom = "2026.09.00"
+navigationCompose = "2.10.2"
+hilt = "2.60.1"
+hiltNavigationCompose = "1.4.0"
+room = "2.8.5"
+firebaseBom = "35.1.0"
+kotlinxSerialization = "1.12.0"
+datastorePreferences = "1.3.0"
+work = "2.12.0"
+coroutines = "1.11.0"
+playServicesAuth = "22.0.0"
+splashScreen = "1.2.0"
+mockk = "1.14.11"
+turbine = "1.2.1"
+truth = "1.4.5"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -49,7 +46,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
-androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "hiltNavigationCompose" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltNavigationCompose" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltNavigationCompose" }
 
@@ -74,14 +71,10 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
-vico-compose = { module = "com.patrykandpatrick.vico:compose", version.ref = "vico" }
-vico-compose-m3 = { module = "com.patrykandpatrick.vico:compose-m3", version.ref = "vico" }
 
-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashScreen" }
 
@@ -91,9 +84,8 @@ truth = { module = "com.google.truth:truth", version.ref = "truth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
+google-services = { id = "com.google.gms.google-services", version = "4.5.0" }

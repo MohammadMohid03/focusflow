@@ -23,11 +23,11 @@ fun StatCard(
     icon: ImageVector,
     value: String,
     label: String,
+    modifier: Modifier = Modifier,
     backgroundColor: Color? = null,
     iconColor: Color = MaterialTheme.colorScheme.primary,
     iconContainerColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    onClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    onClick: (() -> Unit)? = null
 ) {
     val cardShape = FocusFlowCorners.Card
 

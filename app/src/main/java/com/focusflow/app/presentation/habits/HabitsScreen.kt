@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.focusflow.app.domain.model.Habit
 import com.focusflow.app.presentation.components.CompactTopBar
 import com.focusflow.app.presentation.theme.FocusFlowCorners
@@ -40,7 +40,7 @@ fun HabitsScreen(
     onHabitClick: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

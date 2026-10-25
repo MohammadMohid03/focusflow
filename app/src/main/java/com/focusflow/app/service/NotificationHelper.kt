@@ -121,7 +121,7 @@ class NotificationHelper @Inject constructor(
         if (!isEnabled(CHANNEL_TASKS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_TASKS)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("Task Reminder")
             .setContentText("$taskTitle is due $dueTime")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -139,7 +139,7 @@ class NotificationHelper @Inject constructor(
         if (!isEnabled(CHANNEL_HABITS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_HABITS)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("Habit Reminder")
             .setContentText("Time to complete: $habitName")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -157,7 +157,7 @@ class NotificationHelper @Inject constructor(
         if (!isEnabled(CHANNEL_FOCUS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_FOCUS)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("Session Complete!")
             .setContentText("Great work! You focused for $sessionDuration minutes.")
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -175,7 +175,7 @@ class NotificationHelper @Inject constructor(
         if (!isEnabled(CHANNEL_COMMITMENTS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_COMMITMENTS)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("$minutesRemaining minutes left")
             .setContentText("Complete your commitment before Focus Lock activates: $taskName")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -193,7 +193,7 @@ class NotificationHelper @Inject constructor(
         if (!isEnabled(CHANNEL_COMMITMENTS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_COMMITMENTS)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("Commitment Missed")
             .setContentText("Your selected consequence has been activated for: $taskName")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -211,7 +211,7 @@ class NotificationHelper @Inject constructor(
         if (!isEnabled(CHANNEL_COMMITMENTS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_COMMITMENTS)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("Commitment Completed! 🎉")
             .setContentText("Great work completing: $taskName")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -229,7 +229,7 @@ class NotificationHelper @Inject constructor(
         if (!isEnabled(CHANNEL_COMMITMENTS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_COMMITMENTS)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("Commitment Activated")
             .setContentText("$taskName is due at $deadline")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -247,7 +247,7 @@ class NotificationHelper @Inject constructor(
         if (!isEnabled(CHANNEL_COMMITMENTS)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_COMMITMENTS)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("Recovery Available")
             .setContentText("Complete $recoveryMinutes minutes of focused work to restore access.")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -265,7 +265,7 @@ class NotificationHelper @Inject constructor(
         if (!isEnabled(CHANNEL_DAILY)) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_DAILY)
-            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle("Your Day Ahead")
             .setContentText("$taskCount tasks planned · $focusMinutes min focus time")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

@@ -23,11 +23,11 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ProfileHeader(
     userName: String,
-    greeting: String = "Good morning,",
     onProfileClick: () -> Unit,
     onThemeToggle: () -> Unit,
-    isDarkTheme: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    greeting: String = "Good morning,",
+    isDarkTheme: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -94,8 +94,8 @@ fun ProfileHeader(
 @Composable
 fun CompactTopBar(
     title: String,
-    onBackClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    onBackClick: (() -> Unit)? = null,
     actions: @Composable (RowScope.() -> Unit)? = null
 ) {
     Row(
